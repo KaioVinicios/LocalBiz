@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:localbiz/clientes/clientes_page.dart';
+import 'package:localbiz/forgot_password/forgot_password_page.dart';
 import 'package:localbiz/login/login_page.dart';
 import 'package:localbiz/theme/app_colors.dart';
 
@@ -17,6 +18,7 @@ class MyApp extends StatelessWidget {
       title: 'LocalBiz',
       routes: {
         '/login': (context) => const LoginPage(),
+        '/recuperar-senha': (context) => const ForgotPasswordPage(),
         '/clientes': (context) => const ClientesPage(),
       },
       theme: ThemeData(
