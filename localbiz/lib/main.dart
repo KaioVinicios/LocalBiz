@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:localbiz/clientes/clientes_page.dart';
 import 'package:localbiz/forgot_password/forgot_password_page.dart';
 import 'package:localbiz/login/login_page.dart';
+import 'package:localbiz/register/register_page.dart';
 import 'package:localbiz/theme/app_colors.dart';
 
 void main() {
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginPage(),
         '/recuperar-senha': (context) => const ForgotPasswordPage(),
+        '/signin': (context) => const RegisterPage(),
         '/clientes': (context) => const ClientesPage(),
       },
       theme: ThemeData(
