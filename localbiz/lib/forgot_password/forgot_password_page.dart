@@ -88,7 +88,7 @@ class ForgotPasswordPage extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.md),
 
                     // DESCRIPTION
                     const Text(
@@ -103,7 +103,7 @@ class ForgotPasswordPage extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 48),
+                    const SizedBox(height: AppRadii.sheet),
 
                     // LABEL
                     const Text(
@@ -153,7 +153,7 @@ class ForgotPasswordPage extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.sm),
 
                     // BUTTON
                     SizedBox(
@@ -181,14 +181,14 @@ class ForgotPasswordPage extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 48),
+                    const SizedBox(height: AppSpacing.lg),
 
                     Divider(
                       color: AppColors.dangerBg, // Cor da linha
                       thickness: 1, 
                     ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.lg),
 
                     // SUPPORT
                     Center(
@@ -222,7 +222,7 @@ class ForgotPasswordPage extends StatelessWidget {
                       ),
                     ),
 
-                    const SizedBox(height: 24,)
+                    const SizedBox(height: AppSpacing.lg,)
                     
                   ],
                 ),
