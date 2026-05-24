@@ -1,274 +1,354 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_colors.dart';
+import '../theme/app_design_tokens.dart';
+import '../forgot_password/forgot_password_page.dart';
+
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      
-      
+      backgroundColor: AppColors.surface,
+
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surface,
         elevation: 0,
         centerTitle: true,
-        
-        
+
         title: Padding(
-          padding: const EdgeInsets.only(top: 22),
+          padding: const EdgeInsets.only(top: AppSpacing.sm),
+
           child: Text(
-          "LocalBiz",
-          style: TextStyle(
-            color: Color(0xFF64748B),
-            fontWeight: FontWeight.bold,
-          )
-        ),
+            "LocalBiz",
+
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w900,
+              fontSize: 18,
+            ),
+          ),
         ),
 
         actions: [
           Padding(
-            padding: const EdgeInsets.only(top: 22),
+            padding: const EdgeInsets.only(top: AppSpacing.sm),
+
             child: IconButton(
-            icon: Icon(Icons.help_center_outlined),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Ajuda ainda não implementada"))
-              );
-          }, 
+              icon: const Icon(
+                Icons.help_center_outlined,
+                color: AppColors.textSecondary,
+              ),
+
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Ajuda ainda não implementada"),
+                  ),
+                );
+              },
+            ),
           ),
-          )
         ],
       ),
 
-      body: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: 15,
-          vertical: 1
-        ),
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 16,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppSizes.contentWidth,
               ),
-        
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-        
+
                 children: [
-                  const SizedBox(height: 14,),
-        
+                  const SizedBox(height: AppSpacing.xs),
+
+                  // TITLE
                   const Text(
                     "Entrar",
                     textAlign: TextAlign.center,
+
                     style: TextStyle(
+                      color: AppColors.textPrimary,
                       fontSize: 28,
-                      fontWeight: FontWeight.w900
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
-        
-                  const SizedBox(height: 8,),
-        
+
+                  const SizedBox(height: AppSpacing.xs),
+
+                  // SUBTITLE
                   const Text(
                     "Bem-vindo de volta ao seu comércio local",
                     textAlign: TextAlign.center,
+
                     style: TextStyle(
-                      color: Color(0xFF64748B),
-                      fontSize: 14
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-        
-                  const SizedBox(height: 60),
-        
-                  const Text(
+
+                    const SizedBox(height: AppRadii.sheet),
+
+                  // EMAIL LABEL
+                  Text(
                     "E-mail/Empresa",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTextStyles.fieldLabel.copyWith(fontSize: 14),
                   ),
-        
-                  const SizedBox(height: 8),
-        
-                  TextField(
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.zero
-                      ),
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 16,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.zero,
-                        borderSide: BorderSide(color: Color(0xFFE2E8F0))
-                      )
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 16),
-        
-                  const Text(
+
+                  const SizedBox(height: AppSpacing.xs),
+
+                  // EMAIL FIELD
+                  _AuthTextField(),
+
+                  const SizedBox(height: AppSpacing.sm),
+
+                  // PASSWORD LABEL
+                  Text(
                     "Senha",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTextStyles.fieldLabel.copyWith(fontSize: 14),
                   ),
-        
-                  const SizedBox(height: 8),
-        
-                  TextField(
+
+                  const SizedBox(height: AppSpacing.xs),
+
+                  // PASSWORD FIELD
+                  const _AuthTextField(
                     obscureText: true,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.zero
-                      ),
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 16,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.zero,
-                        borderSide: BorderSide(color: Color(0xFFE2E8F0))
-                      )
-                    ),
                   ),
-                  
-                  const SizedBox(height: 16),
-        
+
+                  const SizedBox(height: AppSpacing.sm),
+
+                  // FORGOT PASSWORD
                   Align(
                     alignment: Alignment.centerRight,
+
                     child: TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ForgotPasswordPage(),
+                          ),
+                        );
+                      },
+
                       child: const Text(
                         "Esqueci minha senha",
+
                         style: TextStyle(
-                          color: Color(0xFF64748B)
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ),
-        
-                  const SizedBox(height: 40 ),
-        
+
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // LOGIN BUTTON
                   SizedBox(
-                    height: 60,
-        
+                    height: AppSizes.primaryButtonHeight,
+
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF043DAE),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(0)
-                        )
-                      ),
-        
                       onPressed: () {},
-        
-                      child: const Text(
-                        "Entrar",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
+
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: AppColors.blue,
+
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero,
                         ),
+                      ),
+
+                      child: Text(
+                        "Entrar",
+                        style: AppTextStyles.primaryButton.copyWith(fontSize: 18),
                       ),
                     ),
                   ),
-                  
-                  const SizedBox(height: 56),
-        
+
+                  const SizedBox(height: AppRadii.sheet),
+
+                  // REGISTER
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
+
                     children: [
                       const Text(
-                        "Não tenho conta, ",
+                        "Não tenho conta",
+
+                        style: TextStyle(
+                          color: AppColors.backText,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-        
+
                       GestureDetector(
                         onTap: () {},
-        
+
                         child: const Text(
-                          "cadastrar",
+                          " cadastrar",
+
                           style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF043DAE)
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w800,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  
-                  const SizedBox(height: 60),
-        
+
+                  const SizedBox(height: AppRadii.sheet),
+
+                  // DIVIDER
                   Row(
                     children: [
-                      Expanded(
-                        child: Divider(),
+                      const Expanded(
+                        child: Divider(
+                          color: AppColors.divider,
+                        ),
                       ),
-        
+
                       Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
                         ),
-        
+
                         child: Text(
                           "OU ENTRE COM",
+
                           style: TextStyle(
-                            color: Colors.grey,
+                            color: AppColors.textMuted,
                             fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 1,
                           ),
                         ),
                       ),
-        
-                      Expanded(
-                        child: Divider(),
+
+                      const Expanded(
+                        child: Divider(
+                          color: AppColors.divider,
+                        ),
                       ),
                     ],
                   ),
-        
-                  const SizedBox(height: 36),
-        
+
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // GOOGLE BUTTON
                   SizedBox(
-                    height: 52,
-        
+                    height: AppRadii.pill,
+
                     child: OutlinedButton(
-        
-                      style: OutlinedButton.styleFrom( // Ajustado para OutlinedButton
-                        side: const BorderSide(color: Color(0xFFE2E8F0)), // Define a cor da borda
+                      onPressed: () {},
+
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(
+                          color: AppColors.divider,
+                        ),
+
                         shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero, // Mantém quadrado
+                          borderRadius: BorderRadius.zero,
                         ),
                       ),
-                      
-                      onPressed: () {},
-        
+
                       child: const Text(
                         "Google",
+
                         style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14
                         ),
                       ),
                     ),
                   ),
-        
-                  const SizedBox(height: 60,),
-        
+
+                  const SizedBox(height: AppRadii.sheet),
+
+                  // FOOTER
                   const Text(
                     "© 2024 LocalBiz. Todos os direitos reservados.",
                     textAlign: TextAlign.center,
+
                     style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 11
+                      color: AppColors.textMuted,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
                     ),
-                  )
+                  ),
+
+                  const SizedBox(height: AppSpacing.md,)
                   
                 ],
-              )
+              ),
             ),
           ),
         ),
-      )
+      ),
+    );
+  }
+}
+
+class _AuthTextField extends StatelessWidget {
+  final bool obscureText;
+
+  const _AuthTextField({
+    this.obscureText = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: AppSizes.inputHeight,
+
+      child: TextField(
+        obscureText: obscureText,
+        style: AppTextStyles.fieldText,
+
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 18,
+          ),
+
+          enabledBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.zero,
+
+            borderSide: BorderSide(
+              color: AppColors.divider,
+            ),
+          ),
+
+          focusedBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.zero,
+
+            borderSide: BorderSide(
+              color: AppColors.blue,
+              width: 1.5,
+            ),
+          ),
+
+          border: const OutlineInputBorder(
+            borderRadius: BorderRadius.zero,
+          ),
+        ),
+      ),
     );
   }
 }
