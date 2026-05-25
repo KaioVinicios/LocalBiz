@@ -8,11 +8,15 @@ class AppPrimaryButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.height = AppSizes.primaryButtonHeight,
+    this.radius = AppRadii.sm,
+    this.textStyle,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final double height;
+  final double radius;
+  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +31,10 @@ class AppPrimaryButton extends StatelessWidget {
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadii.sm),
+            borderRadius: BorderRadius.circular(radius),
           ),
         ),
-        child: Text(label, style: AppTextStyles.primaryButton),
+        child: Text(label, style: textStyle ?? AppTextStyles.primaryButton),
       ),
     );
   }
