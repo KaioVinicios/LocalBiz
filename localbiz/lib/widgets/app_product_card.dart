@@ -1,14 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:localbiz/widgets/app_add_button.dart';
 
-/// Card de produto na grade da tela de Venda.
-///
-/// Especificações Figma:
-///   Layout : Vertical
-///   Width  : Fill (186 px)
-///   Height : 200.53 px (Hug)
-///   Radius : 8 px
-///   Gap    : 5.45 px
 class ProdutoCard extends StatelessWidget {
   const ProdutoCard({
     super.key,
@@ -25,20 +17,18 @@ class ProdutoCard extends StatelessWidget {
   final VoidCallback? onAdicionar;
   final bool emEstoque;
 
-  // ── Figma tokens ─────────────────────────────────────────────────────────
   static const double _radius       = 8;
   static const double _gap          = 5.45;
   static const double _imageHeight  = 96;   // área da imagem placeholder
 
-  // Selection colors (inferidos da imagem — mesma paleta do projeto)
-  static const Color _bgColor       = Color(0xFFDDE6F5); // card background
-  static const Color _imageBg       = Color(0xFFCDD8EC); // placeholder topo
-  static const Color _imageFg       = Color(0xFFB0BDD0); // ícone X placeholder
+  static const Color _bgColor       = Color(0x1A0D56E6); // #0D56E6 @ 10%
+  static const Color _imageBg       = Color(0xFFDDE1E6); // placeholder topo
+  static const Color _imageFg       = Color(0xFFFFFFFF); // ícone X placeholder
 
-  static const Color _nomeColor     = Color(0xFF1B2B5E);
-  static const Color _estoqueColor  = Color(0xFF6B7A99);
-  static const Color _precoPrefix   = Color(0xFF3A4A6B); // "R$" menor
-  static const Color _precoColor    = Color(0xFF1B2B5E); // valor principal
+  static const Color _nomeColor     = Color(0xFF253E7B);
+  static const Color _estoqueColor  = Color(0x80253E7B); // #253E7B @ 50%
+  static const Color _precoPrefix   = Color(0xCC334155); // #334155 @ 80%
+  static const Color _precoColor    = Color(0xFF334155); // #334155 @ 100%
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +41,6 @@ class ProdutoCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Imagem / placeholder ─────────────────────────────────────────
           ClipRRect(
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(_radius),
@@ -68,7 +57,6 @@ class ProdutoCard extends StatelessWidget {
             ),
           ),
 
-          // ── Informações ──────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
             child: Column(
@@ -109,7 +97,6 @@ class ProdutoCard extends StatelessWidget {
 
                 SizedBox(height: _gap),
 
-                // Preço — Poppins Black 15px lh 100% center
                 SizedBox(
                   width: double.infinity,
                   child: RichText(
@@ -147,7 +134,6 @@ class ProdutoCard extends StatelessWidget {
 
                 SizedBox(height: _gap * 1.6),
 
-                // Botão
                 AddButton(
                   onPressed: emEstoque ? onAdicionar : null,
                 ),
@@ -159,10 +145,6 @@ class ProdutoCard extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Painter do placeholder (retângulo com X)
-// ---------------------------------------------------------------------------
 
 class _ImagePlaceholderPainter extends CustomPainter {
   const _ImagePlaceholderPainter({required this.color});
