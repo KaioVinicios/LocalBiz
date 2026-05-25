@@ -15,11 +15,13 @@ class ConfigItem {
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.route,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
+  final String? route;
 }
 
 class ConfigSection {
@@ -45,11 +47,13 @@ const List<ConfigSection> mockConfigSections = [
         icon: Icons.storefront_outlined,
         title: 'Perfil do Negócio',
         subtitle: 'Nome, logo e informações de contato',
+        route: '/business-profile',
       ),
       ConfigItem(
         icon: Icons.description_outlined,
         title: 'Relatórios',
         subtitle: 'Alterar senha e verificação em duas etapas',
+        route: '/report',
       ),
     ],
   ),

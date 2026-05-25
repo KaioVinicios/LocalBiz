@@ -215,7 +215,9 @@ class _ConfigCard extends StatelessWidget {
       color: AppColors.surface,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
-        onTap: () {},
+        onTap: item.route == null
+            ? null
+            : () => Navigator.of(context).pushNamed(item.route!),
         borderRadius: BorderRadius.circular(14),
         child: Container(
           padding: const EdgeInsets.all(14),
