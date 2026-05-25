@@ -5,10 +5,6 @@ import 'package:localbiz/theme/app_colors.dart';
 import 'package:localbiz/theme/app_design_tokens.dart';
 import 'package:localbiz/widgets/app_primary_button.dart';
 
-// ---------------------------------------------------------------------------
-// Model (re-exportado para quem importar este arquivo)
-// ---------------------------------------------------------------------------
-
 class CarrinhoItemData {
   CarrinhoItemData({
     required this.nome,
@@ -21,21 +17,6 @@ class CarrinhoItemData {
   final int quantidade;
 }
 
-// ---------------------------------------------------------------------------
-// AppCartMenu
-// ---------------------------------------------------------------------------
-
-/// Menu do carrinho de venda.
-///
-/// Renderize-o dentro de um [Stack] acima do conteúdo principal e do FAB
-/// para que fique por cima de ambos.
-///
-/// Parâmetros:
-///   [itens]          — lista de itens no carrinho
-///   [onFechar]       — chamado ao tocar no X ou no backdrop
-///   [onIncrement]    — chamado ao tocar em "+" de um item (recebe o índice)
-///   [onDecrement]    — chamado ao tocar em "-" de um item (recebe o índice)
-///   [onCobrar]       — chamado ao tocar em "Cobrar"
 class AppCartMenu extends StatelessWidget {
   const AppCartMenu({
     super.key,
@@ -59,7 +40,6 @@ class AppCartMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // ── Backdrop com blur ─────────────────────────────────────────────
         GestureDetector(
           onTap: onFechar,
           child: BackdropFilter(
@@ -68,7 +48,6 @@ class AppCartMenu extends StatelessWidget {
           ),
         ),
 
-        // ── Sheet ─────────────────────────────────────────────────────────
         Align(
           alignment: Alignment.bottomCenter,
           child: Container(
@@ -95,17 +74,19 @@ class AppCartMenu extends StatelessWidget {
                     height: AppSizes.sheetHandleHeight,
                     margin: const EdgeInsets.only(bottom: AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: AppColors.divider,
+                      color: const Color(0xFF043DAE),
                       borderRadius: BorderRadius.circular(
                         AppSizes.sheetHandleHeight,
                       ),
                     ),
                   ),
 
-                  // Título + fechar
                   Row(
                     children: [
-                      Text('Carrinho', style: AppTextStyles.sheetTitle),
+                      Text('Carrinho',
+                          style: AppTextStyles.sheetTitle.copyWith(
+                            color: const Color(0xFF2B1A49),
+                          )),
                       const Spacer(),
                       _CloseButton(onTap: onFechar),
                     ],
@@ -113,7 +94,6 @@ class AppCartMenu extends StatelessWidget {
 
                   const SizedBox(height: AppSpacing.sm),
 
-                  // Lista de itens
                   ConstrainedBox(
                     constraints: BoxConstraints(
                       maxHeight:
@@ -122,8 +102,7 @@ class AppCartMenu extends StatelessWidget {
                     child: ListView.separated(
                       shrinkWrap: true,
                       itemCount: itens.length,
-                      separatorBuilder: (_, __) =>
-                          const Divider(color: AppColors.divider, height: 1),
+                      separatorBuilder: (_, __) => const SizedBox.shrink(),
                       itemBuilder: (context, i) => _CarrinhoItemRow(
                         item: itens[i],
                         onIncrement: () => onIncrement(i),
@@ -132,10 +111,9 @@ class AppCartMenu extends StatelessWidget {
                     ),
                   ),
 
-                  const Divider(color: AppColors.divider),
+                  const SizedBox(height: AppSpacing.xs),
                   const SizedBox(height: AppSpacing.xs),
 
-                  // Footer: total + cobrar
                   _CarrinhoFooter(
                     total: _total,
                     onCobrar: onCobrar,
@@ -150,10 +128,6 @@ class AppCartMenu extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Sub-widgets privados
-// ---------------------------------------------------------------------------
-
 class _CloseButton extends StatelessWidget {
   const _CloseButton({required this.onTap});
 
@@ -166,14 +140,14 @@ class _CloseButton extends StatelessWidget {
       child: Container(
         width: 32,
         height: 32,
-        decoration: BoxDecoration(
-          color: AppColors.fieldFill,
-          shape: BoxShape.circle,
+        decoration: const BoxDecoration(
+          color: Color(0x1A65558F), // #65558F @ 10% bg
+          borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
         child: const Icon(
           Icons.close,
-          size: 18,
-          color: AppColors.textSecondary,
+          size: 16,
+          color: Color(0xFF65558F),
         ),
       ),
     );
@@ -206,7 +180,7 @@ class _CarrinhoItemRow extends StatelessWidget {
                   item.nome,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
-                    color: AppColors.textPrimary,
+                    color: Color(0xFF0A2463),
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     height: 1.2,
@@ -219,7 +193,7 @@ class _CarrinhoItemRow extends StatelessWidget {
                         text: 'R\$',
                         style: TextStyle(
                           fontFamily: 'Poppins',
-                          color: AppColors.textPrimary,
+                          color: Color(0xCC0A2463), // #0A2463 @ 80%
                           fontSize: 12,
                           fontWeight: FontWeight.w900,
                         ),
@@ -230,7 +204,7 @@ class _CarrinhoItemRow extends StatelessWidget {
                             .replaceAll('.', ','),
                         style: const TextStyle(
                           fontFamily: 'Poppins',
-                          color: AppColors.textPrimary,
+                          color: Color(0xFF0A2463), // #0A2463 @ 100%
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
                         ),
@@ -270,7 +244,7 @@ class _QtyControl extends StatelessWidget {
     return Container(
       height: 32,
       decoration: BoxDecoration(
-        color: AppColors.fieldFill,
+        color: const Color(0xFFD3E9FE),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -283,7 +257,7 @@ class _QtyControl extends StatelessWidget {
               '$quantidade',
               style: const TextStyle(
                 fontFamily: 'Poppins',
-                color: AppColors.textPrimary,
+                color: Color(0xFF043DAE),
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
               ),
@@ -309,7 +283,7 @@ class _QtyButton extends StatelessWidget {
       child: SizedBox(
         width: 32,
         height: 32,
-        child: Icon(icon, size: 16, color: AppColors.textSecondary),
+        child: Icon(icon, size: 16, color: const Color(0xFF698CD1)),
       ),
     );
   }
@@ -329,12 +303,12 @@ class _CarrinhoFooter extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
-        color: AppColors.blue,
+        color: const Color(0xFF043DAE),
         borderRadius: BorderRadius.circular(AppRadii.md),
       ),
       child: Row(
         children: [
-          // Total da venda
+
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -342,7 +316,7 @@ class _CarrinhoFooter extends StatelessWidget {
                 'Total da venda',
                 style: TextStyle(
                   fontFamily: 'Poppins',
-                  color: Colors.white70,
+                  color: Color(0xCCFFFFFF), // branco @ 80%
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -354,7 +328,7 @@ class _CarrinhoFooter extends StatelessWidget {
                       text: 'R\$',
                       style: TextStyle(
                         fontFamily: 'Poppins',
-                        color: Colors.white,
+                        color: Color(0xB3FFFFFF), // branco @ 70%
                         fontSize: 13,
                         fontWeight: FontWeight.w900,
                       ),
@@ -365,7 +339,7 @@ class _CarrinhoFooter extends StatelessWidget {
                           .replaceAll('.', ','),
                       style: const TextStyle(
                         fontFamily: 'Poppins',
-                        color: Colors.white,
+                        color: Color(0xFFFFFFFF), // branco @ 100%
                         fontSize: 20,
                         fontWeight: FontWeight.w900,
                       ),
@@ -376,33 +350,35 @@ class _CarrinhoFooter extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(width: AppSpacing.sm),
+          const Spacer(),
 
-          // Botão Cobrar
-          Expanded(
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 135),
             child: SizedBox(
-              height: AppSizes.primaryButtonHeight,
+              height: 56,
               child: ElevatedButton.icon(
                 onPressed: onCobrar,
                 icon: const Icon(
                   Icons.storefront_outlined,
-                  color: AppColors.blue,
+                  color: Color(0xFF043DAE),
                   size: 22,
                 ),
                 label: const Text(
                   'Cobrar',
                   style: TextStyle(
                     fontFamily: 'Poppins',
-                    color: AppColors.blue,
+                    color: Color(0xFF043DAE),
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
+                  backgroundColor: const Color(0xFFD3E9FE),
                   elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  iconSize: 22,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadii.sm),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),

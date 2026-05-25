@@ -10,7 +10,6 @@ class VendaFab extends StatelessWidget {
   final VoidCallback onPressed;
   final int itemCount;
 
-  // ── Figma tokens ─────────────────────────────────────────────────────────
   static const double _width        = 64;
   static const double _height       = 65;
   static const double _radius       = 8;
@@ -28,7 +27,6 @@ class VendaFab extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        // ── Botão principal ───────────────────────────────────────────────
         SizedBox(
           width: _width,
           height: _height,
@@ -51,7 +49,6 @@ class VendaFab extends StatelessWidget {
           ),
         ),
 
-        // ── Badge de quantidade ──────────────────────────────────────────
         if (itemCount > 0)
           Positioned(
             top: _badgeOffset,
