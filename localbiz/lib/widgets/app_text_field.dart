@@ -16,6 +16,13 @@ class AppTextField extends StatelessWidget {
     this.radius = AppRadii.md,
     this.prefixIconSize = 28,
     this.labelGap = AppSpacing.xs,
+    this.textStyle,
+    this.hintStyle,
+    this.labelStyle,
+    this.fillColor,
+    this.prefixIconColor,
+    this.contentPadding,
+    this.prefixIconMinWidth,
   });
 
   final String? label;
@@ -29,6 +36,13 @@ class AppTextField extends StatelessWidget {
   final double radius;
   final double prefixIconSize;
   final double labelGap;
+  final TextStyle? textStyle;
+  final TextStyle? hintStyle;
+  final TextStyle? labelStyle;
+  final Color? fillColor;
+  final Color? prefixIconColor;
+  final EdgeInsetsGeometry? contentPadding;
+  final double? prefixIconMinWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -40,12 +54,12 @@ class AppTextField extends StatelessWidget {
         keyboardType: keyboardType,
         textInputAction: textInputAction,
         textAlignVertical: TextAlignVertical.center,
-        style: AppTextStyles.fieldText,
+        style: textStyle ?? AppTextStyles.fieldText,
         decoration: InputDecoration(
           filled: true,
-          fillColor: AppColors.fieldFill,
+          fillColor: fillColor ?? AppColors.fieldFill,
           hintText: hint,
-          hintStyle: AppTextStyles.fieldHint,
+          hintStyle: hintStyle ?? AppTextStyles.fieldHint,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(radius),
             borderSide: BorderSide.none,
@@ -58,17 +72,22 @@ class AppTextField extends StatelessWidget {
             borderRadius: BorderRadius.circular(radius),
             borderSide: const BorderSide(color: AppColors.blue, width: 1.2),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          contentPadding:
+              contentPadding ??
+              const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
           prefixIcon: prefixIcon == null
               ? null
               : Icon(
                   prefixIcon,
-                  color: AppColors.textPrimary,
+                  color: prefixIconColor ?? AppColors.textPrimary,
                   size: prefixIconSize,
                 ),
           prefixIconConstraints: prefixIcon == null
               ? null
-              : BoxConstraints(minWidth: height, minHeight: height),
+              : BoxConstraints(
+                  minWidth: prefixIconMinWidth ?? height,
+                  minHeight: height,
+                ),
         ),
       ),
     );
@@ -80,7 +99,7 @@ class AppTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label!, style: AppTextStyles.fieldLabel),
+        Text(label!, style: labelStyle ?? AppTextStyles.fieldLabel),
         SizedBox(height: labelGap),
         field,
       ],
