@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:localbiz/theme/app_colors.dart';
 import 'package:localbiz/theme/app_design_tokens.dart';
-import 'package:localbiz/widgets/app_primary_button.dart';
 
 class CarrinhoItemData {
   CarrinhoItemData({
@@ -34,8 +33,7 @@ class AppCartMenu extends StatelessWidget {
   final ValueChanged<int> onDecrement;
   final VoidCallback onCobrar;
 
-  double get _total =>
-      itens.fold(0, (acc, i) => acc + i.preco * i.quantidade);
+  double get _total => itens.fold(0, (acc, i) => acc + i.preco * i.quantidade);
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +43,7 @@ class AppCartMenu extends StatelessWidget {
           onTap: onFechar,
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-            child: Container(color: Colors.black.withOpacity(0.25)),
+            child: Container(color: Colors.black.withValues(alpha: 0.25)),
           ),
         ),
 
@@ -69,7 +67,6 @@ class AppCartMenu extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-
                   Container(
                     width: AppSizes.sheetHandleWidth,
                     height: AppSizes.sheetHandleHeight,
@@ -84,10 +81,12 @@ class AppCartMenu extends StatelessWidget {
 
                   Row(
                     children: [
-                      Text('Carrinho',
-                          style: AppTextStyles.sheetTitle.copyWith(
-                            color: const Color(0xFF2B1A49),
-                          )),
+                      Text(
+                        'Carrinho',
+                        style: AppTextStyles.sheetTitle.copyWith(
+                          color: const Color(0xFF2B1A49),
+                        ),
+                      ),
                       const Spacer(),
                       _CloseButton(onTap: onFechar),
                     ],
@@ -97,13 +96,12 @@ class AppCartMenu extends StatelessWidget {
 
                   ConstrainedBox(
                     constraints: BoxConstraints(
-                      maxHeight:
-                          MediaQuery.of(context).size.height * 0.35,
+                      maxHeight: MediaQuery.of(context).size.height * 0.35,
                     ),
                     child: ListView.separated(
                       shrinkWrap: true,
                       itemCount: itens.length,
-                      separatorBuilder: (_, __) => const SizedBox.shrink(),
+                      separatorBuilder: (_, index) => const SizedBox.shrink(),
                       itemBuilder: (context, i) => _CarrinhoItemRow(
                         item: itens[i],
                         onIncrement: () => onIncrement(i),
@@ -115,10 +113,7 @@ class AppCartMenu extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xs),
                   const SizedBox(height: AppSpacing.xs),
 
-                  _CarrinhoFooter(
-                    total: _total,
-                    onCobrar: onCobrar,
-                  ),
+                  _CarrinhoFooter(total: _total, onCobrar: onCobrar),
                 ],
               ),
             ),
@@ -145,11 +140,7 @@ class _CloseButton extends StatelessWidget {
           color: Color(0x1A65558F),
           borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
-        child: const Icon(
-          Icons.close,
-          size: 16,
-          color: Color(0xFF65558F),
-        ),
+        child: const Icon(Icons.close, size: 16, color: Color(0xFF65558F)),
       ),
     );
   }
@@ -172,7 +163,6 @@ class _CarrinhoItemRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,7 +206,6 @@ class _CarrinhoItemRow extends StatelessWidget {
               ],
             ),
           ),
-
 
           _QtyControl(
             quantidade: item.quantidade,
@@ -291,10 +280,7 @@ class _QtyButton extends StatelessWidget {
 }
 
 class _CarrinhoFooter extends StatelessWidget {
-  const _CarrinhoFooter({
-    required this.total,
-    required this.onCobrar,
-  });
+  const _CarrinhoFooter({required this.total, required this.onCobrar});
 
   final double total;
   final VoidCallback onCobrar;
@@ -309,7 +295,6 @@ class _CarrinhoFooter extends StatelessWidget {
       ),
       child: Row(
         children: [
-
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -335,9 +320,7 @@ class _CarrinhoFooter extends StatelessWidget {
                       ),
                     ),
                     TextSpan(
-                      text: total
-                          .toStringAsFixed(2)
-                          .replaceAll('.', ','),
+                      text: total.toStringAsFixed(2).replaceAll('.', ','),
                       style: const TextStyle(
                         fontFamily: 'Poppins',
                         color: Color(0xFFFFFFFF),
