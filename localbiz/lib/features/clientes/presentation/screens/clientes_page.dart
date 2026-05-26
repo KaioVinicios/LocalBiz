@@ -7,7 +7,8 @@ import 'package:localbiz/features/clientes/domain/entities/cliente_model.dart';
 import 'package:localbiz/features/clientes/presentation/widgets/novo_cliente_form.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
-import 'package:localbiz/core/ui/app_square_action_button.dart';
+import 'package:localbiz/core/ui/app_floating_add_button.dart';
+import 'package:localbiz/core/ui/app_help_action_button.dart';
 import 'package:localbiz/core/ui/app_text_field.dart';
 
 const _buscaAltura = 56.0;
@@ -301,8 +302,7 @@ class _ClientesPageState extends State<ClientesPage> {
                   Positioned(
                     right: AppSpacing.lg,
                     bottom: AppSpacing.lg,
-                    child: AppSquareActionButton(
-                      icon: Icons.add,
+                    child: AppFloatingAddButton(
                       tooltip: 'Adicionar cliente',
                       onPressed: abrirForm,
                     ),
@@ -432,15 +432,7 @@ class _ClientesTopBar extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        IconButton(
-          onPressed: () {},
-          tooltip: 'Ajuda',
-          icon: const Icon(
-            Icons.help_outline,
-            color: AppColors.textPrimary,
-            size: 24,
-          ),
-        ),
+        const AppHelpActionButton(),
       ],
     );
   }

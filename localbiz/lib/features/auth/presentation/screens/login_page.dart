@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
+import 'package:localbiz/core/ui/app_help_action_button.dart';
 import 'package:localbiz/core/ui/app_outlined_text_field.dart';
 import 'package:localbiz/features/auth/presentation/screens/forgot_password_page.dart';
 
@@ -34,14 +35,11 @@ class LoginPage extends StatelessWidget {
 
         actions: [
           Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.sm),
-
-            child: IconButton(
-              icon: const Icon(
-                Icons.help_center_outlined,
-                color: AppColors.textSecondary,
-              ),
-
+            padding: const EdgeInsets.only(
+              top: AppSpacing.sm,
+              right: AppSpacing.sm,
+            ),
+            child: AppHelpActionButton(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Ajuda ainda não implementada")),

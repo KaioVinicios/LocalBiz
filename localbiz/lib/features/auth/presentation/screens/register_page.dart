@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
+import 'package:localbiz/core/ui/app_help_action_button.dart';
 import 'package:localbiz/core/ui/app_outlined_text_field.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -23,6 +24,7 @@ class _RegisterPageState extends State<RegisterPage> {
         backgroundColor: AppColors.surface,
         elevation: 0,
         centerTitle: true,
+        automaticallyImplyLeading: false,
 
         title: Padding(
           padding: const EdgeInsets.only(top: AppSpacing.sm),
@@ -40,14 +42,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
         actions: [
           Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.sm),
-
-            child: IconButton(
-              icon: const Icon(
-                Icons.help_center_outlined,
-                color: AppColors.textSecondary,
-              ),
-
+            padding: const EdgeInsets.only(
+              top: AppSpacing.sm,
+              right: AppSpacing.sm,
+            ),
+            child: AppHelpActionButton(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Ajuda ainda não implementada")),

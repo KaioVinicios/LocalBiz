@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/ui/app_top_bar.dart';
-import 'package:localbiz/core/ui/nav_bar_button.dart';
 import 'package:localbiz/features/configuration/presentation/models/mock_data.dart';
 
 class ConfigurationPage extends StatelessWidget {
@@ -47,7 +46,6 @@ class ConfigurationPage extends StatelessWidget {
                 ],
               ),
             ),
-            const _BottomNavBar(),
           ],
         ),
       ),
@@ -249,49 +247,6 @@ class _SignOutButton extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _BottomNavBar extends StatelessWidget {
-  const _BottomNavBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.navBarBg,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          NavBarButton(
-            icon: Icons.menu,
-            label: 'Início',
-            isActive: false,
-            onTap: () {},
-          ),
-          NavBarButton(
-            icon: Icons.star_border,
-            label: 'Serviços',
-            isActive: false,
-            onTap: () {},
-          ),
-          NavBarButton(
-            icon: Icons.inventory_2_outlined,
-            label: 'Produtos',
-            isActive: false,
-            onTap: () => Navigator.of(
-              context,
-            ).pushReplacementNamed(AppRoute.produtos.path),
-          ),
-          NavBarButton(
-            icon: Icons.settings,
-            label: 'Configurações',
-            isActive: true,
-            onTap: () {},
-          ),
-        ],
       ),
     );
   }
