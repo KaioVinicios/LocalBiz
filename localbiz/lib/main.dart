@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:localbiz/clientes/clientes_page.dart';
 import 'package:localbiz/forgot_password/forgot_password_page.dart';
 import 'package:localbiz/login/login_page.dart';
+import 'package:localbiz/pages/configuration/configuration_page.dart';
+import 'package:localbiz/produtos/produtos_page.dart';
 import 'package:localbiz/register/register_page.dart';
 import 'package:localbiz/services/service_listing.dart';
 import 'package:localbiz/services/services_details.dart';
-import 'package:localbiz/pages/configuration/configuration_page.dart';
-import 'package:localbiz/widgets/nav_bar.dart';
 import 'package:localbiz/theme/app_colors.dart';
 import 'package:localbiz/vendas/venda_page.dart';
 
@@ -23,11 +23,13 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'LocalBiz',
       routes: {
-        '/home': (context) => const _HomeMenuTestePage(),
+        '/home': (context) => const VendaPage(),
         '/login': (context) => const LoginPage(),
         '/recuperar-senha': (context) => const ForgotPasswordPage(),
         '/signin': (context) => const RegisterPage(),
         '/clientes': (context) => const ClientesPage(),
+        '/produtos': (context) => const ProdutosPage(),
+        '/configuracoes': (context) => const ConfigurationPage(),
         '/vendas': (context) => const VendaPage(),
         '/services': (context) => const ServicosScreen(),
         '/service-details': (context) => const DetalheServicoScreen(),
@@ -38,29 +40,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.blue),
         scaffoldBackgroundColor: AppColors.surface,
       ),
-      // home: const _HomeMenuTestePage(),
       home: const VendaPage(),
-
-    );
-  }
-}
-
-class _HomeMenuTestePage extends StatelessWidget {
-  const _HomeMenuTestePage();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: const Center(
-        child: Text(
-          'menu teste',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-      bottomNavigationBar: const NavBar(initialIndex: 0),
     );
   }
 }
