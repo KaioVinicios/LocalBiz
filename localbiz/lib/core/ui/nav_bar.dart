@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 
 class NavBar extends StatefulWidget {
@@ -58,6 +59,11 @@ class _NavBarState extends State<NavBar> {
           label: 'Clientes',
         ),
         const NavigationDestination(
+          icon: Icon(Icons.inventory_2_outlined),
+          selectedIcon: Icon(Icons.inventory_2_outlined, color: AppColors.blue),
+          label: 'Produtos',
+        ),
+        const NavigationDestination(
           icon: Icon(Icons.settings_outlined),
           selectedIcon: Icon(Icons.settings_outlined, color: AppColors.blue),
           label: 'Configurações',
@@ -69,13 +75,15 @@ class _NavBarState extends State<NavBar> {
   String? _rotaParaIndice(int index) {
     switch (index) {
       case 0:
-        return '/home';
+        return AppRoute.dashboard.path;
       case 1:
-        return '/services';
+        return AppRoute.services.path;
       case 2:
-        return '/clientes';
+        return AppRoute.clientes.path;
       case 3:
-        return '/configuration';
+        return AppRoute.produtos.path;
+      case 4:
+        return AppRoute.configuration.path;
       default:
         return null;
     }

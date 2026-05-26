@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
+import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
 
@@ -26,8 +27,9 @@ class DashboardPage extends StatelessWidget {
                         const _DashboardHeader(),
                         const SizedBox(height: 22),
                         _QuickActions(
-                          onServiceCreate: () =>
-                              Navigator.of(context).pushNamed('/services/new'),
+                          onServiceCreate: () => Navigator.of(
+                            context,
+                          ).pushNamed(AppRoute.serviceCreate.path),
                         ),
                         const SizedBox(height: 20),
                         const _SummaryCards(),
@@ -134,19 +136,21 @@ class _QuickActions extends StatelessWidget {
           _QuickActionCard(
             label: 'Venda',
             icon: Icons.show_chart,
-            onTap: () {},
+            onTap: () => Navigator.of(context).pushNamed(AppRoute.vendas.path),
           ),
           const SizedBox(width: 16),
           _QuickActionCard(
             label: 'Agendar',
             icon: Icons.show_chart,
-            onTap: () => Navigator.of(context).pushNamed('/service-details'),
+            onTap: () =>
+                Navigator.of(context).pushNamed(AppRoute.serviceSchedules.path),
           ),
           const SizedBox(width: 16),
           _QuickActionCard(
             label: 'Clientes',
             icon: Icons.show_chart,
-            onTap: () => Navigator.of(context).pushNamed('/clientes'),
+            onTap: () =>
+                Navigator.of(context).pushNamed(AppRoute.clientes.path),
           ),
           const SizedBox(width: 16),
           _QuickActionCard(
@@ -589,17 +593,20 @@ class _DashboardNavBar extends StatelessWidget {
           _DashboardNavItem(
             icon: Icons.stars_outlined,
             label: 'Serviços',
-            onTap: () => Navigator.of(context).pushNamed('/services'),
+            onTap: () =>
+                Navigator.of(context).pushNamed(AppRoute.services.path),
           ),
           _DashboardNavItem(
             icon: Icons.inventory_2_outlined,
             label: 'Produtos',
-            onTap: () {},
+            onTap: () =>
+                Navigator.of(context).pushNamed(AppRoute.produtos.path),
           ),
           _DashboardNavItem(
             icon: Icons.settings_outlined,
             label: 'Configurações',
-            onTap: () => Navigator.of(context).pushNamed('/configuration'),
+            onTap: () =>
+                Navigator.of(context).pushNamed(AppRoute.configuration.path),
           ),
         ],
       ),

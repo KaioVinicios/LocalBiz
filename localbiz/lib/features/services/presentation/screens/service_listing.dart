@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 
 class Servico {
@@ -56,9 +57,9 @@ class _ServicosScreenState extends State<ServicosScreen> {
     if (query.isEmpty) return _servicos;
     return _servicos
         .where(
-          (s) =>
-              s.nome.toLowerCase().contains(query) ||
-              s.categoria.toLowerCase().contains(query),
+          (servico) =>
+              servico.nome.toLowerCase().contains(query) ||
+              servico.categoria.toLowerCase().contains(query),
         )
         .toList();
   }
@@ -72,7 +73,7 @@ class _ServicosScreenState extends State<ServicosScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,7 +87,7 @@ class _ServicosScreenState extends State<ServicosScreen> {
           ],
         ),
       ),
-      floatingActionButton: _buildFAB(),
+      floatingActionButton: _buildFab(),
     );
   }
 
@@ -96,7 +97,7 @@ class _ServicosScreenState extends State<ServicosScreen> {
       child: GestureDetector(
         onTap: () => Navigator.of(
           context,
-        ).pushNamedAndRemoveUntil('/home', (route) => false),
+        ).pushNamedAndRemoveUntil(AppRoute.home.path, (route) => false),
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -142,10 +143,16 @@ class _ServicosScreenState extends State<ServicosScreen> {
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
                 hintText: 'Pesquisar por Serviço',
-                hintStyle: TextStyle(color: Colors.grey[400], fontSize: 15),
-                prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
+                hintStyle: const TextStyle(
+                  color: AppColors.textMuted,
+                  fontSize: 15,
+                ),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  color: AppColors.textMuted,
+                ),
                 filled: true,
-                fillColor: const Color(0xFFF2F2F2),
+                fillColor: AppColors.fieldFill,
                 contentPadding: const EdgeInsets.symmetric(
                   vertical: 12,
                   horizontal: 16,
@@ -165,7 +172,11 @@ class _ServicosScreenState extends State<ServicosScreen> {
               color: AppColors.cardIconBg,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(Icons.tune, color: Colors.grey[600], size: 22),
+            child: const Icon(
+              Icons.tune,
+              color: AppColors.textSecondary,
+              size: 22,
+            ),
           ),
         ],
       ),
@@ -188,12 +199,13 @@ class _ServicosScreenState extends State<ServicosScreen> {
     );
   }
 
-  Widget _buildFAB() {
+  Widget _buildFab() {
     return FloatingActionButton(
-      onPressed: () => Navigator.of(context).pushNamed('/services/new'),
+      onPressed: () =>
+          Navigator.of(context).pushNamed(AppRoute.serviceCreate.path),
       backgroundColor: AppColors.blue,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: const Icon(Icons.add, color: Colors.white, size: 28),
+      child: const Icon(Icons.add, color: AppColors.sheetSurface, size: 28),
     );
   }
 }
@@ -212,17 +224,18 @@ class _ServicoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: AppColors.sheetSurface,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => Navigator.of(context).pushNamed('/service-details'),
+        onTap: () =>
+            Navigator.of(context).pushNamed(AppRoute.serviceDetails.path),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColors.sheetSurface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFEEEEEE), width: 1),
+            border: Border.all(color: AppColors.divider),
           ),
           child: Row(
             children: [
@@ -245,18 +258,25 @@ class _ServicoCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       servico.categoria,
-                      style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: Colors.grey[400], size: 22),
+              const Icon(
+                Icons.chevron_right,
+                color: AppColors.textMuted,
+                size: 22,
+              ),
             ],
           ),
         ),
