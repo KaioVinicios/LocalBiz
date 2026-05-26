@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:localbiz/services/services_scheduling.dart';
+import 'package:localbiz/services/widgets/service_calendar.dart';
 import 'package:localbiz/theme/app_colors.dart';
 
 class DetalheServicoScreen extends StatefulWidget {
@@ -21,12 +23,6 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
  
   final Set<int> _diasComAgendamento = {7, 8, 9, 10};
 
-  static const List<String> _diasSemana = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
-  static const List<String> _meses = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
-  ];
-
   void _mesAnterior() => setState(() {
         _mesAtual = DateTime(_mesAtual.year, _mesAtual.month - 1);
         _diaSelecionado = null;
@@ -40,7 +36,7 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -121,7 +117,7 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: const Color(0xFFF0F0F0),
+                color: AppColors.navBarBg,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(Icons.edit, color: AppColors.textPrimary, size: 18),
@@ -155,130 +151,13 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
   }
 
   Widget _buildCalendario() {
-    final primeiroDia = DateTime(_mesAtual.year, _mesAtual.month, 1);
-    final ultimoDia = DateTime(_mesAtual.year, _mesAtual.month + 1, 0);
-    final diasNoMes = ultimoDia.day;
-    final iniciaSemana = primeiroDia.weekday % 7; // 0=Dom
-
-    final diasMesAnterior = DateTime(_mesAtual.year, _mesAtual.month, 0).day;
-
-    List<_DiaCalendario> dias = [];
-
-    for (int i = iniciaSemana - 1; i >= 0; i--) {
-      dias.add(_DiaCalendario(dia: diasMesAnterior - i, mesAtual: false));
-    }
-
-    for (int i = 1; i <= diasNoMes; i++) {
-      dias.add(_DiaCalendario(dia: i, mesAtual: true));
-    }
-
-    int restante = 7 - (dias.length % 7);
-    if (restante < 7) {
-      for (int i = 1; i <= restante; i++) {
-        dias.add(_DiaCalendario(dia: i, mesAtual: false));
-      }
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: AppColors.divider),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: _mesAnterior,
-                child: const Icon(Icons.chevron_left, color: Colors.black54),
-              ),
-              Text(
-                '${_meses[_mesAtual.month - 1]} ${_mesAtual.year}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Colors.black87,
-                ),
-              ),
-              GestureDetector(
-                onTap: _proximoMes,
-                child: const Icon(Icons.chevron_right, color: Colors.black54),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          Row(
-            children: _diasSemana
-                .map((d) => Expanded(
-                      child: Center(
-                        child: Text(
-                          d,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ),
-                    ))
-                .toList(),
-          ),
-          const SizedBox(height: 8),
-
-
-          ...List.generate(dias.length ~/ 7, (semana) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                children: List.generate(7, (col) {
-                  final item = dias[semana * 7 + col];
-                  final isSelecionado = item.mesAtual && item.dia == _diaSelecionado;
-                  final temAgendamento = item.mesAtual && _diasComAgendamento.contains(item.dia);
-
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: item.mesAtual
-                          ? () => setState(() => _diaSelecionado = item.dia)
-                          : null,
-                      child: Container(
-                        height: 36,
-                        margin: const EdgeInsets.symmetric(horizontal: 1),
-                        decoration: BoxDecoration(
-                          color: isSelecionado
-                              ? AppColors.blue
-                              : temAgendamento
-                                  ? AppColors.fieldFill
-                                  : Colors.transparent,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${item.dia}',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: isSelecionado || temAgendamento
-                                  ? FontWeight.w600
-                                  : FontWeight.normal,
-                              color: isSelecionado
-                                  ? AppColors.fieldFill
-                                  : item.mesAtual
-                                      ? Colors.black87
-                                      : Colors.grey[400],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            );
-          }),
-        ],
-      ),
+    return ServiceCalendar(
+      mesAtual: _mesAtual,
+      diaSelecionado: _diaSelecionado,
+      diasComAgendamento: _diasComAgendamento,
+      onMesAnterior: _mesAnterior,
+      onProximoMes: _proximoMes,
+      onDiaSelecionado: (dia) => setState(() => _diaSelecionado = dia),
     );
   }
 
@@ -303,13 +182,19 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
   Widget _buildBottomButton() {
     return Container(
       width: double.infinity,
-      color: Colors.white,
+      color: AppColors.sheetSurface,
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const AgendamentoServicoScreen(),
+            ),
+          );
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.blue,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.sheetSurface,
           minimumSize: const Size(double.infinity, 52),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           elevation: 0,
@@ -321,12 +206,6 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
       ),
     );
   }
-}
-
-class _DiaCalendario {
-  final int dia;
-  final bool mesAtual;
-  const _DiaCalendario({required this.dia, required this.mesAtual});
 }
 
 class _Agendamento {
@@ -347,7 +226,7 @@ class _AgendamentoCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.sheetSurface,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppColors.divider),
       ),
@@ -360,7 +239,7 @@ class _AgendamentoCard extends StatelessWidget {
               color: AppColors.fieldFill,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.person_outline, color: Color(0xFF1A3A8F), size: 24),
+            child: Icon(Icons.person_outline, color: AppColors.cardIconFg, size: 24),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -372,13 +251,13 @@ class _AgendamentoCard extends StatelessWidget {
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 15,
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 3),
                 Text(
                   '${agendamento.data} • ${agendamento.hora}',
-                  style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -388,7 +267,7 @@ class _AgendamentoCard extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 15,
-              color: Color(0xFF1A3A8F),
+              color: AppColors.cardIconFg,
             ),
           ),
         ],
