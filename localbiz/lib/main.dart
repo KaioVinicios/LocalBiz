@@ -29,7 +29,6 @@ class MyApp extends StatelessWidget {
         '/signin': (context) => const RegisterPage(),
         '/clientes': (context) => const ClientesPage(),
         '/vendas': (context) => const VendaPage(),
-
         '/services': (context) => const ServicosScreen(),
         '/service-details': (context) => const DetalheServicoScreen(),
         '/configuration': (context) => const ConfigurationPage(),
@@ -39,7 +38,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.blue),
         scaffoldBackgroundColor: AppColors.surface,
       ),
-      home: const _HomeMenuTestePage(),
+      // home: const _HomeMenuTestePage(),
+      home: const VendaPage(),
+
     );
   }
 }

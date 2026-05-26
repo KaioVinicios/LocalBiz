@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:localbiz/theme/app_colors.dart';
 import 'package:localbiz/theme/app_design_tokens.dart';
 import 'package:localbiz/widgets/app_sale_completed_overlay.dart';
@@ -28,7 +29,7 @@ class ItemCarrinho {
 }
 
 final _mockProdutos = <Produto>[
-  Produto(nome: 'Shampoo Argan 250ml', preco: 45.90, emEstoque: true),
+  Produto(nome: 'Shampoo Argan', preco: 45.90, emEstoque: true),
   Produto(nome: 'Condicionador Nutri', preco: 49.90, emEstoque: true),
   Produto(nome: 'Mascara Reconstrutora', preco: 89.90, emEstoque: true),
   Produto(nome: 'Óleo Capilar 60ml', preco: 34.90, emEstoque: false),
@@ -42,6 +43,7 @@ class VendaPage extends StatefulWidget {
 }
 
 class _VendaPageState extends State<VendaPage> {
+  
   final _buscaController = TextEditingController();
   final _carrinho = <ItemCarrinho>[];
   bool _carrinhoAberto = false;
@@ -56,8 +58,8 @@ class _VendaPageState extends State<VendaPage> {
 
   List<Produto> get _produtosFiltrados {
     if (_busca.isEmpty) return _mockProdutos;
-    final q = _busca.toLowerCase();
-    return _mockProdutos.where((p) => p.nome.toLowerCase().contains(q)).toList();
+    final busca = _busca.toLowerCase();
+    return _mockProdutos.where((b) => b.nome.toLowerCase().contains(busca)).toList();
   }
 
   double get _totalCarrinho =>
@@ -100,7 +102,11 @@ class _VendaPageState extends State<VendaPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Theme(
+      data: Theme.of(context).copyWith(
+        textTheme: GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme),
+      ),
+      child: Scaffold(
       backgroundColor: AppColors.surface,
       body: Stack(
         children: [
@@ -109,21 +115,30 @@ class _VendaPageState extends State<VendaPage> {
               children: [
                 const AppTopBar(),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Align(
                     alignment: Alignment.centerLeft,
-                    child: Text('Nova Venda', style: AppTextStyles.pageTitle),
+                    child: Text(
+                      'Nova Venda',
+                      style: AppTextStyles.pageTitle.copyWith(
+                        color: const Color(0xFF334155),
+                        fontSize: 32,
+                        fontWeight: FontWeight.w900,
+                        height: 1.0,
+                        letterSpacing: 0,
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: AppSpacing.xs),
+                const SizedBox(height: 24),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: VendaSearchBar(
                     controller: _buscaController,
                     onChanged: (v) => setState(() => _busca = v),
                   ),
                 ),
-                const SizedBox(height: AppSpacing.sm),
+                const SizedBox(height: 24),
                 Expanded(
                   child: _ProdutosGrid(
                     produtos: _produtosFiltrados,
@@ -136,7 +151,7 @@ class _VendaPageState extends State<VendaPage> {
           ),
           if (!_vendaFinalizada)
             Positioned(
-              right: 16,
+              right: 24,
               bottom: 24,
               child: SafeArea(
                 child: VendaFab(
@@ -166,6 +181,7 @@ class _VendaPageState extends State<VendaPage> {
             ),
         ],
       ),
+      ),
     );
   }
 }
@@ -182,15 +198,12 @@ class _ProdutosGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: AppSpacing.xs,
         mainAxisSpacing: AppSpacing.xs,
-        mainAxisExtent: 204,
+        mainAxisExtent: 186,
       ),
       itemCount: produtos.length,
       itemBuilder: (context, i) {

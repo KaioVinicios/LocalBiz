@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class VendaSearchBar extends StatelessWidget {
   const VendaSearchBar({
@@ -18,9 +19,8 @@ class VendaSearchBar extends StatelessWidget {
   static const double _gap       = 10;
   static const double _iconSize  = 20;
 
-  static const Color _iconColor  = Color(0xFF183D8C);           // 100 %
-  static const Color _fillColor  = Color(0x0D043DAE);           // #043DAE @  5 % ≈ 0x0D
-  static const Color _hintColor  = Color(0x66444B58);           // #444B58 @ 40 % ≈ 0x66
+  static const Color _fillColor   = Color(0x0D043DAE);
+  static const Color _hintColor   = Color(0x66444B58);
   static const Color _focusBorder = Color(0xFF183D8C);
 
   @override
@@ -45,7 +45,6 @@ class VendaSearchBar extends StatelessWidget {
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
-
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(_radius),
             borderSide: BorderSide.none,
@@ -58,18 +57,16 @@ class VendaSearchBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(_radius),
             borderSide: const BorderSide(color: _focusBorder, width: 1.2),
           ),
-
           contentPadding: const EdgeInsets.symmetric(
             horizontal: _padding,
             vertical: 0,
           ),
-
-          prefixIcon: const Padding(
-            padding: EdgeInsets.only(left: _padding, right: _gap),
-            child: Icon(
-              Icons.search_rounded,
-              color: _iconColor,
-              size: _iconSize,
+          prefixIcon: Padding(
+            padding: const EdgeInsets.only(left: _padding, right: _gap),
+            child: SvgPicture.asset(
+              'assets/icons/search-02.svg',
+              width: _iconSize,
+              height: _iconSize,
             ),
           ),
           prefixIconConstraints: const BoxConstraints(

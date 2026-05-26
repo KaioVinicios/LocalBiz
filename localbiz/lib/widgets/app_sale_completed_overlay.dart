@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:localbiz/theme/app_colors.dart';
 import 'package:localbiz/theme/app_design_tokens.dart';
 
@@ -50,10 +51,10 @@ class AppSaleCompletedOverlay extends StatelessWidget {
                     color: AppColors.fieldFill,
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(
-                    Icons.verified_outlined,
-                    color: AppColors.blue,
-                    size: 32,
+                  child: SvgPicture.asset(
+                    'assets/icons/checkmark-badge-02.svg',
+                    width: 42,
+                    height: 42,
                   ),
                 ),
 

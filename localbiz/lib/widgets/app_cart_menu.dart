@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:localbiz/theme/app_colors.dart';
 import 'package:localbiz/theme/app_design_tokens.dart';
 import 'package:localbiz/widgets/app_primary_button.dart';
@@ -68,7 +69,7 @@ class AppCartMenu extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Handle
+
                   Container(
                     width: AppSizes.sheetHandleWidth,
                     height: AppSizes.sheetHandleHeight,
@@ -141,7 +142,7 @@ class _CloseButton extends StatelessWidget {
         width: 32,
         height: 32,
         decoration: const BoxDecoration(
-          color: Color(0x1A65558F), // #65558F @ 10% bg
+          color: Color(0x1A65558F),
           borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
         child: const Icon(
@@ -171,7 +172,7 @@ class _CarrinhoItemRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          // Nome + preço
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,7 +194,7 @@ class _CarrinhoItemRow extends StatelessWidget {
                         text: 'R\$',
                         style: TextStyle(
                           fontFamily: 'Poppins',
-                          color: Color(0xCC0A2463), // #0A2463 @ 80%
+                          color: Color(0xCC0A2463),
                           fontSize: 12,
                           fontWeight: FontWeight.w900,
                         ),
@@ -204,7 +205,7 @@ class _CarrinhoItemRow extends StatelessWidget {
                             .replaceAll('.', ','),
                         style: const TextStyle(
                           fontFamily: 'Poppins',
-                          color: Color(0xFF0A2463), // #0A2463 @ 100%
+                          color: Color(0xFF0A2463),
                           fontSize: 16,
                           fontWeight: FontWeight.w900,
                         ),
@@ -216,7 +217,7 @@ class _CarrinhoItemRow extends StatelessWidget {
             ),
           ),
 
-          // Controle de quantidade
+
           _QtyControl(
             quantidade: item.quantidade,
             onIncrement: onIncrement,
@@ -316,7 +317,7 @@ class _CarrinhoFooter extends StatelessWidget {
                 'Total da venda',
                 style: TextStyle(
                   fontFamily: 'Poppins',
-                  color: Color(0xCCFFFFFF), // branco @ 80%
+                  color: Color(0xCCFFFFFF),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -328,7 +329,7 @@ class _CarrinhoFooter extends StatelessWidget {
                       text: 'R\$',
                       style: TextStyle(
                         fontFamily: 'Poppins',
-                        color: Color(0xB3FFFFFF), // branco @ 70%
+                        color: Color(0xB3FFFFFF),
                         fontSize: 13,
                         fontWeight: FontWeight.w900,
                       ),
@@ -339,7 +340,7 @@ class _CarrinhoFooter extends StatelessWidget {
                           .replaceAll('.', ','),
                       style: const TextStyle(
                         fontFamily: 'Poppins',
-                        color: Color(0xFFFFFFFF), // branco @ 100%
+                        color: Color(0xFFFFFFFF),
                         fontSize: 20,
                         fontWeight: FontWeight.w900,
                       ),
@@ -358,10 +359,10 @@ class _CarrinhoFooter extends StatelessWidget {
               height: 56,
               child: ElevatedButton.icon(
                 onPressed: onCobrar,
-                icon: const Icon(
-                  Icons.storefront_outlined,
-                  color: Color(0xFF043DAE),
-                  size: 22,
+                icon: SvgPicture.asset(
+                  'assets/icons/money-receive-01.svg',
+                  width: 22,
+                  height: 22,
                 ),
                 label: const Text(
                   'Cobrar',
