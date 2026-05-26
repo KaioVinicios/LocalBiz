@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:localbiz/features/clientes/presentation/models/cliente_model.dart';
+import 'package:localbiz/features/clientes/domain/entities/cliente_model.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
 

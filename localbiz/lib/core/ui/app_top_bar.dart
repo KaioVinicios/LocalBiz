@@ -20,46 +20,43 @@ class AppTopBar extends StatelessWidget {
     return Padding(
       padding: padding,
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           InkWell(
             onTap: onBack ?? () => Navigator.of(context).maybePop(),
             borderRadius: BorderRadius.circular(8),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+              padding: const EdgeInsets.symmetric(vertical: 8),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.arrow_back,
-                    size: 20,
-                    color: AppColors.textPrimary,
-                  ),
-                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_back, color: AppColors.blue, size: 20),
+                  const SizedBox(width: 6),
                   Text(
                     backLabel,
                     style: const TextStyle(
-                      fontSize: 14,
+                      color: AppColors.blue,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 0.8,
-                      color: AppColors.textPrimary,
+                      fontSize: 13,
+                      letterSpacing: 0.2,
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          const Spacer(),
           if (showHelp)
             Container(
-              width: 36,
-              height: 36,
+              width: 34,
+              height: 34,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
                 border: Border.all(color: AppColors.divider),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(
                 Icons.help_outline,
-                size: 20,
                 color: AppColors.textPrimary,
+                size: 20,
               ),
             ),
         ],

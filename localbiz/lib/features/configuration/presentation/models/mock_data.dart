@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localbiz/core/router/app_route.dart';
 
 class BusinessProfile {
   const BusinessProfile({required this.name, required this.avatarHint});
@@ -18,7 +19,7 @@ class ConfigItem {
   final IconData icon;
   final String title;
   final String subtitle;
-  final String? route;
+  final AppRoute? route;
 }
 
 class ConfigSection {
@@ -41,13 +42,13 @@ const List<ConfigSection> mockConfigSections = [
         icon: Icons.storefront_outlined,
         title: 'Perfil do Negócio',
         subtitle: 'Nome, logo e informações de contato',
-        route: '/business-profile',
+        route: AppRoute.businessProfile,
       ),
       ConfigItem(
         icon: Icons.description_outlined,
         title: 'Relatórios',
         subtitle: 'Alterar senha e verificação em duas etapas',
-        route: '/report',
+        route: AppRoute.relatorios,
       ),
     ],
   ),

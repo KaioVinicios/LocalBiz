@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/ui/app_top_bar.dart';
 import 'package:localbiz/core/ui/nav_bar_button.dart';
@@ -169,7 +170,7 @@ class _ConfigCard extends StatelessWidget {
       child: InkWell(
         onTap: item.route == null
             ? null
-            : () => Navigator.of(context).pushNamed(item.route!),
+            : () => Navigator.of(context).pushNamed(item.route!.path),
         borderRadius: BorderRadius.circular(14),
         child: Container(
           padding: const EdgeInsets.all(14),
@@ -280,7 +281,9 @@ class _BottomNavBar extends StatelessWidget {
             icon: Icons.inventory_2_outlined,
             label: 'Produtos',
             isActive: false,
-            onTap: () {},
+            onTap: () => Navigator.of(
+              context,
+            ).pushReplacementNamed(AppRoute.produtos.path),
           ),
           NavBarButton(
             icon: Icons.settings,

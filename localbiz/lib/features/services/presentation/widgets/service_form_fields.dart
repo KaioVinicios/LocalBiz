@@ -1,69 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
 
-class ServiceFormField extends StatelessWidget {
-  const ServiceFormField({
+const serviceCategoryOptions = [
+  'Serviços Capilares',
+  'Barbearia',
+  'Manicure e Pedicure',
+  'Estética Facial',
+  'Massoterapia',
+];
+
+class ServiceTextField extends StatelessWidget {
+  const ServiceTextField({
     super.key,
     required this.label,
-    this.value,
-    this.hint,
-    this.trailing,
+    required this.controller,
+    this.keyboardType,
+    this.inputFormatters,
   });
 
   final String label;
-  final String? value;
-  final String? hint;
-  final Widget? trailing;
+  final TextEditingController controller;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) {
-    final displayText = value ?? hint;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4),
-          child: Text(
-            label,
-            style: const TextStyle(
-              color: AppColorTokens.slate700,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              height: 20 / 14,
-            ),
-          ),
-        ),
+        _ServiceFieldLabel(label),
         const SizedBox(height: 6),
-        Container(
+        SizedBox(
           height: 48,
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: AppColorTokens.formInputFill,
-            border: Border.all(color: AppColorTokens.slate200),
-          ),
-          child: Row(
-            children: [
-              if (displayText != null)
-                Expanded(
-                  child: Text(
-                    displayText,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: AppColorTokens.slate500,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      height: 28 / 14,
-                    ),
-                  ),
-                )
-              else
-                const Spacer(),
-              ?trailing,
-            ],
+          child: TextFormField(
+            controller: controller,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
+            cursorColor: AppColors.blue,
+            style: const TextStyle(
+              color: AppColorTokens.slate900,
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              height: 28 / 14,
+            ),
+            decoration: _serviceInputDecoration(),
           ),
         ),
       ],
@@ -71,13 +53,143 @@ class ServiceFormField extends StatelessWidget {
   }
 }
 
-class ServiceFormScaffold extends StatelessWidget {
+class ServiceCategoryField extends StatelessWidget {
+  const ServiceCategoryField({
+    super.key,
+    required this.value,
+    required this.categories,
+    required this.onChanged,
+  });
+
+  final String? value;
+  final List<String> categories;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const _ServiceFieldLabel('Categoria'),
+        const SizedBox(height: 6),
+        SizedBox(
+          height: 48,
+          child: DropdownButtonFormField<String>(
+            initialValue: value,
+            isExpanded: true,
+            icon: const Icon(
+              Icons.arrow_drop_down,
+              color: AppColorTokens.black,
+              size: 24,
+            ),
+            hint: const Text(
+              'Selecione',
+              style: TextStyle(
+                color: AppColorTokens.slate500,
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                height: 28 / 14,
+              ),
+            ),
+            items: categories
+                .map(
+                  (category) => DropdownMenuItem<String>(
+                    value: category,
+                    child: Text(
+                      category,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                )
+                .toList(),
+            onChanged: onChanged,
+            style: const TextStyle(
+              color: AppColorTokens.slate900,
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              height: 28 / 14,
+            ),
+            decoration: _serviceInputDecoration(),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ServiceFieldLabel extends StatelessWidget {
+  const _ServiceFieldLabel(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: AppColorTokens.slate700,
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+          height: 20 / 14,
+        ),
+      ),
+    );
+  }
+}
+
+InputDecoration _serviceInputDecoration() {
+  return const InputDecoration(
+    filled: true,
+    fillColor: AppColorTokens.formInputFill,
+    contentPadding: EdgeInsets.symmetric(horizontal: 16),
+    enabledBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: AppColorTokens.slate200),
+      borderRadius: BorderRadius.zero,
+    ),
+    focusedBorder: OutlineInputBorder(
+      borderSide: BorderSide(color: AppColors.blue, width: 1.4),
+      borderRadius: BorderRadius.zero,
+    ),
+  );
+}
+
+class RealCurrencyInputFormatter extends TextInputFormatter {
+  const RealCurrencyInputFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+
+    if (digits.isEmpty) {
+      return TextEditingValue.empty;
+    }
+
+    final cents = int.parse(digits);
+    final reais = cents ~/ 100;
+    final centavos = cents % 100;
+    final formatted = 'R\$ $reais,${centavos.toString().padLeft(2, '0')}';
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
+class ServiceFormScaffold extends StatefulWidget {
   const ServiceFormScaffold({
     super.key,
     required this.title,
     required this.description,
     required this.image,
     required this.category,
+    this.categories = serviceCategoryOptions,
     this.name,
     this.price,
   });
@@ -86,8 +198,35 @@ class ServiceFormScaffold extends StatelessWidget {
   final String description;
   final Widget image;
   final String category;
+  final List<String> categories;
   final String? name;
   final String? price;
+
+  @override
+  State<ServiceFormScaffold> createState() => _ServiceFormScaffoldState();
+}
+
+class _ServiceFormScaffoldState extends State<ServiceFormScaffold> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _priceController;
+  String? _selectedCategory;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.name ?? '');
+    _priceController = TextEditingController(text: widget.price ?? '');
+    _selectedCategory = widget.categories.contains(widget.category)
+        ? widget.category
+        : null;
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _priceController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +247,7 @@ class ServiceFormScaffold extends StatelessWidget {
                       children: [
                         const SizedBox(height: 12),
                         Text(
-                          title,
+                          widget.title,
                           style: const TextStyle(
                             color: AppColorTokens.slate900,
                             fontSize: 30,
@@ -118,7 +257,7 @@ class ServiceFormScaffold extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          description,
+                          widget.description,
                           style: const TextStyle(
                             color: AppColorTokens.slate600,
                             fontSize: 16,
@@ -130,23 +269,32 @@ class ServiceFormScaffold extends StatelessWidget {
                         SizedBox(
                           width: double.infinity,
                           height: 146,
-                          child: image,
+                          child: widget.image,
                         ),
                         const SizedBox(height: 18),
-                        ServiceFormField(
-                          label: 'Categoria',
-                          value: category,
-                          hint: category,
-                          trailing: const Icon(
-                            Icons.arrow_drop_down,
-                            color: AppColorTokens.black,
-                            size: 24,
-                          ),
+                        ServiceCategoryField(
+                          value: _selectedCategory,
+                          categories: widget.categories,
+                          onChanged: (category) {
+                            setState(() {
+                              _selectedCategory = category;
+                            });
+                          },
                         ),
                         const SizedBox(height: 24),
-                        ServiceFormField(label: 'Nome', value: name),
+                        ServiceTextField(
+                          label: 'Nome',
+                          controller: _nameController,
+                        ),
                         const SizedBox(height: 24),
-                        ServiceFormField(label: 'Preço', value: price),
+                        ServiceTextField(
+                          label: 'Preço',
+                          controller: _priceController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: const [RealCurrencyInputFormatter()],
+                        ),
                         const SizedBox(height: 24),
                       ],
                     ),
