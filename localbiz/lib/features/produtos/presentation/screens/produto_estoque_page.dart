@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
+import 'package:localbiz/core/ui/app_help_action_button.dart';
 import 'package:localbiz/core/ui/labeled_fields.dart';
 import 'package:localbiz/features/produtos/domain/entities/produto_model.dart';
 import 'package:localbiz/features/produtos/presentation/widgets/produto_image.dart';
-
-const _helpIcon = 'assets/icons/help.png';
 
 enum MovimentoEstoque { entrada, saida }
 
@@ -247,13 +246,7 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          const SizedBox(
-            width: 36,
-            height: 36,
-            child: Center(
-              child: Image(image: AssetImage(_helpIcon), width: 24, height: 24),
-            ),
-          ),
+          const AppHelpActionButton(),
         ],
       ),
     );

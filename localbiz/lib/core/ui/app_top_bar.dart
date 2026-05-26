@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
+import 'package:localbiz/core/ui/app_help_action_button.dart';
 
 class AppTopBar extends StatelessWidget {
   const AppTopBar({
@@ -45,20 +46,7 @@ class AppTopBar extends StatelessWidget {
               ),
             ),
           ),
-          if (showHelp)
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                border: Border.all(color: AppColors.divider),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.help_outline,
-                color: AppColors.textPrimary,
-                size: 20,
-              ),
-            ),
+          if (showHelp) const AppHelpActionButton(),
         ],
       ),
     );
