@@ -190,7 +190,7 @@ class _ServicosScreenState extends State<ServicosScreen> {
 
   Widget _buildFAB() {
     return FloatingActionButton(
-      onPressed: () {},
+      onPressed: () => Navigator.of(context).pushNamed('/services/new'),
       backgroundColor: AppColors.blue,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: const Icon(Icons.add, color: Colors.white, size: 28),

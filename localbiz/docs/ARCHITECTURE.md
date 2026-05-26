@@ -43,9 +43,14 @@ lib/
     │           └── report_page.dart
     └── services/
         └── presentation/
-            └── screens/
-                ├── service_listing.dart
-                └── services_details.dart
+            ├── screens/
+            │   ├── dashboard_page.dart
+            │   ├── service_create_page.dart
+            │   ├── service_edit_page.dart
+            │   ├── service_listing.dart
+            │   └── services_details.dart
+            └── widgets/
+                └── service_form_fields.dart
 ```
 
 ## Responsabilidades das Pastas
@@ -78,7 +83,8 @@ atendem apenas aquela feature. As features atuais são:
 - `clientes`: lista de clientes, detalhes e formulário de cliente.
 - `configuration`: configurações, perfil do negócio, relatórios e dados mockados
   de configuração.
-- `services`: lista de serviços e detalhes de serviço.
+- `services`: dashboard, lista de serviços, detalhes de serviço, cadastro e
+  edição de serviço.
 
 ## Evolução Além de Presentation
 
