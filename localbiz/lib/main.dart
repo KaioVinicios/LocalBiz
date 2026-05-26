@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:localbiz/clientes/clientes_page.dart';
-import 'package:localbiz/forgot_password/forgot_password_page.dart';
-import 'package:localbiz/login/login_page.dart';
-import 'package:localbiz/register/register_page.dart';
-import 'package:localbiz/services/service_listing.dart';
-import 'package:localbiz/services/services_details.dart';
-import 'package:localbiz/pages/configuration/configuration_page.dart';
-import 'package:localbiz/widgets/nav_bar.dart';
-import 'package:localbiz/theme/app_colors.dart';
+import 'package:localbiz/core/theme/app_colors.dart';
+import 'package:localbiz/core/ui/nav_bar.dart';
+import 'package:localbiz/features/auth/presentation/screens/forgot_password_page.dart';
+import 'package:localbiz/features/auth/presentation/screens/login_page.dart';
+import 'package:localbiz/features/auth/presentation/screens/register_page.dart';
+import 'package:localbiz/features/clientes/presentation/screens/clientes_page.dart';
+import 'package:localbiz/features/configuration/presentation/screens/business_profile_page.dart';
+import 'package:localbiz/features/configuration/presentation/screens/configuration_page.dart';
+import 'package:localbiz/features/configuration/presentation/screens/report_page.dart';
+import 'package:localbiz/features/services/presentation/screens/service_listing.dart';
+import 'package:localbiz/features/services/presentation/screens/services_details.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,6 +32,8 @@ class MyApp extends StatelessWidget {
         '/services': (context) => const ServicosScreen(),
         '/service-details': (context) => const DetalheServicoScreen(),
         '/configuration': (context) => const ConfigurationPage(),
+        '/business-profile': (context) => const BusinessProfilePage(),
+        '/report': (context) => const ReportPage(),
       },
       theme: ThemeData(
         useMaterial3: true,
@@ -50,10 +54,7 @@ class _HomeMenuTestePage extends StatelessWidget {
       body: const Center(
         child: Text(
           'menu teste',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
         ),
       ),
       bottomNavigationBar: const NavBar(initialIndex: 0),

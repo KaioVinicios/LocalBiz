@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:localbiz/main.dart';
+import 'package:localbiz/features/clientes/presentation/screens/clientes_page.dart';
+
+Future<void> pumpClientesPage(WidgetTester tester) async {
+  await tester.pumpWidget(const MaterialApp(home: ClientesPage()));
+}
 
 void main() {
   testWidgets('abre tela de clientes', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpClientesPage(tester);
 
     expect(find.text('Clientes'), findsOneWidget);
     expect(find.text('Mariana Silva'), findsOneWidget);
   });
 
   testWidgets('cadastra novo cliente', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpClientesPage(tester);
 
     await tester.tap(find.byIcon(Icons.add));
     await tester.pumpAndSettle();
@@ -25,7 +29,7 @@ void main() {
   });
 
   testWidgets('filtra clientes na busca', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpClientesPage(tester);
 
     await tester.enterText(find.byType(TextField).first, 'Julian');
     await tester.pump();
@@ -41,7 +45,7 @@ void main() {
   });
 
   testWidgets('abre dados do cliente e volta para lista', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpClientesPage(tester);
 
     await tester.tap(find.text('Carlos Mendes'));
     await tester.pump();
@@ -59,7 +63,7 @@ void main() {
   });
 
   testWidgets('edita cliente', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpClientesPage(tester);
 
     await tester.tap(find.text('Mariana Silva'));
     await tester.pump();
@@ -83,7 +87,7 @@ void main() {
   });
 
   testWidgets('exclui cliente', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpClientesPage(tester);
 
     await tester.tap(find.text('Carlos Mendes'));
     await tester.pump();
