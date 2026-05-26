@@ -1,17 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:localbiz/clientes/clientes_page.dart';
-import 'package:localbiz/forgot_password/forgot_password_page.dart';
-import 'package:localbiz/login/login_page.dart';
-import 'package:localbiz/pages/business_profile/business_profile_page.dart';
-import 'package:localbiz/pages/configuration/configuration_page.dart';
-import 'package:localbiz/pages/report/report_page.dart';
-import 'package:localbiz/produtos/produtos_page.dart';
-import 'package:localbiz/register/register_page.dart';
-import 'package:localbiz/services/service_listing.dart';
-import 'package:localbiz/services/services_details.dart';
-import 'package:localbiz/theme/app_colors.dart';
-import 'package:localbiz/vendas/venda_page.dart';
-import 'package:localbiz/services/services_scheduling.dart';
+import 'package:localbiz/core/router/app_router.dart';
+import 'package:localbiz/core/theme/app_colors.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,28 +14,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'LocalBiz',
-      routes: {
-        '/home': (context) => const VendaPage(), // add dashboard
-        '/login': (context) => const LoginPage(),
-        '/recuperar-senha': (context) => const ForgotPasswordPage(),
-        '/signin': (context) => const RegisterPage(),
-        '/clientes': (context) => const ClientesPage(),
-        '/produtos': (context) => const ProdutosPage(),
-        '/configuracoes': (context) => const ConfigurationPage(),
-        '/vendas': (context) => const VendaPage(),
-        '/services': (context) => const ServicosScreen(),
-        '/service-details': (context) => const DetalheServicoScreen(),
-        '/service-schedules': (context) => const AgendamentoServicoScreen(),
-        '/configuration': (context) => const ConfigurationPage(),
-        '/business-profile': (context) => const BusinessProfilePage(),
-        '/relatorios': (context) => const ReportPage(),
-      },
+      initialRoute: AppRouter.initialRoute,
+      routes: AppRouter.routes,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.blue),
         scaffoldBackgroundColor: AppColors.surface,
       ),
-      home: const ServicosScreen(),
     );
   }
 }
