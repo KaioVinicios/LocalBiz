@@ -3,6 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:localbiz/main.dart';
 
 void main() {
+  Future<void> abrirProdutos(WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    var navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.pushNamed('/produtos');
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('abre tela de clientes', (tester) async {
     await tester.pumpWidget(const MyApp());
 
@@ -98,5 +106,85 @@ void main() {
 
     expect(find.text('Clientes'), findsOneWidget);
     expect(find.text('Carlos Mendes'), findsNothing);
+  });
+
+  testWidgets('produtos: lista e busca', (tester) async {
+    await abrirProdutos(tester);
+
+    expect(find.text('Produtos'), findsWidgets);
+    expect(find.text('Fini Salada de Frutas'), findsOneWidget);
+    expect(find.text('Estoque: 48 unidades'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).first, 'Bebidas');
+    await tester.pump();
+
+    expect(find.text('Fini Salada de Frutas'), findsNothing);
+    expect(find.text('Nenhum produto encontrado'), findsOneWidget);
+  });
+
+  testWidgets('produtos: cadastro e edicao', (tester) async {
+    await abrirProdutos(tester);
+
+    await tester.tap(find.byTooltip('Adicionar produto'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).at(0), 'Chocolate 70%');
+    await tester.enterText(find.byType(TextField).at(1), 'R\$ 12,00');
+    await tester.enterText(find.byType(TextField).at(2), '123456789');
+    await tester.tap(find.text('Concluir'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Chocolate 70%'), findsOneWidget);
+    expect(find.text('Estoque: 0 unidades'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField).first, 'Fini');
+    await tester.pump();
+    await tester.tap(find.byTooltip('Editar produto'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).at(0), 'Fini Frutas Mix');
+    await tester.enterText(find.byType(TextField).at(1), 'R\$ 9,90');
+    await tester.tap(find.text('Concluir'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Fini Frutas Mix'), findsOneWidget);
+    expect(find.text('R\$ 9,90'), findsOneWidget);
+  });
+
+  testWidgets('produtos: exclusao', (tester) async {
+    await abrirProdutos(tester);
+
+    await tester.tap(find.byTooltip('Excluir produto'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Excluir produto'), findsOneWidget);
+    expect(find.text('Deseja excluir Fini Salada de Frutas?'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(TextButton, 'Excluir'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Fini Salada de Frutas'), findsNothing);
+    expect(find.text('Nenhum produto encontrado'), findsOneWidget);
+  });
+
+  testWidgets('produtos: estoque', (tester) async {
+    await abrirProdutos(tester);
+
+    await tester.tap(find.byTooltip('Estoque do produto'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).first, '7');
+    await tester.tap(find.text('Concluir'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Estoque: 55 unidades'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Estoque do produto'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Saída'));
+    await tester.pump();
+    await tester.enterText(find.byType(TextField).first, '10');
+    await tester.tap(find.text('Concluir'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Estoque: 45 unidades'), findsOneWidget);
   });
 }
