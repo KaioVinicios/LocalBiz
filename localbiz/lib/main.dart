@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:localbiz/clientes/clientes_page.dart';
 import 'package:localbiz/forgot_password/forgot_password_page.dart';
 import 'package:localbiz/login/login_page.dart';
+import 'package:localbiz/pages/business_profile/business_profile_page.dart';
 import 'package:localbiz/pages/configuration/configuration_page.dart';
+import 'package:localbiz/pages/report/report_page.dart';
 import 'package:localbiz/produtos/produtos_page.dart';
 import 'package:localbiz/register/register_page.dart';
 import 'package:localbiz/services/service_listing.dart';
@@ -23,7 +25,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'LocalBiz',
       routes: {
-        '/home': (context) => const VendaPage(),
+        '/home': (context) => const VendaPage(), // add dashboard
         '/login': (context) => const LoginPage(),
         '/recuperar-senha': (context) => const ForgotPasswordPage(),
         '/signin': (context) => const RegisterPage(),
@@ -34,6 +36,8 @@ class MyApp extends StatelessWidget {
         '/services': (context) => const ServicosScreen(),
         '/service-details': (context) => const DetalheServicoScreen(),
         '/configuration': (context) => const ConfigurationPage(),
+        '/business-profile': (context) => const BusinessProfilePage(),
+        '/relatorios': (context) => const ReportPage(),
       },
       theme: ThemeData(
         useMaterial3: true,
