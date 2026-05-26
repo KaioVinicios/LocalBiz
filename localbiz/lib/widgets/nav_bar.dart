@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
 class NavBar extends StatefulWidget {
-  const NavBar({
-    super.key,
-    this.initialIndex = 1,
-  });
+  const NavBar({super.key, this.initialIndex = 1});
 
   final int initialIndex;
 
@@ -49,13 +46,21 @@ class _NavBarState extends State<NavBar> {
         ),
         const NavigationDestination(
           icon: Icon(Icons.home_repair_service_rounded),
-          selectedIcon: Icon(Icons.home_repair_service_rounded, color: AppColors.blue),
+          selectedIcon: Icon(
+            Icons.home_repair_service_rounded,
+            color: AppColors.blue,
+          ),
           label: 'Serviços',
         ),
         const NavigationDestination(
           icon: Icon(Icons.supervisor_account),
           selectedIcon: Icon(Icons.supervisor_account, color: AppColors.blue),
           label: 'Clientes',
+        ),
+        const NavigationDestination(
+          icon: Icon(Icons.inventory_2_outlined),
+          selectedIcon: Icon(Icons.inventory_2_outlined, color: AppColors.blue),
+          label: 'Produtos',
         ),
         const NavigationDestination(
           icon: Icon(Icons.settings_outlined),
@@ -75,6 +80,8 @@ class _NavBarState extends State<NavBar> {
       case 2:
         return '/clientes';
       case 3:
+        return '/produtos';
+      case 4:
         return '/configuration';
       default:
         return null;
