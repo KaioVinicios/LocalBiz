@@ -3,6 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:localbiz/main.dart';
 
 void main() {
+  Future<void> abrirClientes(WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    var navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.pushNamed('/clientes');
+    await tester.pumpAndSettle();
+  }
+
   Future<void> abrirProdutos(WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
@@ -12,14 +20,14 @@ void main() {
   }
 
   testWidgets('abre tela de clientes', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await abrirClientes(tester);
 
     expect(find.text('Clientes'), findsOneWidget);
     expect(find.text('Mariana Silva'), findsOneWidget);
   });
 
   testWidgets('cadastra novo cliente', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await abrirClientes(tester);
 
     await tester.tap(find.byIcon(Icons.add));
     await tester.pumpAndSettle();
@@ -33,7 +41,7 @@ void main() {
   });
 
   testWidgets('filtra clientes na busca', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await abrirClientes(tester);
 
     await tester.enterText(find.byType(TextField).first, 'Julian');
     await tester.pump();
@@ -49,7 +57,7 @@ void main() {
   });
 
   testWidgets('abre dados do cliente e volta para lista', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await abrirClientes(tester);
 
     await tester.tap(find.text('Carlos Mendes'));
     await tester.pump();
@@ -67,7 +75,7 @@ void main() {
   });
 
   testWidgets('edita cliente', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await abrirClientes(tester);
 
     await tester.tap(find.text('Mariana Silva'));
     await tester.pump();
@@ -91,7 +99,7 @@ void main() {
   });
 
   testWidgets('exclui cliente', (tester) async {
-    await tester.pumpWidget(const MyApp());
+    await abrirClientes(tester);
 
     await tester.tap(find.text('Carlos Mendes'));
     await tester.pump();
