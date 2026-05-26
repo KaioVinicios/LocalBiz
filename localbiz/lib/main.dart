@@ -8,6 +8,7 @@ import 'package:localbiz/services/services_details.dart';
 import 'package:localbiz/pages/configuration/configuration_page.dart';
 import 'package:localbiz/widgets/nav_bar.dart';
 import 'package:localbiz/theme/app_colors.dart';
+import 'package:localbiz/vendas/venda_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
         '/recuperar-senha': (context) => const ForgotPasswordPage(),
         '/signin': (context) => const RegisterPage(),
         '/clientes': (context) => const ClientesPage(),
+        '/vendas': (context) => const VendaPage(),
         '/services': (context) => const ServicosScreen(),
         '/service-details': (context) => const DetalheServicoScreen(),
         '/configuration': (context) => const ConfigurationPage(),
@@ -36,7 +38,9 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.blue),
         scaffoldBackgroundColor: AppColors.surface,
       ),
-      home: const _HomeMenuTestePage(),
+      // home: const _HomeMenuTestePage(),
+      home: const VendaPage(),
+
     );
   }
 }
