@@ -6,7 +6,7 @@ import 'package:localbiz/core/theme/app_design_tokens.dart';
 import 'package:localbiz/core/ui/app_sale_completed_overlay.dart';
 import 'package:localbiz/core/ui/app_search_bar.dart';
 import 'package:localbiz/core/ui/app_product_card.dart';
-import 'package:localbiz/core/ui/app_fab_sell_button.dart';
+import 'package:localbiz/core/ui/app_floating_add_button.dart';
 import 'package:localbiz/core/ui/app_cart_menu.dart';
 import 'package:localbiz/core/ui/app_top_bar.dart';
 
@@ -159,11 +159,12 @@ class _VendaPageState extends State<VendaPage> {
                 right: 24,
                 bottom: 24,
                 child: SafeArea(
-                  child: VendaFab(
-                    itemCount: _carrinho.fold(
+                  child: AppFloatingAddButton(
+                    badgeCount: _carrinho.fold(
                       0,
                       (acc, i) => acc + i.quantidade,
                     ),
+                    tooltip: 'Abrir carrinho',
                     onPressed: () => setState(() => _carrinhoAberto = true),
                   ),
                 ),
