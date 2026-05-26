@@ -37,6 +37,53 @@ class AppSizes {
   static const double sheetHandleHeight = 4;
 }
 
+class AppColorTokens {
+  AppColorTokens._();
+
+  static const Color surfaceWhite = Color(0xFFFFFFFF);
+  static const Color transparent = Color(0x00000000);
+  static const Color black = Color(0xFF000000);
+  static const Color shadowBlack04 = Color(0x0A000000);
+  static const Color shadowBlack06 = Color(0x0F000000);
+
+  static const Color primaryBlue10 = Color(0x1A043DAE);
+  static const Color primaryBlue20 = Color(0x33043DAE);
+  static const Color primaryBlue26 = Color(0x42043DAE);
+  static const Color primaryBlue50 = Color(0x80043DAE);
+  static const Color primaryBlue83 = Color(0xD4043DAE);
+
+  static const Color slate900 = Color(0xFF0F172A);
+  static const Color slate700 = Color(0xFF334155);
+  static const Color slate600 = Color(0xFF475569);
+  static const Color slate500 = Color(0xFF5C677D);
+  static const Color slate300 = Color(0xFFDDE1E6);
+  static const Color slate200 = Color(0xFFE2E8F0);
+  static const Color slate100 = Color(0xFFF1F5F9);
+  static const Color slate50 = Color(0xFFEDF2F7);
+  static const Color formInputFill = Color(0x4DF8FAFC);
+
+  static const Color dashboardPurple = Color(0xFF2B1A49);
+  static const Color dashboardGreeting = Color(0xFF79747E);
+  static const Color dashboardActionText = Color(0xFF4A4459);
+  static const Color dashboardNavText = Color(0xFF49454F);
+  static const Color inventoryText = Color(0xFF183D8C);
+  static const Color inventoryPillText = Color(0xFF182F8C);
+  static const Color inventoryPillBg = Color(0xFFDCE8F9);
+
+  static const Color white80 = Color(0xCCFFFFFF);
+  static const Color white65 = Color(0xA6FFFFFF);
+  static const Color white62 = Color(0x9EFFFFFF);
+  static const Color white60 = Color(0x99FFFFFF);
+
+  static const Color serviceHeroDark = Color(0xFF211C1D);
+  static const Color serviceHeroLight = Color(0xFFF2D3BE);
+  static const Color serviceHeroAccent = Color(0xFF8A5A3F);
+  static const Color serviceHeroSkin = Color(0xFFF6D7C3);
+  static const Color serviceHeroSkinShade = Color(0xFFF9CDB5);
+  static const Color serviceHeroHair = Color(0xFF6D3E2E);
+  static const Color serviceHeroTool = Color(0xFF2B1A14);
+}
+
 class AppTextStyles {
   AppTextStyles._();
 
@@ -93,7 +140,7 @@ class AppTextStyles {
   );
 
   static const TextStyle primaryButton = TextStyle(
-    color: Colors.white,
+    color: AppColorTokens.surfaceWhite,
     fontSize: 20,
     fontWeight: FontWeight.w900,
   );

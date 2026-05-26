@@ -149,10 +149,15 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
                 color: const Color(0xFFF0F0F0),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
-                Icons.edit,
-                color: AppColors.textPrimary,
-                size: 18,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: () =>
+                    Navigator.of(context).pushNamed('/services/edit'),
+                icon: const Icon(
+                  Icons.edit,
+                  color: AppColors.textPrimary,
+                  size: 18,
+                ),
               ),
             ),
           ],
