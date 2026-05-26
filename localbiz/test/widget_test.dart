@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:localbiz/core/router/app_route.dart';
+import 'package:localbiz/core/ui/nav_bar_button.dart';
 import 'package:localbiz/main.dart';
 
 void main() {
@@ -17,6 +18,14 @@ void main() {
 
     final navigator = tester.state<NavigatorState>(find.byType(Navigator));
     navigator.pushNamed(AppRoute.produtos.path);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> abrirConfiguracoes(WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.pushNamed(AppRoute.configuration.path);
     await tester.pumpAndSettle();
   }
 
@@ -131,6 +140,12 @@ void main() {
     expect(find.text('Nenhum produto encontrado'), findsOneWidget);
   });
 
+  testWidgets('produtos nao exibe nav bar inferior da feature', (tester) async {
+    await abrirProdutos(tester);
+
+    expect(find.byType(NavBarButton), findsNothing);
+  });
+
   testWidgets('produtos: cadastro e edicao', (tester) async {
     await abrirProdutos(tester);
 
@@ -195,5 +210,29 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Estoque: 45 unidades'), findsOneWidget);
+  });
+
+  testWidgets('configuracoes nao exibe nav bar inferior da feature', (
+    tester,
+  ) async {
+    await abrirConfiguracoes(tester);
+
+    expect(find.text('Meu Negócio Local'), findsOneWidget);
+    expect(find.byType(NavBarButton), findsNothing);
+  });
+
+  testWidgets('cadastro nao exibe seta automatica no app bar', (tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.pushNamed(AppRoute.register.path);
+    await tester.pumpAndSettle();
+
+    final appBar = find.byType(AppBar);
+    expect(
+      find.descendant(of: appBar, matching: find.byIcon(Icons.arrow_back)),
+      findsNothing,
+    );
+    expect(find.text('VOLTAR PARA LOGIN'), findsOneWidget);
   });
 }
