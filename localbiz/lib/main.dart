@@ -9,6 +9,7 @@ import 'package:localbiz/services/service_listing.dart';
 import 'package:localbiz/services/services_details.dart';
 import 'package:localbiz/theme/app_colors.dart';
 import 'package:localbiz/vendas/venda_page.dart';
+import 'package:localbiz/services/services_scheduling.dart';
 
 void main() {
   runApp(const MyApp());
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
         '/vendas': (context) => const VendaPage(),
         '/services': (context) => const ServicosScreen(),
         '/service-details': (context) => const DetalheServicoScreen(),
+        '/service-schedules': (context) => const AgendamentoServicoScreen(),
         '/configuration': (context) => const ConfigurationPage(),
       },
       theme: ThemeData(
@@ -40,7 +42,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: AppColors.blue),
         scaffoldBackgroundColor: AppColors.surface,
       ),
-      home: const VendaPage(),
+      home: const ServicosScreen(),
     );
   }
 }
