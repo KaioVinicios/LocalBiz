@@ -98,6 +98,7 @@ class _VendaPageState extends State<VendaPage> {
       _busca = '';
       _buscaController.clear();
     });
+    Navigator.of(context).pushReplacementNamed('/dashboard');
   }
 
   @override
@@ -113,7 +114,9 @@ class _VendaPageState extends State<VendaPage> {
           SafeArea(
             child: Column(
               children: [
-                const AppTopBar(),
+                AppTopBar(
+                  onBack: () => Navigator.of(context).pushReplacementNamed('/dashboard'),
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Align(

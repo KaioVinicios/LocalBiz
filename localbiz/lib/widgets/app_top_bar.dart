@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:localbiz/theme/app_colors.dart';
 
 class AppTopBar extends StatelessWidget {
-  const AppTopBar({super.key});
+  const AppTopBar({super.key, this.onBack});
+
+  final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -11,17 +13,13 @@ class AppTopBar extends StatelessWidget {
       child: Row(
         children: [
           InkWell(
-            onTap: () => Navigator.of(context).maybePop(),
+            onTap: onBack ?? () => Navigator.of(context).maybePop(),
             borderRadius: BorderRadius.circular(8),
             child: const Padding(
               padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.arrow_back,
-                    size: 20,
-                    color: AppColors.textPrimary,
-                  ),
+                  Icon(Icons.arrow_back, size: 20, color: AppColors.textPrimary),
                   SizedBox(width: 8),
                   Text(
                     'VOLTAR',
@@ -37,11 +35,7 @@ class AppTopBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          const Icon(
-            Icons.help_outline,
-            size: 20,
-            color: AppColors.textPrimary,
-          ),
+          const Icon(Icons.help_outline, size: 20, color: AppColors.textPrimary),
         ],
       ),
     );
