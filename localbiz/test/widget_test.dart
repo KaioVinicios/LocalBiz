@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/main.dart';
 
 void main() {
   Future<void> abrirClientes(WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
-    var navigator = tester.state<NavigatorState>(find.byType(Navigator));
-    navigator.pushNamed('/clientes');
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.pushNamed(AppRoute.clientes.path);
     await tester.pumpAndSettle();
   }
 
   Future<void> abrirProdutos(WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
-    var navigator = tester.state<NavigatorState>(find.byType(Navigator));
-    navigator.pushNamed('/produtos');
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.pushNamed(AppRoute.produtos.path);
     await tester.pumpAndSettle();
   }
 
