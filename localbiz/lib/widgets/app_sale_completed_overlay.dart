@@ -21,7 +21,7 @@ class AppSaleCompletedOverlay extends StatelessWidget {
       children: [
         BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
-          child: Container(color: Colors.black.withValues(alpha: 0.3)),
+          child: Container(color: Colors.black.withOpacity(0.3)),
         ),
 
         Center(
@@ -33,7 +33,7 @@ class AppSaleCompletedOverlay extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.12),
+                  color: Colors.black.withOpacity(0.12),
                   blurRadius: 24,
                   offset: const Offset(0, 8),
                 ),
@@ -76,7 +76,7 @@ class AppSaleCompletedOverlay extends StatelessWidget {
                       softWrap: false,
                       style: TextStyle(
                         color: Color(0xFF2B1A49),
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -97,7 +97,7 @@ class AppSaleCompletedOverlay extends StatelessWidget {
                       const Text(
                         'Valor recebido',
                         style: TextStyle(
-                          color: Color(0xCCFFFFFF), // branco @ 80%
+                          color: Color(0xCCFFFFFF),
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
@@ -108,7 +108,7 @@ class AppSaleCompletedOverlay extends StatelessWidget {
                             const TextSpan(
                               text: 'R\$',
                               style: TextStyle(
-                                color: Color(0xB3FFFFFF), // branco @ 70%
+                                color: Color(0xB3FFFFFF), 
                                 fontSize: 14,
                                 fontWeight: FontWeight.w900,
                               ),
