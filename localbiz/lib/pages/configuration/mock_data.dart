@@ -53,7 +53,7 @@ const List<ConfigSection> mockConfigSections = [
         icon: Icons.description_outlined,
         title: 'Relatórios',
         subtitle: 'Alterar senha e verificação em duas etapas',
-        route: '/report',
+        route: '/relatorios',
       ),
     ],
   ),

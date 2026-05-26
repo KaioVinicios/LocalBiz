@@ -330,7 +330,7 @@ class _BottomNavBar extends StatelessWidget {
             icon: Icons.inventory_2_outlined,
             label: 'Produtos',
             isActive: false,
-            onTap: () {},
+            onTap: () => Navigator.of(context).pushReplacementNamed('/produtos'),
           ),
           NavBarButton(
             icon: Icons.settings,
