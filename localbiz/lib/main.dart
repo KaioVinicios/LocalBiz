@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:localbiz/clientes/clientes_page.dart';
 import 'package:localbiz/forgot_password/forgot_password_page.dart';
 import 'package:localbiz/login/login_page.dart';
+import 'package:localbiz/pages/configuration/configuration_page.dart';
+import 'package:localbiz/produtos/produtos_page.dart';
 import 'package:localbiz/register/register_page.dart';
 import 'package:localbiz/theme/app_colors.dart';
 
@@ -22,6 +24,8 @@ class MyApp extends StatelessWidget {
         '/recuperar-senha': (context) => const ForgotPasswordPage(),
         '/signin': (context) => const RegisterPage(),
         '/clientes': (context) => const ClientesPage(),
+        '/produtos': (context) => const ProdutosPage(),
+        '/configuracoes': (context) => const ConfigurationPage(),
       },
       theme: ThemeData(
         useMaterial3: true,
