@@ -1,11 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
-import 'package:localbiz/core/ui/app_square_action_button.dart';
-import 'package:localbiz/core/ui/nav_bar_button.dart';
+import 'package:localbiz/core/ui/app_floating_add_button.dart';
+import 'package:localbiz/core/ui/app_help_action_button.dart';
 import 'package:localbiz/features/produtos/domain/entities/produto_model.dart';
 import 'package:localbiz/features/produtos/presentation/screens/produto_estoque_page.dart';
 import 'package:localbiz/features/produtos/presentation/screens/produto_form_page.dart';
@@ -15,7 +14,6 @@ import 'package:localbiz/features/produtos/presentation/widgets/produto_photo_pi
 const _buscaAltura = 56.0;
 const _finiAsset = 'assets/products/fini-salada-frutas.jpg';
 const _searchIcon = 'assets/icons/search.png';
-const _helpIcon = 'assets/icons/help.png';
 
 enum _ProdutosView { lista, cadastro, edicao, estoque }
 
@@ -254,7 +252,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(
-              maxWidth: AppSizes.screenMaxWidth,
+              maxWidth: AppSizes.webFlowMaxWidth,
             ),
             child: SizedBox(
               width: double.infinity,
@@ -484,14 +482,12 @@ class _ProdutosListView extends StatelessWidget {
                 ),
               ),
             ),
-            const _ProdutosBottomNavBar(),
           ],
         ),
         Positioned(
-          right: 28,
-          bottom: 96,
-          child: AppSquareActionButton(
-            icon: Icons.add,
+          right: AppSpacing.lg,
+          bottom: AppSpacing.lg,
+          child: AppFloatingAddButton(
             tooltip: 'Adicionar produto',
             onPressed: onAdicionar,
           ),
@@ -533,64 +529,7 @@ class _ProdutosTopBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          const SizedBox(
-            width: 36,
-            height: 36,
-            child: Center(
-              child: Image(image: AssetImage(_helpIcon), width: 24, height: 24),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ProdutosBottomNavBar extends StatelessWidget {
-  const _ProdutosBottomNavBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.navBarBg,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Expanded(
-            child: NavBarButton(
-              icon: Icons.menu,
-              label: 'Início',
-              isActive: false,
-              onTap: () {},
-            ),
-          ),
-          Expanded(
-            child: NavBarButton(
-              icon: Icons.star_border,
-              label: 'Serviços',
-              isActive: false,
-              onTap: () {},
-            ),
-          ),
-          Expanded(
-            child: NavBarButton(
-              icon: Icons.star,
-              label: 'Produtos',
-              isActive: true,
-              onTap: () {},
-            ),
-          ),
-          Expanded(
-            child: NavBarButton(
-              icon: Icons.settings,
-              label: 'Configurações',
-              isActive: false,
-              onTap: () => Navigator.of(
-                context,
-              ).pushReplacementNamed(AppRoute.configuracoes.path),
-            ),
-          ),
+          const AppHelpActionButton(),
         ],
       ),
     );

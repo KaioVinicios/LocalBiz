@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
+import 'package:localbiz/core/ui/app_help_action_button.dart';
 
 const serviceCategoryOptions = [
   'Serviços Capilares',
@@ -603,14 +604,7 @@ class _ServiceTopBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          const Padding(
-            padding: EdgeInsets.all(8),
-            child: Icon(
-              Icons.help_outline,
-              color: AppColorTokens.slate900,
-              size: 22,
-            ),
-          ),
+          const AppHelpActionButton(),
         ],
       ),
     );

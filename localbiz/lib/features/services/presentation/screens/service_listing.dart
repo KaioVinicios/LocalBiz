@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
+import 'package:localbiz/core/ui/app_floating_add_button.dart';
 
 class Servico {
   final String nome;
@@ -200,12 +201,10 @@ class _ServicosScreenState extends State<ServicosScreen> {
   }
 
   Widget _buildFab() {
-    return FloatingActionButton(
+    return AppFloatingAddButton(
       onPressed: () =>
           Navigator.of(context).pushNamed(AppRoute.serviceCreate.path),
-      backgroundColor: AppColors.blue,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: const Icon(Icons.add, color: AppColors.sheetSurface, size: 28),
+      tooltip: 'Adicionar serviço',
     );
   }
 }

@@ -24,6 +24,7 @@ class AppSizes {
   AppSizes._();
 
   static const double screenMaxWidth = 428;
+  static const double webFlowMaxWidth = 960;
   static const double contentWidth = 380;
   static const double searchHeight = 80;
   static const double inputHeight = 64;
