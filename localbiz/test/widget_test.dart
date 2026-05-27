@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:localbiz/core/router/app_route.dart';
+import 'package:localbiz/core/router/app_router.dart';
 import 'package:localbiz/core/ui/nav_bar_button.dart';
 import 'package:localbiz/features/clientes/presentation/widgets/cliente_list_item.dart';
 import 'package:localbiz/features/produtos/presentation/widgets/produto_list_item.dart';
@@ -47,6 +48,17 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> abrirCadastroDireto(WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        initialRoute: AppRoute.register.path,
+        routes: AppRouter.routes,
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('app inicia no login', (tester) async {
     await tester.pumpWidget(const MyApp());
 
@@ -73,11 +85,7 @@ void main() {
 
   testWidgets('cadastro funciona no web', (tester) async {
     configurarViewport(tester, const Size(1200, 900));
-    await tester.pumpWidget(const MyApp());
-
-    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
-    navigator.pushNamed(AppRoute.register.path);
-    await tester.pumpAndSettle();
+    await abrirCadastroDireto(tester);
 
     final campoSize = tester.getSize(find.byType(TextField).first);
     final botaoSize = tester.getSize(
@@ -121,6 +129,27 @@ void main() {
     expect(find.text('Crie sua conta\nno LocalBiz'), findsOneWidget);
   });
 
+  testWidgets('abre cadastro direto no web', (
+    tester,
+  ) async {
+    configurarViewport(tester, const Size(1200, 900));
+    await abrirCadastroDireto(tester);
+
+    final titulo = find.text('Crie sua conta\nno LocalBiz');
+    final campo = find.byType(TextField).first;
+    final tituloTop = tester.getTopLeft(titulo).dy;
+    final tituloBottom = tester.getBottomRight(titulo).dy;
+    final campoTop = tester.getTopLeft(campo).dy;
+    final campoBottom = tester.getBottomRight(campo).dy;
+
+    expect(tituloTop, greaterThan(0));
+    expect(tituloBottom, lessThan(900));
+    expect(campoTop, greaterThan(0));
+    expect(campoBottom, lessThan(900));
+    expect(find.widgetWithText(ElevatedButton, 'Criar Conta'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('abre cadastro pelo login no web', (
     tester,
   ) async {
@@ -132,14 +161,21 @@ void main() {
     await tester.pumpAndSettle();
 
     final titulo = find.text('Crie sua conta\nno LocalBiz');
+    final campo = find.byType(TextField).first;
     final botao = find.widgetWithText(ElevatedButton, 'Criar Conta');
     final tituloTop = tester.getTopLeft(titulo).dy;
     final tituloBottom = tester.getBottomRight(titulo).dy;
-    final botaoTop = tester.getTopLeft(botao).dy;
-    final botaoBottom = tester.getBottomRight(botao).dy;
+    final campoTop = tester.getTopLeft(campo).dy;
+    final campoBottom = tester.getBottomRight(campo).dy;
 
     expect(tituloTop, greaterThan(0));
     expect(tituloBottom, lessThan(900));
+    expect(campoTop, greaterThan(0));
+    expect(campoBottom, lessThan(900));
+    await tester.ensureVisible(botao);
+    await tester.pumpAndSettle();
+    final botaoTop = tester.getTopLeft(botao).dy;
+    final botaoBottom = tester.getBottomRight(botao).dy;
     expect(botaoTop, greaterThan(0));
     expect(botaoBottom, lessThan(900));
     expect(tester.takeException(), isNull);
