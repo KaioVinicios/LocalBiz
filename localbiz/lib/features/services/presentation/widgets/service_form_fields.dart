@@ -13,7 +13,6 @@ const serviceCategoryOptions = [
 ];
 
 const _serviceFormWideBreakpoint = 900.0;
-const _serviceFormWideMaxWidth = 960.0;
 const _serviceFormDesktopButtonWidth = 260.0;
 
 class ServiceTextField extends StatelessWidget {
@@ -238,73 +237,64 @@ class _ServiceFormScaffoldState extends State<ServiceFormScaffold> {
     return Scaffold(
       backgroundColor: AppColorTokens.surfaceWhite,
       body: SafeArea(
-        child: Center(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final isWide = constraints.maxWidth >= _serviceFormWideBreakpoint;
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth >= _serviceFormWideBreakpoint;
 
-              return ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: isWide
-                      ? _serviceFormWideMaxWidth
-                      : AppSizes.screenMaxWidth,
-                ),
-                child: Column(
-                  children: [
-                    const _ServiceTopBar(),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: EdgeInsets.fromLTRB(
-                          isWide ? 32 : 16,
-                          12,
-                          isWide ? 32 : 16,
-                          24,
-                        ),
-                        child: isWide
-                            ? _buildWideFormContent()
-                            : _buildCompactFormContent(),
-                      ),
+            return Column(
+              children: [
+                const _ServiceTopBar(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(
+                      isWide ? 32 : 16,
+                      12,
+                      isWide ? 32 : 16,
+                      24,
                     ),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        isWide ? 32 : 16,
-                        8,
-                        isWide ? 32 : 16,
-                        16,
-                      ),
-                      child: Align(
-                        alignment: isWide
-                            ? Alignment.centerRight
-                            : Alignment.center,
-                        child: SizedBox(
-                          height: 60,
-                          width: isWide
-                              ? _serviceFormDesktopButtonWidth
-                              : double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () => Navigator.of(context).maybePop(),
-                            style: ElevatedButton.styleFrom(
-                              elevation: 0,
-                              backgroundColor: AppColors.blue,
-                              foregroundColor: AppColorTokens.surfaceWhite,
-                              shape: const RoundedRectangleBorder(),
-                            ),
-                            child: const Text(
-                              'Concluir',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
+                    child: isWide
+                        ? _buildWideFormContent()
+                        : _buildCompactFormContent(),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    isWide ? 32 : 16,
+                    8,
+                    isWide ? 32 : 16,
+                    16,
+                  ),
+                  child: Align(
+                    alignment: isWide
+                        ? Alignment.centerRight
+                        : Alignment.center,
+                    child: SizedBox(
+                      height: 60,
+                      width: isWide
+                          ? _serviceFormDesktopButtonWidth
+                          : double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).maybePop(),
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          backgroundColor: AppColors.blue,
+                          foregroundColor: AppColorTokens.surfaceWhite,
+                          shape: const RoundedRectangleBorder(),
+                        ),
+                        child: const Text(
+                          'Concluir',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              );
-            },
-          ),
+              ],
+            );
+          },
         ),
       ),
     );

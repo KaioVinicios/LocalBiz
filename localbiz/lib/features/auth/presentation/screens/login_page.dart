@@ -57,234 +57,222 @@ class LoginPage extends StatelessWidget {
             vertical: AppSpacing.sm,
           ),
 
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: AppSizes.webFlowMaxWidth,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+
+            children: [
+              const SizedBox(height: AppSpacing.xs),
+
+              // TITLE
+              const Text(
+                "Entrar",
+                textAlign: TextAlign.center,
+
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
 
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+              const SizedBox(height: AppSpacing.xs),
 
-                children: [
-                  const SizedBox(height: AppSpacing.xs),
+              // SUBTITLE
+              const Text(
+                "Bem-vindo de volta ao seu comércio local",
+                textAlign: TextAlign.center,
 
-                  // TITLE
-                  const Text(
-                    "Entrar",
-                    textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
 
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
+              const SizedBox(height: AppRadii.sheet),
 
-                  const SizedBox(height: AppSpacing.xs),
+              // EMAIL LABEL
+              Text(
+                "E-mail/Empresa",
+                style: AppTextStyles.fieldLabel.copyWith(fontSize: 14),
+              ),
 
-                  // SUBTITLE
-                  const Text(
-                    "Bem-vindo de volta ao seu comércio local",
-                    textAlign: TextAlign.center,
+              const SizedBox(height: AppSpacing.xs),
+
+              // EMAIL FIELD
+              const AppOutlinedTextField(),
+
+              const SizedBox(height: AppSpacing.sm),
+
+              // PASSWORD LABEL
+              Text(
+                "Senha",
+                style: AppTextStyles.fieldLabel.copyWith(fontSize: 14),
+              ),
+
+              const SizedBox(height: AppSpacing.xs),
+
+              // PASSWORD FIELD
+              const AppOutlinedTextField(obscureText: true),
+
+              const SizedBox(height: AppSpacing.sm),
+
+              // FORGOT PASSWORD
+              Align(
+                alignment: Alignment.centerRight,
+
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.of(
+                      context,
+                    ).pushNamed(AppRoute.forgotPassword.path);
+                  },
+
+                  child: const Text(
+                    "Esqueci minha senha",
 
                     style: TextStyle(
                       color: AppColors.textSecondary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: AppSpacing.lg),
+
+              // LOGIN BUTTON
+              SizedBox(
+                height: AppSizes.primaryButtonHeight,
+
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      AppRoute.dashboard.path,
+                      (route) => false,
+                    );
+                  },
+
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: AppColors.blue,
+
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
                     ),
                   ),
 
-                  const SizedBox(height: AppRadii.sheet),
-
-                  // EMAIL LABEL
-                  Text(
-                    "E-mail/Empresa",
-                    style: AppTextStyles.fieldLabel.copyWith(fontSize: 14),
+                  child: Text(
+                    "Entrar",
+                    style: AppTextStyles.primaryButton.copyWith(fontSize: 18),
                   ),
+                ),
+              ),
 
-                  const SizedBox(height: AppSpacing.xs),
+              const SizedBox(height: AppRadii.sheet),
 
-                  // EMAIL FIELD
-                  const AppOutlinedTextField(),
-
-                  const SizedBox(height: AppSpacing.sm),
-
-                  // PASSWORD LABEL
-                  Text(
-                    "Senha",
-                    style: AppTextStyles.fieldLabel.copyWith(fontSize: 14),
-                  ),
-
-                  const SizedBox(height: AppSpacing.xs),
-
-                  // PASSWORD FIELD
-                  const AppOutlinedTextField(obscureText: true),
-
-                  const SizedBox(height: AppSpacing.sm),
-
-                  // FORGOT PASSWORD
-                  Align(
-                    alignment: Alignment.centerRight,
-
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(
-                          context,
-                        ).pushNamed(AppRoute.forgotPassword.path);
-                      },
-
-                      child: const Text(
-                        "Esqueci minha senha",
-
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.lg),
-
-                  // LOGIN BUTTON
-                  SizedBox(
-                    height: AppSizes.primaryButtonHeight,
-
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                          AppRoute.dashboard.path,
-                          (route) => false,
-                        );
-                      },
-
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        backgroundColor: AppColors.blue,
-
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                      ),
-
-                      child: Text(
-                        "Entrar",
-                        style: AppTextStyles.primaryButton.copyWith(
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppRadii.sheet),
-
-                  // REGISTER
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      const Text(
-                        "Não tenho conta",
-
-                        style: TextStyle(
-                          color: AppColors.backText,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.of(
-                            context,
-                          ).pushNamed(AppRoute.register.path);
-                        },
-
-                        child: const Text(
-                          " cadastrar",
-
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: AppRadii.sheet),
-
-                  // DIVIDER
-                  Row(
-                    children: [
-                      const Expanded(child: Divider(color: AppColors.divider)),
-
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-
-                        child: Text(
-                          "OU ENTRE COM",
-
-                          style: TextStyle(
-                            color: AppColors.textMuted,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ),
-
-                      const Expanded(child: Divider(color: AppColors.divider)),
-                    ],
-                  ),
-
-                  const SizedBox(height: AppSpacing.lg),
-
-                  // GOOGLE BUTTON
-                  SizedBox(
-                    height: AppRadii.pill,
-
-                    child: OutlinedButton(
-                      onPressed: () {},
-
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppColors.divider),
-
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                      ),
-
-                      child: const Text(
-                        "Google",
-
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppRadii.sheet),
-
-                  // FOOTER
+              // REGISTER
+              Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
                   const Text(
-                    "© 2024 LocalBiz. Todos os direitos reservados.",
-                    textAlign: TextAlign.center,
+                    "Não tenho conta",
 
                     style: TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 11,
+                      color: AppColors.backText,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
 
-                  const SizedBox(height: AppSpacing.md),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pushNamed(AppRoute.register.path);
+                    },
+
+                    child: const Text(
+                      " cadastrar",
+
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ),
+
+              const SizedBox(height: AppRadii.sheet),
+
+              // DIVIDER
+              Row(
+                children: [
+                  const Expanded(child: Divider(color: AppColors.divider)),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+
+                    child: Text(
+                      "OU ENTRE COM",
+
+                      style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ),
+
+                  const Expanded(child: Divider(color: AppColors.divider)),
+                ],
+              ),
+
+              const SizedBox(height: AppSpacing.lg),
+
+              // GOOGLE BUTTON
+              SizedBox(
+                height: AppRadii.pill,
+
+                child: OutlinedButton(
+                  onPressed: () {},
+
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.divider),
+
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                  ),
+
+                  child: const Text(
+                    "Google",
+
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: AppRadii.sheet),
+
+              // FOOTER
+              const Text(
+                "© 2024 LocalBiz. Todos os direitos reservados.",
+                textAlign: TextAlign.center,
+
+                style: TextStyle(
+                  color: AppColors.textMuted,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+
+              const SizedBox(height: AppSpacing.md),
+            ],
           ),
         ),
       ),

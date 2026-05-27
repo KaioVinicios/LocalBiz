@@ -249,91 +249,84 @@ class _ProdutosPageState extends State<ProdutosPage> {
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: AppSizes.webFlowMaxWidth,
+        child: SizedBox(
+          width: double.infinity,
+          child: switch (_view) {
+            _ProdutosView.lista => _ProdutosListView(
+              produtos: produtosFiltrados,
+              buscaController: buscaController,
+              onBuscaChanged: (_) => setState(() {}),
+              onAdicionar: _abrirCadastro,
+              onEditar: _abrirEdicao,
+              onEstoque: _abrirEstoque,
+              onExcluir: _confirmarExclusao,
             ),
-            child: SizedBox(
-              width: double.infinity,
-              child: switch (_view) {
-                _ProdutosView.lista => _ProdutosListView(
-                  produtos: produtosFiltrados,
-                  buscaController: buscaController,
-                  onBuscaChanged: (_) => setState(() {}),
-                  onAdicionar: _abrirCadastro,
-                  onEditar: _abrirEdicao,
-                  onEstoque: _abrirEstoque,
-                  onExcluir: _confirmarExclusao,
-                ),
-                _ProdutosView.cadastro => ProdutoFormPage(
-                  title: 'Cadastro de Produto',
-                  description:
-                      'Preencha os dados abaixo para o cadastro de Produto.',
-                  nomeController: nomeController,
-                  precoController: precoController,
-                  codigoController: codigoController,
-                  categoria: _categoriaSelecionada,
-                  categorias: categorias,
-                  estoqueLocal: _estoqueSelecionado,
-                  estoques: estoques,
-                  onSelecionarFoto: _selecionarFotoProduto,
-                  onCategoriaChanged: (value) {
-                    setState(() {
-                      _categoriaSelecionada = value ?? 'Selecione';
-                    });
-                  },
-                  onEstoqueChanged: (value) {
-                    setState(() => _estoqueSelecionado = value ?? 'Selecione');
-                  },
-                  onVoltar: _voltarParaLista,
-                  onConcluir: _salvarProduto,
-                  imagemBytes: _imagemSelecionadaBytes,
-                ),
-                _ProdutosView.edicao => ProdutoFormPage(
-                  title: 'Edição de Produto',
-                  description:
-                      'Preencha os dados abaixo para o cadastro de Produto.',
-                  nomeController: nomeController,
-                  precoController: precoController,
-                  codigoController: codigoController,
-                  categoria: _categoriaSelecionada,
-                  categorias: categorias,
-                  estoqueLocal: _estoqueSelecionado,
-                  estoques: estoques,
-                  imagemAsset: _produtoSelecionado?.imagemAsset,
-                  imagemBytes: _imagemSelecionadaBytes,
-                  showEstoqueField: false,
-                  onSelecionarFoto: _selecionarFotoProduto,
-                  onCategoriaChanged: (value) {
-                    setState(() {
-                      _categoriaSelecionada = value ?? 'Selecione';
-                    });
-                  },
-                  onEstoqueChanged: (value) {
-                    setState(() => _estoqueSelecionado = value ?? 'Selecione');
-                  },
-                  onVoltar: _voltarParaLista,
-                  onConcluir: _salvarProduto,
-                ),
-                _ProdutosView.estoque => ProdutoEstoquePage(
-                  produto: _produtoSelecionado!,
-                  movimento: _movimento,
-                  quantidadeController: quantidadeController,
-                  estoqueLocal: _estoqueSelecionado,
-                  estoques: estoques,
-                  onMovimentoChanged: (value) {
-                    setState(() => _movimento = value);
-                  },
-                  onEstoqueChanged: (value) {
-                    setState(() => _estoqueSelecionado = value ?? 'Selecione');
-                  },
-                  onVoltar: _voltarParaLista,
-                  onConcluir: _concluirMovimentoEstoque,
-                ),
+            _ProdutosView.cadastro => ProdutoFormPage(
+              title: 'Cadastro de Produto',
+              description:
+                  'Preencha os dados abaixo para o cadastro de Produto.',
+              nomeController: nomeController,
+              precoController: precoController,
+              codigoController: codigoController,
+              categoria: _categoriaSelecionada,
+              categorias: categorias,
+              estoqueLocal: _estoqueSelecionado,
+              estoques: estoques,
+              onSelecionarFoto: _selecionarFotoProduto,
+              onCategoriaChanged: (value) {
+                setState(() {
+                  _categoriaSelecionada = value ?? 'Selecione';
+                });
               },
+              onEstoqueChanged: (value) {
+                setState(() => _estoqueSelecionado = value ?? 'Selecione');
+              },
+              onVoltar: _voltarParaLista,
+              onConcluir: _salvarProduto,
+              imagemBytes: _imagemSelecionadaBytes,
             ),
-          ),
+            _ProdutosView.edicao => ProdutoFormPage(
+              title: 'Edição de Produto',
+              description:
+                  'Preencha os dados abaixo para o cadastro de Produto.',
+              nomeController: nomeController,
+              precoController: precoController,
+              codigoController: codigoController,
+              categoria: _categoriaSelecionada,
+              categorias: categorias,
+              estoqueLocal: _estoqueSelecionado,
+              estoques: estoques,
+              imagemAsset: _produtoSelecionado?.imagemAsset,
+              imagemBytes: _imagemSelecionadaBytes,
+              showEstoqueField: false,
+              onSelecionarFoto: _selecionarFotoProduto,
+              onCategoriaChanged: (value) {
+                setState(() {
+                  _categoriaSelecionada = value ?? 'Selecione';
+                });
+              },
+              onEstoqueChanged: (value) {
+                setState(() => _estoqueSelecionado = value ?? 'Selecione');
+              },
+              onVoltar: _voltarParaLista,
+              onConcluir: _salvarProduto,
+            ),
+            _ProdutosView.estoque => ProdutoEstoquePage(
+              produto: _produtoSelecionado!,
+              movimento: _movimento,
+              quantidadeController: quantidadeController,
+              estoqueLocal: _estoqueSelecionado,
+              estoques: estoques,
+              onMovimentoChanged: (value) {
+                setState(() => _movimento = value);
+              },
+              onEstoqueChanged: (value) {
+                setState(() => _estoqueSelecionado = value ?? 'Selecione');
+              },
+              onVoltar: _voltarParaLista,
+              onConcluir: _concluirMovimentoEstoque,
+            ),
+          },
         ),
       ),
     );

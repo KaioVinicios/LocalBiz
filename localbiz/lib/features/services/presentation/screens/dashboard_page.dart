@@ -5,7 +5,6 @@ import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
 
 const _dashboardWideBreakpoint = 900.0;
-const _dashboardWideMaxWidth = 1120.0;
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -16,51 +15,42 @@ class DashboardPage extends StatelessWidget {
       backgroundColor: AppColorTokens.surfaceWhite,
       body: SafeArea(
         bottom: false,
-        child: Center(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final isWide = constraints.maxWidth >= _dashboardWideBreakpoint;
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth >= _dashboardWideBreakpoint;
 
-              return ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: isWide
-                      ? _dashboardWideMaxWidth
-                      : AppSizes.screenMaxWidth,
-                ),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: EdgeInsets.fromLTRB(
-                          isWide ? 32 : 18,
-                          isWide ? 32 : 20,
-                          isWide ? 32 : 18,
-                          28,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const _DashboardHeader(),
-                            const SizedBox(height: 22),
-                            _QuickActions(
-                              isWide: isWide,
-                              onServiceCreate: () => Navigator.of(
-                                context,
-                              ).pushNamed(AppRoute.serviceCreate.path),
-                            ),
-                            SizedBox(height: isWide ? 28 : 20),
-                            _DashboardContent(isWide: isWide),
-                            const SizedBox(height: 8),
-                          ],
-                        ),
-                      ),
+            return Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(
+                      isWide ? 32 : 18,
+                      isWide ? 32 : 20,
+                      isWide ? 32 : 18,
+                      28,
                     ),
-                    const _DashboardNavBar(),
-                  ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const _DashboardHeader(),
+                        const SizedBox(height: 22),
+                        _QuickActions(
+                          isWide: isWide,
+                          onServiceCreate: () => Navigator.of(
+                            context,
+                          ).pushNamed(AppRoute.serviceCreate.path),
+                        ),
+                        SizedBox(height: isWide ? 28 : 20),
+                        _DashboardContent(isWide: isWide),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
+                  ),
                 ),
-              );
-            },
-          ),
+                const _DashboardNavBar(),
+              ],
+            );
+          },
         ),
       ),
     );
