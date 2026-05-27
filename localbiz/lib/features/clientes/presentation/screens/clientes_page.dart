@@ -217,114 +217,103 @@ class _ClientesPageState extends State<ClientesPage> {
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: AppSizes.webFlowMaxWidth,
-              minWidth:
-                  MediaQuery.sizeOf(context).width > AppSizes.webFlowMaxWidth
-                  ? AppSizes.webFlowMaxWidth
-                  : MediaQuery.sizeOf(context).width,
-            ),
-            child: Stack(
-              children: [
-                if (cliente == null)
-                  Padding(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const _ClientesTopBar(),
-                        const SizedBox(height: AppSpacing.lg),
-                        Text(
-                          'Clientes',
-                          style: AppTextStyles.pageTitle.copyWith(
-                            fontSize: 32,
-                            height: 1,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        AppTextField(
-                          hint: 'Buscar por nome ...',
-                          controller: buscaController,
-                          prefixIcon: Icons.search,
-                          height: _buscaAltura,
-                          radius: AppRadii.pill,
-                          prefixIconSize: 28,
-                          prefixIconMinWidth: _buscaAltura,
-                          prefixIconColor: AppColors.cardIconFg,
-                          textStyle: AppTextStyles.fieldText.copyWith(
-                            fontSize: 18,
-                            height: 1,
-                          ),
-                          hintStyle: AppTextStyles.fieldHint.copyWith(
-                            fontSize: 18,
-                            height: 1,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          contentPadding: const EdgeInsets.only(right: 16),
-                          onChanged: (value) {
-                            setState(() {});
-                          },
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        Expanded(
-                          child: ListView.separated(
-                            padding: const EdgeInsets.only(
-                              bottom: AppSizes.squareAction + AppSpacing.lg,
-                            ),
-                            itemCount: lista.length,
-                            separatorBuilder: (context, index) =>
-                                const SizedBox(height: 10),
-                            itemBuilder: (context, index) {
-                              return ClienteListItem(
-                                cliente: lista[index],
-                                onTap: () => selecionarCliente(lista[index]),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
+        child: Stack(
+          children: [
+            if (cliente == null)
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const _ClientesTopBar(),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      'Clientes',
+                      style: AppTextStyles.pageTitle.copyWith(
+                        fontSize: 32,
+                        height: 1,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  )
-                else
-                  ClienteDetalhePage(
-                    cliente: cliente,
-                    onVoltar: voltarParaLista,
-                    onEditar: () => abrirEdicao(cliente),
-                    onExcluir: () => confirmarExclusao(cliente),
-                  ),
-                if (cliente == null)
-                  Positioned(
-                    right: AppSpacing.lg,
-                    bottom: AppSpacing.lg,
-                    child: AppFloatingAddButton(
-                      tooltip: 'Adicionar cliente',
-                      onPressed: abrirForm,
+                    const SizedBox(height: AppSpacing.md),
+                    AppTextField(
+                      hint: 'Buscar por nome ...',
+                      controller: buscaController,
+                      prefixIcon: Icons.search,
+                      height: _buscaAltura,
+                      radius: AppRadii.pill,
+                      prefixIconSize: 28,
+                      prefixIconMinWidth: _buscaAltura,
+                      prefixIconColor: AppColors.cardIconFg,
+                      textStyle: AppTextStyles.fieldText.copyWith(
+                        fontSize: 18,
+                        height: 1,
+                      ),
+                      hintStyle: AppTextStyles.fieldHint.copyWith(
+                        fontSize: 18,
+                        height: 1,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      contentPadding: const EdgeInsets.only(right: 16),
+                      onChanged: (value) {
+                        setState(() {});
+                      },
                     ),
-                  ),
-                Positioned.fill(
-                  child: _FormBackdrop(visible: abrindoForm, onTap: fecharForm),
+                    const SizedBox(height: AppSpacing.md),
+                    Expanded(
+                      child: ListView.separated(
+                        padding: const EdgeInsets.only(
+                          bottom: AppSizes.squareAction + AppSpacing.lg,
+                        ),
+                        itemCount: lista.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 10),
+                        itemBuilder: (context, index) {
+                          return ClienteListItem(
+                            cliente: lista[index],
+                            onTap: () => selecionarCliente(lista[index]),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
-                Positioned.fill(
-                  child: _FormSheetTransition(
-                    visible: abrindoForm,
-                    child: NovoClienteForm(
-                      title: clienteEmEdicao == null
-                          ? 'Novo Cliente'
-                          : 'Editar Cliente',
-                      nomeController: nomeController,
-                      telefoneController: telefoneController,
-                      emailController: emailController,
-                      onFechar: fecharForm,
-                      onSalvar: salvarCliente,
-                    ),
-                  ),
+              )
+            else
+              ClienteDetalhePage(
+                cliente: cliente,
+                onVoltar: voltarParaLista,
+                onEditar: () => abrirEdicao(cliente),
+                onExcluir: () => confirmarExclusao(cliente),
+              ),
+            if (cliente == null)
+              Positioned(
+                right: AppSpacing.lg,
+                bottom: AppSpacing.lg,
+                child: AppFloatingAddButton(
+                  tooltip: 'Adicionar cliente',
+                  onPressed: abrirForm,
                 ),
-              ],
+              ),
+            Positioned.fill(
+              child: _FormBackdrop(visible: abrindoForm, onTap: fecharForm),
             ),
-          ),
+            Positioned.fill(
+              child: _FormSheetTransition(
+                visible: abrindoForm,
+                child: NovoClienteForm(
+                  title: clienteEmEdicao == null
+                      ? 'Novo Cliente'
+                      : 'Editar Cliente',
+                  nomeController: nomeController,
+                  telefoneController: telefoneController,
+                  emailController: emailController,
+                  onFechar: fecharForm,
+                  onSalvar: salvarCliente,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
