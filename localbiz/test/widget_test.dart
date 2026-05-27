@@ -16,6 +16,7 @@ void main() {
 
   Future<void> abrirClientes(WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
+    tester.takeException();
 
     final navigator = tester.state<NavigatorState>(find.byType(Navigator));
     navigator.pushNamed(AppRoute.clientes.path);
@@ -24,6 +25,7 @@ void main() {
 
   Future<void> abrirProdutos(WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
+    tester.takeException();
 
     final navigator = tester.state<NavigatorState>(find.byType(Navigator));
     navigator.pushNamed(AppRoute.produtos.path);
@@ -32,11 +34,110 @@ void main() {
 
   Future<void> abrirConfiguracoes(WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
+    tester.takeException();
 
     final navigator = tester.state<NavigatorState>(find.byType(Navigator));
     navigator.pushNamed(AppRoute.configuration.path);
     await tester.pumpAndSettle();
   }
+
+  Future<void> entrarNoApp(WidgetTester tester) async {
+    await tester.pumpWidget(const MyApp());
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Entrar'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('app inicia no login', (tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    expect(find.text('Entrar'), findsWidgets);
+    expect(
+      find.text('Bem-vindo de volta ao seu comércio local'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('login mockado abre dashboard', (tester) async {
+    await entrarNoApp(tester);
+
+    expect(find.text('Resumo de Hoje'), findsOneWidget);
+    expect(find.text('Alertas importantes'), findsOneWidget);
+  });
+
+  testWidgets('login abre cadastro', (tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    await tester.ensureVisible(find.text(' cadastrar'));
+    await tester.tap(find.text(' cadastrar'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Crie sua conta\nno LocalBiz'), findsOneWidget);
+  });
+
+  testWidgets('cadastro aceito abre dashboard', (tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    await tester.ensureVisible(find.text(' cadastrar'));
+    await tester.tap(find.text(' cadastrar'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byType(Checkbox));
+    await tester.tap(find.byType(Checkbox));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(
+      find.widgetWithText(ElevatedButton, 'Criar Conta'),
+    );
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Criar Conta'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Resumo de Hoje'), findsOneWidget);
+  });
+
+  testWidgets('login abre recuperacao de senha', (tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    await tester.tap(find.text('Esqueci minha senha'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Esqueceu sua\nsenha?'), findsOneWidget);
+  });
+
+  testWidgets('recuperacao de senha volta para login', (tester) async {
+    await tester.pumpWidget(const MyApp());
+
+    await tester.tap(find.text('Esqueci minha senha'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(
+      find.widgetWithText(ElevatedButton, 'Enviar Link de Recuperação'),
+    );
+    await tester.tap(
+      find.widgetWithText(ElevatedButton, 'Enviar Link de Recuperação'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Entrar'), findsWidgets);
+    expect(
+      find.text('Link de recuperação enviado com sucesso'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('sair da conta volta para login', (tester) async {
+    await entrarNoApp(tester);
+
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.pushNamed(AppRoute.configuration.path);
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Sair da Conta'),
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.text('Sair da Conta'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Entrar'), findsWidgets);
+    expect(find.text('Resumo de Hoje'), findsNothing);
+  });
 
   testWidgets('abre tela de clientes', (tester) async {
     await abrirClientes(tester);
