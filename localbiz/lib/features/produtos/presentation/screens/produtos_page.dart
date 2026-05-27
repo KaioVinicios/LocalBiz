@@ -252,7 +252,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(
-              maxWidth: AppSizes.screenMaxWidth,
+              maxWidth: AppSizes.webFlowMaxWidth,
             ),
             child: SizedBox(
               width: double.infinity,
