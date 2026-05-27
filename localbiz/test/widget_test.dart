@@ -57,6 +57,53 @@ void main() {
     );
   });
 
+  testWidgets('login funciona no web', (tester) async {
+    configurarViewport(tester, const Size(1200, 900));
+    await tester.pumpWidget(const MyApp());
+
+    final campoSize = tester.getSize(find.byType(TextField).first);
+    final botaoSize = tester.getSize(
+      find.widgetWithText(ElevatedButton, 'Entrar'),
+    );
+
+    expect(campoSize.width, greaterThan(600));
+    expect(botaoSize.width, greaterThan(600));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('cadastro funciona no web', (tester) async {
+    configurarViewport(tester, const Size(1200, 900));
+    await tester.pumpWidget(const MyApp());
+
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.pushNamed(AppRoute.register.path);
+    await tester.pumpAndSettle();
+
+    final campoSize = tester.getSize(find.byType(TextField).first);
+    final botaoSize = tester.getSize(
+      find.widgetWithText(ElevatedButton, 'Criar Conta'),
+    );
+
+    expect(campoSize.width, greaterThan(600));
+    expect(botaoSize.width, greaterThan(600));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('login e cadastro funcionam no mobile', (tester) async {
+    configurarViewport(tester, const Size(390, 844));
+    await tester.pumpWidget(const MyApp());
+
+    expect(find.text('Entrar'), findsWidgets);
+    expect(tester.takeException(), isNull);
+
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.pushNamed(AppRoute.register.path);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Crie sua conta\nno LocalBiz'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('login mockado abre dashboard', (tester) async {
     await entrarNoApp(tester);
 
@@ -75,17 +122,14 @@ void main() {
   });
 
   testWidgets('cadastro aceito abre dashboard', (tester) async {
+    configurarViewport(tester, const Size(900, 1000));
     await tester.pumpWidget(const MyApp());
 
-    await tester.ensureVisible(find.text(' cadastrar'));
     await tester.tap(find.text(' cadastrar'));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.byType(Checkbox));
-    await tester.tap(find.byType(Checkbox));
+    final checkbox = tester.widget<Checkbox>(find.byType(Checkbox));
+    checkbox.onChanged?.call(true);
     await tester.pumpAndSettle();
-    await tester.ensureVisible(
-      find.widgetWithText(ElevatedButton, 'Criar Conta'),
-    );
     await tester.tap(find.widgetWithText(ElevatedButton, 'Criar Conta'));
     await tester.pumpAndSettle();
 

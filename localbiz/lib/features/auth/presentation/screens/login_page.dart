@@ -60,7 +60,7 @@ class LoginPage extends StatelessWidget {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(
-                maxWidth: AppSizes.contentWidth,
+                maxWidth: AppSizes.webFlowMaxWidth,
               ),
 
               child: Column(
@@ -180,9 +180,9 @@ class LoginPage extends StatelessWidget {
                   const SizedBox(height: AppRadii.sheet),
 
                   // REGISTER
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       const Text(
                         "Não tenho conta",

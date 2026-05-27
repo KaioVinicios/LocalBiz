@@ -70,7 +70,7 @@ class _RegisterPageState extends State<RegisterPage> {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(
-                maxWidth: AppSizes.contentWidth,
+                maxWidth: AppSizes.webFlowMaxWidth,
               ),
 
               child: Column(
@@ -291,37 +291,44 @@ class _RegisterPageState extends State<RegisterPage> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
-
-          child: SizedBox(
-            height: AppSizes.primaryButtonHeight,
-
-            child: ElevatedButton(
-              onPressed: _acceptedTerms
-                  ? () {
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                        AppRoute.dashboard.path,
-                        (route) => false,
-                      );
-                    }
-                  : null,
-
-              style: ElevatedButton.styleFrom(
-                elevation: 0,
-                backgroundColor: AppColors.blue,
-                disabledBackgroundColor: AppColors.textMuted.withValues(
-                  alpha: 0.4,
-                ),
-
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.zero,
-                ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppSizes.webFlowMaxWidth,
               ),
+              child: SizedBox(
+                width: double.infinity,
+                height: AppSizes.primaryButtonHeight,
 
-              child: Text(
-                "Criar Conta",
-                style: AppTextStyles.primaryButton.copyWith(
-                  fontSize: AppRadii.md,
-                  color: Colors.white,
+                child: ElevatedButton(
+                  onPressed: _acceptedTerms
+                      ? () {
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                            AppRoute.dashboard.path,
+                            (route) => false,
+                          );
+                        }
+                      : null,
+
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: AppColors.blue,
+                    disabledBackgroundColor: AppColors.textMuted.withValues(
+                      alpha: 0.4,
+                    ),
+
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                  ),
+
+                  child: Text(
+                    "Criar Conta",
+                    style: AppTextStyles.primaryButton.copyWith(
+                      fontSize: AppRadii.md,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ),
