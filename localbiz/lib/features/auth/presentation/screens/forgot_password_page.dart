@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
 import 'package:localbiz/core/ui/app_outlined_text_field.dart';
@@ -55,7 +56,11 @@ class ForgotPasswordPage extends StatelessWidget {
                   children: [
                     // BACK BUTTON
                     InkWell(
-                      onTap: () => Navigator.pop(context),
+                      onTap: () =>
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                            AppRoute.login.path,
+                            (route) => false,
+                          ),
 
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -136,7 +141,19 @@ class ForgotPasswordPage extends StatelessWidget {
                       height: AppSizes.primaryButtonHeight,
 
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "Link de recuperação enviado com sucesso",
+                              ),
+                            ),
+                          );
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                            AppRoute.login.path,
+                            (route) => false,
+                          );
+                        },
 
                         style: ElevatedButton.styleFrom(
                           elevation: 0,

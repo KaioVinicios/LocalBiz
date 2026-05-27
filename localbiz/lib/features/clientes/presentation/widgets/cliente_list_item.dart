@@ -53,7 +53,7 @@ class _ClienteCard extends StatelessWidget {
     );
 
     return SizedBox(
-      width: AppSizes.contentWidth,
+      width: double.infinity,
       height: AppSizes.clientCardHeight,
       child: Material(
         color: AppColors.clientCardBg,

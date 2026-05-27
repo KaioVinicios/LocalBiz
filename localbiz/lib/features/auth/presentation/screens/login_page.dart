@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
 import 'package:localbiz/core/ui/app_help_action_button.dart';
 import 'package:localbiz/core/ui/app_outlined_text_field.dart';
-import 'package:localbiz/features/auth/presentation/screens/forgot_password_page.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -60,7 +60,7 @@ class LoginPage extends StatelessWidget {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(
-                maxWidth: AppSizes.contentWidth,
+                maxWidth: AppSizes.webFlowMaxWidth,
               ),
 
               child: Column(
@@ -129,12 +129,9 @@ class LoginPage extends StatelessWidget {
 
                     child: TextButton(
                       onPressed: () {
-                        Navigator.push(
+                        Navigator.of(
                           context,
-                          MaterialPageRoute(
-                            builder: (_) => const ForgotPasswordPage(),
-                          ),
-                        );
+                        ).pushNamed(AppRoute.forgotPassword.path);
                       },
 
                       child: const Text(
@@ -155,7 +152,12 @@ class LoginPage extends StatelessWidget {
                     height: AppSizes.primaryButtonHeight,
 
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                          AppRoute.dashboard.path,
+                          (route) => false,
+                        );
+                      },
 
                       style: ElevatedButton.styleFrom(
                         elevation: 0,
@@ -178,9 +180,9 @@ class LoginPage extends StatelessWidget {
                   const SizedBox(height: AppRadii.sheet),
 
                   // REGISTER
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       const Text(
                         "Não tenho conta",
@@ -192,7 +194,11 @@ class LoginPage extends StatelessWidget {
                       ),
 
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.of(
+                            context,
+                          ).pushNamed(AppRoute.register.path);
+                        },
 
                         child: const Text(
                           " cadastrar",
