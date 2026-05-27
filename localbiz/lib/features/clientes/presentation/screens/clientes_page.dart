@@ -219,8 +219,12 @@ class _ClientesPageState extends State<ClientesPage> {
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: AppSizes.screenMaxWidth,
+            constraints: BoxConstraints(
+              maxWidth: AppSizes.webFlowMaxWidth,
+              minWidth:
+                  MediaQuery.sizeOf(context).width > AppSizes.webFlowMaxWidth
+                  ? AppSizes.webFlowMaxWidth
+                  : MediaQuery.sizeOf(context).width,
             ),
             child: Stack(
               children: [
@@ -266,26 +270,19 @@ class _ClientesPageState extends State<ClientesPage> {
                         ),
                         const SizedBox(height: AppSpacing.md),
                         Expanded(
-                          child: Align(
-                            alignment: Alignment.topCenter,
-                            child: SizedBox(
-                              width: AppSizes.contentWidth,
-                              child: ListView.separated(
-                                padding: const EdgeInsets.only(
-                                  bottom: AppSizes.squareAction + AppSpacing.lg,
-                                ),
-                                itemCount: lista.length,
-                                separatorBuilder: (context, index) =>
-                                    const SizedBox(height: 10),
-                                itemBuilder: (context, index) {
-                                  return ClienteListItem(
-                                    cliente: lista[index],
-                                    onTap: () =>
-                                        selecionarCliente(lista[index]),
-                                  );
-                                },
-                              ),
+                          child: ListView.separated(
+                            padding: const EdgeInsets.only(
+                              bottom: AppSizes.squareAction + AppSpacing.lg,
                             ),
+                            itemCount: lista.length,
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(height: 10),
+                            itemBuilder: (context, index) {
+                              return ClienteListItem(
+                                cliente: lista[index],
+                                onTap: () => selecionarCliente(lista[index]),
+                              );
+                            },
                           ),
                         ),
                       ],

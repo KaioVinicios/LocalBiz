@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/core/ui/nav_bar_button.dart';
+import 'package:localbiz/features/clientes/presentation/widgets/cliente_list_item.dart';
+import 'package:localbiz/features/produtos/presentation/widgets/produto_list_item.dart';
 import 'package:localbiz/main.dart';
 
 void main() {
+  void configurarViewport(WidgetTester tester, Size size) {
+    tester.view.physicalSize = size;
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+  }
+
   Future<void> abrirClientes(WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
 
@@ -34,6 +43,16 @@ void main() {
 
     expect(find.text('Clientes'), findsOneWidget);
     expect(find.text('Mariana Silva'), findsOneWidget);
+  });
+
+  testWidgets('clientes: cards expandem no viewport web', (tester) async {
+    configurarViewport(tester, const Size(1200, 800));
+    await abrirClientes(tester);
+
+    final cardSize = tester.getSize(find.byType(ClienteListItem).first);
+
+    expect(cardSize.width, greaterThan(600));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('cadastra novo cliente', (tester) async {
@@ -140,6 +159,16 @@ void main() {
     expect(find.text('Nenhum produto encontrado'), findsOneWidget);
   });
 
+  testWidgets('produtos: cards expandem no viewport web', (tester) async {
+    configurarViewport(tester, const Size(1200, 800));
+    await abrirProdutos(tester);
+
+    final cardSize = tester.getSize(find.byType(ProdutoListItem).first);
+
+    expect(cardSize.width, greaterThan(600));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('produtos nao exibe nav bar inferior da feature', (tester) async {
     await abrirProdutos(tester);
 
@@ -210,6 +239,22 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Estoque: 45 unidades'), findsOneWidget);
+  });
+
+  testWidgets('clientes e produtos renderizam no viewport mobile', (
+    tester,
+  ) async {
+    configurarViewport(tester, const Size(390, 844));
+
+    await abrirClientes(tester);
+    expect(find.text('Clientes'), findsOneWidget);
+    expect(find.text('Mariana Silva'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await abrirProdutos(tester);
+    expect(find.text('Produtos'), findsWidgets);
+    expect(find.text('Fini Salada de Frutas'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('configuracoes nao exibe nav bar inferior da feature', (
