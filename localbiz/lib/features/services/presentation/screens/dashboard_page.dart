@@ -4,6 +4,9 @@ import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
 
+const _dashboardWideBreakpoint = 900.0;
+const _dashboardWideMaxWidth = 1120.0;
+
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
 
@@ -14,48 +17,94 @@ class DashboardPage extends StatelessWidget {
       body: SafeArea(
         bottom: false,
         child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 428),
-            child: Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(18, 20, 18, 28),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const _DashboardHeader(),
-                        const SizedBox(height: 22),
-                        _QuickActions(
-                          onServiceCreate: () => Navigator.of(
-                            context,
-                          ).pushNamed(AppRoute.serviceCreate.path),
-                        ),
-                        const SizedBox(height: 20),
-                        const _SummaryCards(),
-                        const SizedBox(height: 24),
-                        const Text(
-                          'Alertas importantes',
-                          style: TextStyle(
-                            color: AppColorTokens.dashboardPurple,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w800,
-                            height: 1,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        const _InventoryAlertCard(),
-                        const SizedBox(height: 8),
-                      ],
-                    ),
-                  ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isWide = constraints.maxWidth >= _dashboardWideBreakpoint;
+
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: isWide
+                      ? _dashboardWideMaxWidth
+                      : AppSizes.screenMaxWidth,
                 ),
-                const _DashboardNavBar(),
-              ],
-            ),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.fromLTRB(
+                          isWide ? 32 : 18,
+                          isWide ? 32 : 20,
+                          isWide ? 32 : 18,
+                          28,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const _DashboardHeader(),
+                            const SizedBox(height: 22),
+                            _QuickActions(
+                              isWide: isWide,
+                              onServiceCreate: () => Navigator.of(
+                                context,
+                              ).pushNamed(AppRoute.serviceCreate.path),
+                            ),
+                            SizedBox(height: isWide ? 28 : 20),
+                            _DashboardContent(isWide: isWide),
+                            const SizedBox(height: 8),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const _DashboardNavBar(),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DashboardContent extends StatelessWidget {
+  const _DashboardContent({required this.isWide});
+
+  final bool isWide;
+
+  @override
+  Widget build(BuildContext context) {
+    const alerts = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Alertas importantes',
+          style: TextStyle(
+            color: AppColorTokens.dashboardPurple,
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            height: 1,
+          ),
+        ),
+        SizedBox(height: 24),
+        _InventoryAlertCard(),
+      ],
+    );
+
+    if (isWide) {
+      return const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(flex: 7, child: _SummaryCards()),
+          SizedBox(width: 28),
+          Expanded(flex: 5, child: alerts),
+        ],
+      );
+    }
+
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [_SummaryCards(), SizedBox(height: 24), alerts],
     );
   }
 }
@@ -122,45 +171,57 @@ class _HeaderIconButton extends StatelessWidget {
 }
 
 class _QuickActions extends StatelessWidget {
-  const _QuickActions({required this.onServiceCreate});
+  const _QuickActions({required this.onServiceCreate, required this.isWide});
 
   final VoidCallback onServiceCreate;
+  final bool isWide;
 
   @override
   Widget build(BuildContext context) {
+    final actions = [
+      _QuickActionCard(
+        label: 'Venda',
+        icon: Icons.show_chart,
+        onTap: () => Navigator.of(context).pushNamed(AppRoute.vendas.path),
+      ),
+      _QuickActionCard(
+        label: 'Agendar',
+        icon: Icons.show_chart,
+        onTap: () =>
+            Navigator.of(context).pushNamed(AppRoute.serviceSchedules.path),
+      ),
+      _QuickActionCard(
+        label: 'Clientes',
+        icon: Icons.show_chart,
+        onTap: () => Navigator.of(context).pushNamed(AppRoute.clientes.path),
+      ),
+      _QuickActionCard(
+        label: 'Cadastrar serviço',
+        visibleLabel: 'Mais',
+        icon: Icons.show_chart,
+        highlighted: true,
+        onTap: onServiceCreate,
+      ),
+    ];
+
+    if (isWide) {
+      return Row(
+        children: [
+          for (final action in actions) ...[
+            Expanded(child: action),
+            if (action != actions.last) const SizedBox(width: 16),
+          ],
+        ],
+      );
+    }
+
     return SizedBox(
       height: 86,
-      child: ListView(
+      child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        children: [
-          _QuickActionCard(
-            label: 'Venda',
-            icon: Icons.show_chart,
-            onTap: () => Navigator.of(context).pushNamed(AppRoute.vendas.path),
-          ),
-          const SizedBox(width: 16),
-          _QuickActionCard(
-            label: 'Agendar',
-            icon: Icons.show_chart,
-            onTap: () =>
-                Navigator.of(context).pushNamed(AppRoute.serviceSchedules.path),
-          ),
-          const SizedBox(width: 16),
-          _QuickActionCard(
-            label: 'Clientes',
-            icon: Icons.show_chart,
-            onTap: () =>
-                Navigator.of(context).pushNamed(AppRoute.clientes.path),
-          ),
-          const SizedBox(width: 16),
-          _QuickActionCard(
-            label: 'Cadastrar serviço',
-            visibleLabel: 'Mais',
-            icon: Icons.show_chart,
-            highlighted: true,
-            onTap: onServiceCreate,
-          ),
-        ],
+        itemCount: actions.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 16),
+        itemBuilder: (_, index) => actions[index],
       ),
     );
   }
@@ -190,6 +251,7 @@ class _QuickActionCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
         child: Container(
+          height: 86,
           width: visibleLabel == null ? 86 : 100,
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(

@@ -11,6 +11,10 @@ const serviceCategoryOptions = [
   'Massoterapia',
 ];
 
+const _serviceFormWideBreakpoint = 900.0;
+const _serviceFormWideMaxWidth = 960.0;
+const _serviceFormDesktopButtonWidth = 260.0;
+
 class ServiceTextField extends StatelessWidget {
   const ServiceTextField({
     super.key,
@@ -234,100 +238,214 @@ class _ServiceFormScaffoldState extends State<ServiceFormScaffold> {
       backgroundColor: AppColorTokens.surfaceWhite,
       body: SafeArea(
         child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 428),
-            child: Column(
-              children: [
-                const _ServiceTopBar(),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 12),
-                        Text(
-                          widget.title,
-                          style: const TextStyle(
-                            color: AppColorTokens.slate900,
-                            fontSize: 30,
-                            fontWeight: FontWeight.w800,
-                            height: 38.4 / 30,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          widget.description,
-                          style: const TextStyle(
-                            color: AppColorTokens.slate600,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            height: 26.3 / 16,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 146,
-                          child: widget.image,
-                        ),
-                        const SizedBox(height: 18),
-                        ServiceCategoryField(
-                          value: _selectedCategory,
-                          categories: widget.categories,
-                          onChanged: (category) {
-                            setState(() {
-                              _selectedCategory = category;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 24),
-                        ServiceTextField(
-                          label: 'Nome',
-                          controller: _nameController,
-                        ),
-                        const SizedBox(height: 24),
-                        ServiceTextField(
-                          label: 'Preço',
-                          controller: _priceController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          inputFormatters: const [RealCurrencyInputFormatter()],
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-                    ),
-                  ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isWide = constraints.maxWidth >= _serviceFormWideBreakpoint;
+
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: isWide
+                      ? _serviceFormWideMaxWidth
+                      : AppSizes.screenMaxWidth,
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                  child: SizedBox(
-                    height: 60,
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.of(context).maybePop(),
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        backgroundColor: AppColors.blue,
-                        foregroundColor: AppColorTokens.surfaceWhite,
-                        shape: const RoundedRectangleBorder(),
+                child: Column(
+                  children: [
+                    const _ServiceTopBar(),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.fromLTRB(
+                          isWide ? 32 : 16,
+                          12,
+                          isWide ? 32 : 16,
+                          24,
+                        ),
+                        child: isWide
+                            ? _buildWideFormContent()
+                            : _buildCompactFormContent(),
                       ),
-                      child: const Text(
-                        'Concluir',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        isWide ? 32 : 16,
+                        8,
+                        isWide ? 32 : 16,
+                        16,
+                      ),
+                      child: Align(
+                        alignment: isWide
+                            ? Alignment.centerRight
+                            : Alignment.center,
+                        child: SizedBox(
+                          height: 60,
+                          width: isWide
+                              ? _serviceFormDesktopButtonWidth
+                              : double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () => Navigator.of(context).maybePop(),
+                            style: ElevatedButton.styleFrom(
+                              elevation: 0,
+                              backgroundColor: AppColors.blue,
+                              foregroundColor: AppColorTokens.surfaceWhite,
+                              shape: const RoundedRectangleBorder(),
+                            ),
+                            child: const Text(
+                              'Concluir',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildCompactFormContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _ServiceFormIntro(title: widget.title, description: widget.description),
+        const SizedBox(height: 20),
+        SizedBox(width: double.infinity, height: 146, child: widget.image),
+        const SizedBox(height: 18),
+        _ServiceFormFields(
+          selectedCategory: _selectedCategory,
+          categories: widget.categories,
+          nameController: _nameController,
+          priceController: _priceController,
+          onCategoryChanged: _updateCategory,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWideFormContent() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 5,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _ServiceFormIntro(
+                title: widget.title,
+                description: widget.description,
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                width: double.infinity,
+                height: 260,
+                child: widget.image,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 40),
+        Expanded(
+          flex: 6,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: _ServiceFormFields(
+              selectedCategory: _selectedCategory,
+              categories: widget.categories,
+              nameController: _nameController,
+              priceController: _priceController,
+              onCategoryChanged: _updateCategory,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _updateCategory(String? category) {
+    setState(() {
+      _selectedCategory = category;
+    });
+  }
+}
+
+class _ServiceFormIntro extends StatelessWidget {
+  const _ServiceFormIntro({required this.title, required this.description});
+
+  final String title;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            color: AppColorTokens.slate900,
+            fontSize: 30,
+            fontWeight: FontWeight.w800,
+            height: 38.4 / 30,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          description,
+          style: const TextStyle(
+            color: AppColorTokens.slate600,
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+            height: 26.3 / 16,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ServiceFormFields extends StatelessWidget {
+  const _ServiceFormFields({
+    required this.selectedCategory,
+    required this.categories,
+    required this.nameController,
+    required this.priceController,
+    required this.onCategoryChanged,
+  });
+
+  final String? selectedCategory;
+  final List<String> categories;
+  final TextEditingController nameController;
+  final TextEditingController priceController;
+  final ValueChanged<String?> onCategoryChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ServiceCategoryField(
+          value: selectedCategory,
+          categories: categories,
+          onChanged: onCategoryChanged,
+        ),
+        const SizedBox(height: 24),
+        ServiceTextField(label: 'Nome', controller: nameController),
+        const SizedBox(height: 24),
+        ServiceTextField(
+          label: 'Preço',
+          controller: priceController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: const [RealCurrencyInputFormatter()],
+        ),
+        const SizedBox(height: 24),
+      ],
     );
   }
 }
