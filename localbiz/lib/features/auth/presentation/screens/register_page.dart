@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
 import 'package:localbiz/core/ui/app_help_action_button.dart';
@@ -80,7 +81,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
                   // BACK BUTTON
                   InkWell(
-                    onTap: () => Navigator.pop(context),
+                    onTap: () => Navigator.of(context).pushNamedAndRemoveUntil(
+                      AppRoute.login.path,
+                      (route) => false,
+                    ),
 
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -292,7 +296,14 @@ class _RegisterPageState extends State<RegisterPage> {
             height: AppSizes.primaryButtonHeight,
 
             child: ElevatedButton(
-              onPressed: _acceptedTerms ? () {} : null,
+              onPressed: _acceptedTerms
+                  ? () {
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                        AppRoute.dashboard.path,
+                        (route) => false,
+                      );
+                    }
+                  : null,
 
               style: ElevatedButton.styleFrom(
                 elevation: 0,

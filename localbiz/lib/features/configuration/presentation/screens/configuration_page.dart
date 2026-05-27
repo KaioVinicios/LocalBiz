@@ -229,7 +229,11 @@ class _SignOutButton extends StatelessWidget {
       color: AppColors.dangerBg,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
-        onTap: () {},
+        onTap: () {
+          Navigator.of(
+            context,
+          ).pushNamedAndRemoveUntil(AppRoute.login.path, (route) => false);
+        },
         borderRadius: BorderRadius.circular(14),
         child: Container(
           height: 56,
