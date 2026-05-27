@@ -19,7 +19,7 @@ import 'package:localbiz/features/vendas/presentation/screens/venda_page.dart';
 class AppRouter {
   const AppRouter._();
 
-  static String get initialRoute => AppRoute.dashboard.path;
+  static String get initialRoute => AppRoute.login.path;
 
   static Map<String, WidgetBuilder> get routes => {
     AppRoute.home.path: (context) => const DashboardPage(),

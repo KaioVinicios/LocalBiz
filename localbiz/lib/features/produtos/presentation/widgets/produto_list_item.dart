@@ -25,7 +25,7 @@ class ProdutoListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: AppSizes.contentWidth,
+      width: double.infinity,
       height: 176,
       child: Material(
         color: AppColors.surface,

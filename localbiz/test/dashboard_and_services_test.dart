@@ -7,11 +7,15 @@ Future<void> pumpApp(WidgetTester tester) async {
   await tester.pumpWidget(const MyApp());
 }
 
+Future<void> entrarNoApp(WidgetTester tester) async {
+  await pumpApp(tester);
+  await tester.tap(find.widgetWithText(ElevatedButton, 'Entrar'));
+  await tester.pumpAndSettle();
+}
+
 void main() {
-  testWidgets('app inicia no dashboard e navega para rotas principais', (
-    tester,
-  ) async {
-    await pumpApp(tester);
+  testWidgets('dashboard navega para rotas principais', (tester) async {
+    await entrarNoApp(tester);
 
     expect(find.text('Resumo de Hoje'), findsOneWidget);
     expect(find.text('Faturamento de Hoje'), findsOneWidget);
@@ -21,36 +25,36 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Mariana Silva'), findsOneWidget);
 
-    await pumpApp(tester);
+    await entrarNoApp(tester);
     await tester.tap(find.byIcon(Icons.stars_outlined));
     await tester.pumpAndSettle();
     expect(find.text('Serviços'), findsWidgets);
     expect(find.text('Corte e Hidratação'), findsWidgets);
 
-    await pumpApp(tester);
+    await entrarNoApp(tester);
     await tester.tap(find.text('Venda'));
     await tester.pumpAndSettle();
     expect(find.text('Nova Venda'), findsOneWidget);
 
-    await pumpApp(tester);
+    await entrarNoApp(tester);
     await tester.tap(find.text('Agendar'));
     await tester.pumpAndSettle();
     expect(find.text('Agendamento'), findsOneWidget);
 
-    await pumpApp(tester);
+    await entrarNoApp(tester);
     await tester.tap(find.text('Produtos'));
     await tester.pumpAndSettle();
     expect(find.text('Produtos'), findsWidgets);
     expect(find.text('Fini Salada de Frutas'), findsWidgets);
 
-    await pumpApp(tester);
+    await entrarNoApp(tester);
     await tester.tap(find.text('Configurações'));
     await tester.pumpAndSettle();
     expect(find.text('Meu Negócio Local'), findsOneWidget);
   });
 
   testWidgets('dashboard abre cadastro de serviço', (tester) async {
-    await pumpApp(tester);
+    await entrarNoApp(tester);
 
     await tester.tap(find.text('Mais'));
     await tester.pumpAndSettle();
@@ -68,7 +72,7 @@ void main() {
   });
 
   testWidgets('cadastro de serviço permite preencher campos', (tester) async {
-    await pumpApp(tester);
+    await entrarNoApp(tester);
 
     await tester.tap(find.text('Mais'));
     await tester.pumpAndSettle();
@@ -90,7 +94,7 @@ void main() {
   testWidgets(
     'lista de serviços abre edição de serviço pelo botão adicionar e detalhe',
     (tester) async {
-      await pumpApp(tester);
+      await entrarNoApp(tester);
 
       await tester.tap(find.byIcon(Icons.stars_outlined));
       await tester.pumpAndSettle();
@@ -98,7 +102,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Cadastro de Serviço'), findsOneWidget);
 
-      await pumpApp(tester);
+      await entrarNoApp(tester);
       await tester.tap(find.byIcon(Icons.stars_outlined));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Corte e Hidratação').first);

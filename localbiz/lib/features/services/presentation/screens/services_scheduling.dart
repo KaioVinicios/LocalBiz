@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localbiz/features/services/presentation/screens/widgets/service_calendar.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
+import 'package:localbiz/core/ui/app_help_action_button.dart';
 
 class AgendamentoServicoScreen extends StatefulWidget {
   const AgendamentoServicoScreen({super.key});
@@ -140,11 +141,7 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
               ],
             ),
           ),
-          const Icon(
-            Icons.help_outline,
-            color: AppColors.textPrimary,
-            size: 24,
-          ),
+          const AppHelpActionButton(),
         ],
       ),
     );
