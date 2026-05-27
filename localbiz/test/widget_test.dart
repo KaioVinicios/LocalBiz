@@ -121,6 +121,30 @@ void main() {
     expect(find.text('Crie sua conta\nno LocalBiz'), findsOneWidget);
   });
 
+  testWidgets('abre cadastro pelo login no web', (
+    tester,
+  ) async {
+    configurarViewport(tester, const Size(1200, 900));
+    await tester.pumpWidget(const MyApp());
+
+    await tester.ensureVisible(find.text(' cadastrar'));
+    await tester.tap(find.text(' cadastrar'));
+    await tester.pumpAndSettle();
+
+    final titulo = find.text('Crie sua conta\nno LocalBiz');
+    final botao = find.widgetWithText(ElevatedButton, 'Criar Conta');
+    final tituloTop = tester.getTopLeft(titulo).dy;
+    final tituloBottom = tester.getBottomRight(titulo).dy;
+    final botaoTop = tester.getTopLeft(botao).dy;
+    final botaoBottom = tester.getBottomRight(botao).dy;
+
+    expect(tituloTop, greaterThan(0));
+    expect(tituloBottom, lessThan(900));
+    expect(botaoTop, greaterThan(0));
+    expect(botaoBottom, lessThan(900));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('cadastro aceito abre dashboard', (tester) async {
     configurarViewport(tester, const Size(900, 1000));
     await tester.pumpWidget(const MyApp());
