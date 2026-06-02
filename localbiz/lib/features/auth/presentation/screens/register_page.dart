@@ -255,20 +255,18 @@ class _RegisterPageState extends State<RegisterPage> {
                             if (!mounted) return;
                             String messageError = "Ocorreu um erro inesperado.";
                             String erroString = e.toString();
-
+                            
                             if (erroString.contains("invalid-email")) {
                               messageError = "O formato do e-mail digitado é inválido.";
-                            } else if (erroString.contains(
-                              "email-already-in-use",
-                            )) {
+                            } else if (erroString.contains("email-already-in-use")) {
                               messageError = "Este e-mail já está cadastrado em outra conta.";
                             } else if (erroString.contains("Acesso negado")) {
                               // Captura a nossa regra de domínio do @souunit.com.br
-                              messageError = erroString.replaceAll(
-                                "Exception: ",
-                                "",
-                              );
+                              messageError = erroString.replaceAll("Exception: ", "");
+                            } else if (erroString.contains("Apenas e-mails @souunit.com.br são permitidos.")) {
+                              messageError = erroString.replaceAll("Exception: ", "");
                             }
+
 
                             scaffoldMessenger.showSnackBar(
                               SnackBar(
