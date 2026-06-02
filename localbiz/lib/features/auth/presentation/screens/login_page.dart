@@ -181,11 +181,19 @@ class _LoginPageState extends State<LoginPage> {
                               (route) => false,
                             );
                           } catch (e) {
+                            if(!mounted) return;
+
+                            String messageError = "Ocorreu um erro inesperado, tente novamente mais tarde.";
+                            String erroString = e.toString();
+                            
+                            if(erroString.contains("invalid-credential")) {
+                              messageError = "E-mail ou senha inválidos";
+                            }
+
                             scaffoldMessenger.showSnackBar(
                               SnackBar(
-                                content: Text(
-                                  e.toString().replaceAll("Exception: ", ""),
-                                ),
+                                content: Text(messageError),
+                                backgroundColor: Colors.redAccent,
                               ),
                             );
                           } finally {
