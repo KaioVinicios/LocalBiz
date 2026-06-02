@@ -10,8 +10,12 @@ import 'package:localbiz/services/services_details.dart';
 import 'package:localbiz/theme/app_colors.dart';
 import 'package:localbiz/vendas/venda_page.dart';
 import 'package:localbiz/services/services_scheduling.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -33,7 +37,8 @@ class MyApp extends StatelessWidget {
         '/configuracoes': (context) => const ConfigurationPage(),
         '/vendas': (context) => const VendaPage(),
         '/services': (context) => const ServicosScreen(),
-        '/service-details': (context) => const DetalheServicoScreen(),
+        '/service-details': (context) =>
+            const DetalheServicoScreen(servicoId: ''),
         '/service-schedules': (context) => const AgendamentoServicoScreen(),
         '/configuration': (context) => const ConfigurationPage(),
       },

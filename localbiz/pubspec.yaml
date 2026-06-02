@@ -37,6 +37,8 @@ dependencies:
   web: ^1.1.1
   google_fonts: ^6.2.1
   flutter_svg: ^2.0.10
+  firebase_core: ^4.10.0
+  cloud_firestore: ^6.5.0
 
 dev_dependencies:
   flutter_test:

@@ -188,5 +188,5 @@ $RECYCLE.BIN/
 
 firebase.json
 firebase_options.dart
-android/app/google-services.json
+localbiz/android/app/google-services.json
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,linux,dart,visualstudiocode,flutter

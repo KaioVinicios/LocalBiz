@@ -1,17 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:localbiz/services/models/servico_model.dart';
+import 'package:localbiz/services/repositories/servicos_repository.dart';
+import 'package:localbiz/services/services_details.dart';
 import 'package:localbiz/theme/app_colors.dart';
-
-class Servico {
-  final String nome;
-  final String categoria;
-  final IconData icone;
-
-  const Servico({
-    required this.nome,
-    required this.categoria,
-    required this.icone,
-  });
-}
 
 class ServicosScreen extends StatefulWidget {
   const ServicosScreen({super.key});
@@ -22,42 +13,17 @@ class ServicosScreen extends StatefulWidget {
 
 class _ServicosScreenState extends State<ServicosScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final ServicosRepository _servicosRepository = ServicosRepository();
 
-  final List<Servico> _servicos = const [
-    Servico(
-      nome: 'Corte e Hidratação',
-      categoria: 'Serviços Capilares',
-      icone: Icons.spa_outlined,
-    ),
-    Servico(
-      nome: 'Limpeza de Pele',
-      categoria: 'Serviços Capilares',
-      icone: Icons.spa_outlined,
-    ),
-    Servico(
-      nome: 'Corte e Hidratação',
-      categoria: 'Serviços Capilares',
-      icone: Icons.spa_outlined,
-    ),
-    Servico(
-      nome: 'Manicure e Pedicure',
-      categoria: 'Serviços Capilares',
-      icone: Icons.spa_outlined,
-    ),
-    Servico(
-      nome: 'Manicure e Pedicure',
-      categoria: 'Serviços Capilares',
-      icone: Icons.spa_outlined,
-    ),
-  ];
-
-  List<Servico> get _servicosFiltrados {
+  List<ServicoModel> _filtrarServicos(List<ServicoModel> servicos) {
     final query = _searchController.text.toLowerCase();
-    if (query.isEmpty) return _servicos;
-    return _servicos
-        .where((s) =>
-            s.nome.toLowerCase().contains(query) ||
-            s.categoria.toLowerCase().contains(query))
+    if (query.isEmpty) return servicos;
+    return servicos
+        .where(
+          (s) =>
+              s.nome.toLowerCase().contains(query) ||
+              s.categoria.toLowerCase().contains(query),
+        )
         .toList();
   }
 
@@ -92,8 +58,9 @@ class _ServicosScreenState extends State<ServicosScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: GestureDetector(
-        onTap: () =>
-            Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false),
+        onTap: () => Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil('/home', (route) => false),
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -143,8 +110,10 @@ class _ServicosScreenState extends State<ServicosScreen> {
                 prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
                 filled: true,
                 fillColor: const Color(0xFFF2F2F2),
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 16,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -168,16 +137,51 @@ class _ServicosScreenState extends State<ServicosScreen> {
   }
 
   Widget _buildList() {
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      itemCount: _servicosFiltrados.length,
-      separatorBuilder: (_, index) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        final servico = _servicosFiltrados[index];
-        return _ServicoCard(
-          servico: servico,
-          primaryColor: AppColors.blue,
-          iconBgColor: AppColors.cardIconBg,
+    return StreamBuilder<List<ServicoModel>>(
+      stream: _servicosRepository.listarAtivos(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text(
+              'Erro ao carregar servicos.',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          );
+        }
+
+        final servicos = _filtrarServicos(snapshot.data ?? const []);
+        if (servicos.isEmpty) {
+          return const Center(
+            child: Text(
+              'Nenhum servico encontrado.',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          itemCount: servicos.length,
+          separatorBuilder: (_, index) => const SizedBox(height: 8),
+          itemBuilder: (context, index) {
+            final servico = servicos[index];
+            return _ServicoCard(
+              servico: servico,
+              primaryColor: AppColors.blue,
+              iconBgColor: AppColors.cardIconBg,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => DetalheServicoScreen(servicoId: servico.id),
+                  ),
+                );
+              },
+            );
+          },
         );
       },
     );
@@ -194,15 +198,31 @@ class _ServicosScreenState extends State<ServicosScreen> {
 }
 
 class _ServicoCard extends StatelessWidget {
-  final Servico servico;
+  final ServicoModel servico;
   final Color primaryColor;
   final Color iconBgColor;
+  final VoidCallback onTap;
 
   const _ServicoCard({
     required this.servico,
     required this.primaryColor,
     required this.iconBgColor,
+    required this.onTap,
   });
+
+  IconData _iconFromString(String iconName) {
+    switch (iconName) {
+      case 'content_cut':
+        return Icons.content_cut;
+      case 'face_retouching_natural':
+        return Icons.face_retouching_natural;
+      case 'back_hand':
+        return Icons.back_hand;
+      case 'spa_outlined':
+      default:
+        return Icons.spa_outlined;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +231,7 @@ class _ServicoCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => Navigator.of(context).pushNamed('/service-details'),
+        onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
           decoration: BoxDecoration(
@@ -228,7 +248,11 @@ class _ServicoCard extends StatelessWidget {
                   color: iconBgColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(servico.icone, color: primaryColor, size: 24),
+                child: Icon(
+                  _iconFromString(servico.icone),
+                  color: primaryColor,
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
