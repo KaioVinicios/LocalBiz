@@ -1,19 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:localbiz/core/router/app_route.dart';
+import 'package:localbiz/features/services/models/servico_model.dart';
+import 'package:localbiz/features/services/presentation/screens/services_details.dart';
+import 'package:localbiz/features/services/repositories/servicos_repositories.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
-import 'package:localbiz/core/ui/app_floating_add_button.dart';
-
-class Servico {
-  final String nome;
-  final String categoria;
-  final IconData icone;
-
-  const Servico({
-    required this.nome,
-    required this.categoria,
-    required this.icone,
-  });
-}
 
 class ServicosScreen extends StatefulWidget {
   const ServicosScreen({super.key});
@@ -24,43 +13,16 @@ class ServicosScreen extends StatefulWidget {
 
 class _ServicosScreenState extends State<ServicosScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final ServicosRepository _servicosRepository = ServicosRepository();
 
-  final List<Servico> _servicos = const [
-    Servico(
-      nome: 'Corte e Hidratação',
-      categoria: 'Serviços Capilares',
-      icone: Icons.spa_outlined,
-    ),
-    Servico(
-      nome: 'Limpeza de Pele',
-      categoria: 'Serviços Capilares',
-      icone: Icons.spa_outlined,
-    ),
-    Servico(
-      nome: 'Corte e Hidratação',
-      categoria: 'Serviços Capilares',
-      icone: Icons.spa_outlined,
-    ),
-    Servico(
-      nome: 'Manicure e Pedicure',
-      categoria: 'Serviços Capilares',
-      icone: Icons.spa_outlined,
-    ),
-    Servico(
-      nome: 'Manicure e Pedicure',
-      categoria: 'Serviços Capilares',
-      icone: Icons.spa_outlined,
-    ),
-  ];
-
-  List<Servico> get _servicosFiltrados {
+  List<ServicoModel> _filtrarServicos(List<ServicoModel> servicos) {
     final query = _searchController.text.toLowerCase();
-    if (query.isEmpty) return _servicos;
-    return _servicos
+    if (query.isEmpty) return servicos;
+    return servicos
         .where(
-          (servico) =>
-              servico.nome.toLowerCase().contains(query) ||
-              servico.categoria.toLowerCase().contains(query),
+          (s) =>
+              s.nome.toLowerCase().contains(query) ||
+              s.categoria.toLowerCase().contains(query),
         )
         .toList();
   }
@@ -74,7 +36,7 @@ class _ServicosScreenState extends State<ServicosScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,7 +50,7 @@ class _ServicosScreenState extends State<ServicosScreen> {
           ],
         ),
       ),
-      floatingActionButton: _buildFab(),
+      floatingActionButton: _buildFAB(),
     );
   }
 
@@ -98,7 +60,7 @@ class _ServicosScreenState extends State<ServicosScreen> {
       child: GestureDetector(
         onTap: () => Navigator.of(
           context,
-        ).pushNamedAndRemoveUntil(AppRoute.home.path, (route) => false),
+        ).pushNamedAndRemoveUntil('/home', (route) => false),
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -144,16 +106,10 @@ class _ServicosScreenState extends State<ServicosScreen> {
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
                 hintText: 'Pesquisar por Serviço',
-                hintStyle: const TextStyle(
-                  color: AppColors.textMuted,
-                  fontSize: 15,
-                ),
-                prefixIcon: const Icon(
-                  Icons.search,
-                  color: AppColors.textMuted,
-                ),
+                hintStyle: TextStyle(color: Colors.grey[400], fontSize: 15),
+                prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
                 filled: true,
-                fillColor: AppColors.fieldFill,
+                fillColor: const Color(0xFFF2F2F2),
                 contentPadding: const EdgeInsets.symmetric(
                   vertical: 12,
                   horizontal: 16,
@@ -173,11 +129,7 @@ class _ServicosScreenState extends State<ServicosScreen> {
               color: AppColors.cardIconBg,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
-              Icons.tune,
-              color: AppColors.textSecondary,
-              size: 22,
-            ),
+            child: Icon(Icons.tune, color: Colors.grey[600], size: 22),
           ),
         ],
       ),
@@ -185,56 +137,107 @@ class _ServicosScreenState extends State<ServicosScreen> {
   }
 
   Widget _buildList() {
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      itemCount: _servicosFiltrados.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        final servico = _servicosFiltrados[index];
-        return _ServicoCard(
-          servico: servico,
-          primaryColor: AppColors.blue,
-          iconBgColor: AppColors.cardIconBg,
+    return StreamBuilder<List<ServicoModel>>(
+      stream: _servicosRepository.listarAtivos(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text(
+              'Erro ao carregar servicos.',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          );
+        }
+
+        final servicos = _filtrarServicos(snapshot.data ?? const []);
+        if (servicos.isEmpty) {
+          return const Center(
+            child: Text(
+              'Nenhum servico encontrado.',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          itemCount: servicos.length,
+          separatorBuilder: (_, index) => const SizedBox(height: 8),
+          itemBuilder: (context, index) {
+            final servico = servicos[index];
+            return _ServicoCard(
+              servico: servico,
+              primaryColor: AppColors.blue,
+              iconBgColor: AppColors.cardIconBg,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => DetalheServicoScreen(servicoId: servico.id),
+                  ),
+                );
+              },
+            );
+          },
         );
       },
     );
   }
 
-  Widget _buildFab() {
-    return AppFloatingAddButton(
-      onPressed: () =>
-          Navigator.of(context).pushNamed(AppRoute.serviceCreate.path),
-      tooltip: 'Adicionar serviço',
+  Widget _buildFAB() {
+    return FloatingActionButton(
+      onPressed: () {},
+      backgroundColor: AppColors.blue,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: const Icon(Icons.add, color: Colors.white, size: 28),
     );
   }
 }
 
 class _ServicoCard extends StatelessWidget {
-  final Servico servico;
+  final ServicoModel servico;
   final Color primaryColor;
   final Color iconBgColor;
+  final VoidCallback onTap;
 
   const _ServicoCard({
     required this.servico,
     required this.primaryColor,
     required this.iconBgColor,
+    required this.onTap,
   });
+
+  IconData _iconFromString(String iconName) {
+    switch (iconName) {
+      case 'content_cut':
+        return Icons.content_cut;
+      case 'face_retouching_natural':
+        return Icons.face_retouching_natural;
+      case 'back_hand':
+        return Icons.back_hand;
+      case 'spa_outlined':
+      default:
+        return Icons.spa_outlined;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.sheetSurface,
+      color: Colors.white,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () =>
-            Navigator.of(context).pushNamed(AppRoute.serviceDetails.path),
+        onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
           decoration: BoxDecoration(
-            color: AppColors.sheetSurface,
+            color: Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: const Color(0xFFEEEEEE), width: 1),
           ),
           child: Row(
             children: [
@@ -245,7 +248,11 @@ class _ServicoCard extends StatelessWidget {
                   color: iconBgColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(servico.icone, color: primaryColor, size: 24),
+                child: Icon(
+                  _iconFromString(servico.icone),
+                  color: primaryColor,
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -257,25 +264,18 @@ class _ServicoCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       servico.categoria,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textSecondary,
-                      ),
+                      style: TextStyle(fontSize: 13, color: Colors.grey[500]),
                     ),
                   ],
                 ),
               ),
-              const Icon(
-                Icons.chevron_right,
-                color: AppColors.textMuted,
-                size: 22,
-              ),
+              Icon(Icons.chevron_right, color: Colors.grey[400], size: 22),
             ],
           ),
         ),
