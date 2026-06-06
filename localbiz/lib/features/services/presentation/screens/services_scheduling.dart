@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:localbiz/features/services/models/agendamento_model.dart';
+import 'package:localbiz/features/services/models/servico_model.dart';
+import 'package:localbiz/features/services/repositories/agendamentos_repositories.dart';
 import 'package:localbiz/features/services/presentation/screens/widgets/service_calendar.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
-import 'package:localbiz/core/ui/app_help_action_button.dart';
+
 
 class AgendamentoServicoScreen extends StatefulWidget {
-  const AgendamentoServicoScreen({super.key});
+  const AgendamentoServicoScreen({super.key, this.servico});
+
+  final ServicoModel? servico;
 
   @override
   State<AgendamentoServicoScreen> createState() =>
@@ -15,14 +20,14 @@ class AgendamentoServicoScreen extends StatefulWidget {
 class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
   final TextEditingController _clienteController = TextEditingController();
   final TextEditingController _telefoneController = TextEditingController();
+  final AgendamentosRepository _agendamentosRepository =
+      AgendamentosRepository();
 
   String? _categoriaSelecionada;
   String? _horarioSelecionado;
 
-  DateTime _mesAtual = DateTime(2026, 4);
-  int? _diaSelecionado = 5;
-
-  final Set<int> _diasComAgendamento = {7, 8, 9, 10};
+  DateTime _mesAtual = DateTime.now();
+  int? _diaSelecionado;
 
   static const List<String> _categorias = [
     'Novo Cliente',
@@ -51,6 +56,12 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
     '17:30',
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _categoriaSelecionada = _categorias.first;
+  }
+
   void _mesAnterior() => setState(() {
     _mesAtual = DateTime(_mesAtual.year, _mesAtual.month - 1);
     _diaSelecionado = null;
@@ -61,8 +72,81 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
     _diaSelecionado = null;
   });
 
-  void _confirmarAgendamento() {
-    // TODO: implementar lógica de confirmação
+  String _formatCurrency(double value) {
+    return value.toStringAsFixed(2).replaceAll('.', ',');
+  }
+
+  String _dataSelecionadaIso() {
+    final dia = _diaSelecionado!;
+    final data = DateTime(_mesAtual.year, _mesAtual.month, dia);
+    final mes = data.month.toString().padLeft(2, '0');
+    final diaFormatado = data.day.toString().padLeft(2, '0');
+    return '${data.year}-$mes-$diaFormatado';
+  }
+
+  Set<int> _diasComAgendamentoNoMes(List<AgendamentoModel> agendamentos) {
+    final dias = <int>{};
+    for (final item in agendamentos) {
+      final parsedData = DateTime.tryParse(item.data.trim());
+      if (parsedData == null) {
+        continue;
+      }
+      if (parsedData.year == _mesAtual.year &&
+          parsedData.month == _mesAtual.month) {
+        dias.add(parsedData.day);
+      }
+    }
+    return dias;
+  }
+
+  Future<void> _confirmarAgendamento() async {
+    final servico = widget.servico;
+    if (servico == null || servico.id.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Servico invalido para agendamento.')),
+      );
+      return;
+    }
+
+    if (_clienteController.text.trim().isEmpty ||
+        _telefoneController.text.trim().isEmpty ||
+        _diaSelecionado == null ||
+        _horarioSelecionado == null ||
+        _horarioSelecionado!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Preencha todos os campos obrigatorios.')),
+      );
+      return;
+    }
+
+    final payload = <String, dynamic>{
+      'servicoId': servico.id,
+      'clienteNome': _clienteController.text.trim(),
+      'clienteTelefone': _telefoneController.text.trim(),
+      'categoriaCliente': _categoriaSelecionada ?? _categorias.first,
+      'data': _dataSelecionadaIso(),
+      'hora': _horarioSelecionado,
+      'valor': servico.preco,
+      'status': 'confirmado',
+    };
+
+    try {
+      await _agendamentosRepository.criarAgendamento(payload);
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Agendamento confirmado com sucesso.')),
+      );
+      Navigator.of(context).pop();
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Falha ao confirmar agendamento.')),
+      );
+    }
   }
 
   @override
@@ -141,13 +225,23 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
               ],
             ),
           ),
-          const AppHelpActionButton(),
+          const Icon(
+            Icons.help_outline,
+            color: AppColors.textPrimary,
+            size: 24,
+          ),
         ],
       ),
     );
   }
 
   Widget _buildTitulo() {
+    final servico = widget.servico;
+    final categoria = servico?.categoria ?? 'Servico';
+    final preco = servico != null
+        ? 'R\$ ${_formatCurrency(servico.preco)}'
+        : 'R\$ 0,00';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -162,9 +256,9 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
         const SizedBox(height: 8),
         Row(
           children: [
-            _BadgeTexto(label: 'Serviços Capilares', cor: AppColors.blue),
+            _BadgeTexto(label: categoria, cor: AppColors.blue),
             const SizedBox(width: 12),
-            _BadgeTexto(label: 'R\$ 180,00', cor: AppColors.blue),
+            _BadgeTexto(label: preco, cor: AppColors.blue),
           ],
         ),
       ],
@@ -172,9 +266,10 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
   }
 
   Widget _buildCampoProcedimento() {
+    final nomeServico = widget.servico?.nome ?? 'Servico nao informado';
     return _CampoLabel(
       label: 'Procedimento',
-      child: _InputReadOnly(texto: 'Corte + Hidratação'),
+      child: _InputReadOnly(texto: nomeServico),
     );
   }
 
@@ -226,13 +321,33 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
   }
 
   Widget _buildCalendario() {
-    return ServiceCalendar(
-      mesAtual: _mesAtual,
-      diaSelecionado: _diaSelecionado,
-      diasComAgendamento: _diasComAgendamento,
-      onMesAnterior: _mesAnterior,
-      onProximoMes: _proximoMes,
-      onDiaSelecionado: (dia) => setState(() => _diaSelecionado = dia),
+    final servicoId = widget.servico?.id;
+    if (servicoId == null || servicoId.isEmpty) {
+      return ServiceCalendar(
+        mesAtual: _mesAtual,
+        diaSelecionado: _diaSelecionado,
+        diasComAgendamento: const {},
+        onMesAnterior: _mesAnterior,
+        onProximoMes: _proximoMes,
+        onDiaSelecionado: (dia) => setState(() => _diaSelecionado = dia),
+      );
+    }
+
+    return StreamBuilder<List<AgendamentoModel>>(
+      stream: _agendamentosRepository.listarPorServico(servicoId),
+      builder: (context, snapshot) {
+        final diasComAgendamento = _diasComAgendamentoNoMes(
+          snapshot.data ?? const [],
+        );
+        return ServiceCalendar(
+          mesAtual: _mesAtual,
+          diaSelecionado: _diaSelecionado,
+          diasComAgendamento: diasComAgendamento,
+          onMesAnterior: _mesAnterior,
+          onProximoMes: _proximoMes,
+          onDiaSelecionado: (dia) => setState(() => _diaSelecionado = dia),
+        );
+      },
     );
   }
 
@@ -280,7 +395,7 @@ class _BadgeTexto extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        border: Border.all(color: cor.withValues(alpha: 0.3)),
+        border: Border.all(color: cor.withOpacity(0.3)),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
