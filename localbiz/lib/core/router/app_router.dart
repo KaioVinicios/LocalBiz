@@ -34,7 +34,7 @@ class AppRouter {
     AppRoute.services.path: (context) => const ServicosScreen(),
     AppRoute.serviceCreate.path: (context) => const ServiceCreatePage(),
     AppRoute.serviceEdit.path: (context) => const ServiceEditPage(),
-    AppRoute.serviceDetails.path: (context) => const DetalheServicoScreen(),
+    AppRoute.serviceDetails.path: (context) => const DetalheServicoScreen( servicoId: ''),  
     AppRoute.serviceSchedules.path: (context) =>
         const AgendamentoServicoScreen(),
     AppRoute.configuration.path: (context) => const ConfigurationPage(),
