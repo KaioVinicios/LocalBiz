@@ -148,6 +148,9 @@ Temporary Items
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
+settings.json
+
+**/flutter_export_environment.sh
 
 # Local History for Visual Studio Code
 .history/
@@ -187,3 +190,4 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,linux,dart,visualstudiocode,flutter
+localbiz/android/app/google-services.json
