@@ -6,6 +6,7 @@ import 'package:localbiz/features/auth/presentation/screens/register_page.dart';
 import 'package:localbiz/features/clientes/presentation/screens/clientes_page.dart';
 import 'package:localbiz/features/configuration/presentation/screens/business_profile_page.dart';
 import 'package:localbiz/features/configuration/presentation/screens/configuration_page.dart';
+import 'package:localbiz/features/configuration/presentation/screens/help_support_page.dart';
 import 'package:localbiz/features/configuration/presentation/screens/report_page.dart';
 import 'package:localbiz/features/services/presentation/screens/dashboard_page.dart';
 import 'package:localbiz/features/services/presentation/screens/service_create_page.dart';
@@ -41,5 +42,6 @@ class AppRouter {
     AppRoute.businessProfile.path: (context) => const BusinessProfilePage(),
     AppRoute.report.path: (context) => const ReportPage(),
     AppRoute.relatorios.path: (context) => const ReportPage(),
+    AppRoute.ajuda.path: (context) => const HelpSupportPage(),
   };
 }

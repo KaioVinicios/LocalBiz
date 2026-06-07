@@ -19,7 +19,9 @@ class ConfigurationPage extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            const AppTopBar(),
+            AppTopBar(
+              onHelp: () => Navigator.of(context).pushNamed(AppRoute.ajuda.path),
+            ),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),

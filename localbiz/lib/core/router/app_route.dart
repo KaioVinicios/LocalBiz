@@ -16,7 +16,8 @@ enum AppRoute {
   configuration('/configuration'),
   businessProfile('/business-profile'),
   report('/report'),
-  relatorios('/relatorios');
+  relatorios('/relatorios'),
+  ajuda('/ajuda');
 
   const AppRoute(this.path);
 
