@@ -125,14 +125,14 @@ class _RegisterPageState extends State<RegisterPage> {
                 style: AppTextStyles.fieldLabel.copyWith(fontSize: 14),
               ),
               const SizedBox(height: AppSpacing.xs),
-              const AppOutlinedTextField(),
+              AppOutlinedTextField(controller: _nomeController),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 "Nome do Negócio",
                 style: AppTextStyles.fieldLabel.copyWith(fontSize: 14),
               ),
               const SizedBox(height: AppSpacing.xs),
-              const AppOutlinedTextField(),
+              AppOutlinedTextField(controller: _negocioController),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 "E-mail",
@@ -149,7 +149,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 style: AppTextStyles.fieldLabel.copyWith(fontSize: 14),
               ),
               const SizedBox(height: AppSpacing.xs),
-              const AppOutlinedTextField(keyboardType: TextInputType.phone),
+              AppOutlinedTextField(
+                controller: _telefoneController,
+                keyboardType: TextInputType.phone,
+              ),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 "Senha",
