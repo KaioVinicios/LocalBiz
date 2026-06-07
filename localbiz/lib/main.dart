@@ -2,22 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:localbiz/core/router/app_router.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() async {
-
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: "AIzaSyDj0ZFRUbTUXOFpfc7i3W3nT1zBORL0ul4",
-      authDomain: "localbiz-d523b.firebaseapp.com",
-      projectId: "localbiz-d523b",
-      storageBucket: "localbiz-d523b.firebasestorage.app",
-      messagingSenderId: "316070364598",
-      appId: "1:316070364598:web:b4098807a50e25dbd6ad17",
-    ),
-  );
-  
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
