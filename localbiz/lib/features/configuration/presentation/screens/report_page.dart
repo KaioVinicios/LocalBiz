@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/ui/labeled_fields.dart';
 import 'package:localbiz/core/ui/app_top_bar.dart';
+import 'package:localbiz/features/configuration/data/models/relatorio_model.dart';
+import 'package:localbiz/features/configuration/data/repositories/relatorio_repository.dart';
+import 'package:localbiz/features/services/presentation/screens/auth/auth_service.dart';
 
 class ReportPage extends StatefulWidget {
   const ReportPage({super.key});
@@ -18,11 +21,113 @@ class _ReportPageState extends State<ReportPage> {
   String _docType = 'PDF';
   String _sendTo = 'Email';
 
+  // Datas selecionadas (guardadas para conversão ISO ao gerar).
+  DateTime? _startDate;
+  DateTime? _endDate;
+
+  final _authService = AuthService();
+  final _relatorioRepository = RelatorioRepository();
+
+  bool _gerando = false;
+  RelatorioModel? _resultado;
+
   @override
   void dispose() {
     _startDateController.dispose();
     _endDateController.dispose();
     super.dispose();
+  }
+
+  String _formatarBr(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/'
+      '${d.month.toString().padLeft(2, '0')}/${d.year}';
+
+  String _formatarIso(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-'
+      '${d.day.toString().padLeft(2, '0')}';
+
+  Future<void> _selecionarData({required bool inicio}) async {
+    final agora = DateTime.now();
+    final escolhida = await showDatePicker(
+      context: context,
+      initialDate: (inicio ? _startDate : _endDate) ?? agora,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(agora.year + 5),
+    );
+    if (escolhida == null) return;
+    setState(() {
+      if (inicio) {
+        _startDate = escolhida;
+        _startDateController.text = _formatarBr(escolhida);
+      } else {
+        _endDate = escolhida;
+        _endDateController.text = _formatarBr(escolhida);
+      }
+    });
+  }
+
+  Future<void> _gerar() async {
+    final messenger = ScaffoldMessenger.of(context);
+
+    if (_startDate == null || _endDate == null) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Selecione a data de início e de fim.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+    if (_endDate!.isBefore(_startDate!)) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('A data fim deve ser maior ou igual à data início.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    final uid = _authService.usuarioAtual?.uid;
+    if (uid == null) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Você precisa estar logado para gerar relatórios.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _gerando = true;
+      _resultado = null;
+    });
+    try {
+      final relatorio = await _relatorioRepository.gerar(
+        uid: uid,
+        tipo: _type,
+        dataInicio: _formatarIso(_startDate!),
+        dataFim: _formatarIso(_endDate!),
+        formato: _docType,
+        destino: _sendTo,
+      );
+      if (!mounted) return;
+      setState(() => _resultado = relatorio);
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Relatório gerado e salvo no histórico.')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Não foi possível gerar o relatório.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _gerando = false);
+    }
   }
 
   @override
@@ -73,6 +178,7 @@ class _ReportPageState extends State<ReportPage> {
                             label: 'Data Inicio',
                             hint: '00/00/0000',
                             controller: _startDateController,
+                            onTap: () => _selecionarData(inicio: true),
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -81,6 +187,7 @@ class _ReportPageState extends State<ReportPage> {
                             label: 'Data Fim',
                             hint: '00/00/0000',
                             controller: _endDateController,
+                            onTap: () => _selecionarData(inicio: false),
                           ),
                         ),
                       ],
@@ -100,16 +207,106 @@ class _ReportPageState extends State<ReportPage> {
                       items: const ['Email', 'Whatsapp'],
                       onChanged: (v) => setState(() => _sendTo = v ?? _sendTo),
                     ),
+                    if (_resultado != null) ...[
+                      const SizedBox(height: 28),
+                      _ResultadoCard(relatorio: _resultado!),
+                    ],
                   ],
                 ),
               ),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-              child: FormSubmitButton(label: 'Enviar', onPressed: () {}),
+              child: FormSubmitButton(
+                label: _gerando ? 'Gerando...' : 'Enviar',
+                onPressed: _gerando ? null : _gerar,
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ResultadoCard extends StatelessWidget {
+  const _ResultadoCard({required this.relatorio});
+
+  final RelatorioModel relatorio;
+
+  @override
+  Widget build(BuildContext context) {
+    final valor = relatorio.valorTotal.toStringAsFixed(2).replaceAll('.', ',');
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Resumo — ${relatorio.tipo}',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${relatorio.dataInicio} até ${relatorio.dataFim}',
+            style: const TextStyle(
+              fontSize: 13,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 16),
+          _LinhaResumo(rotulo: 'Agendamentos', valor: '${relatorio.quantidade}'),
+          _LinhaResumo(rotulo: 'Cancelados', valor: '${relatorio.cancelados}'),
+          _LinhaResumo(rotulo: 'Faturamento', valor: 'R\$ $valor'),
+          const SizedBox(height: 8),
+          Text(
+            'Salvo no histórico • ${relatorio.formato} • ${relatorio.destino}',
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LinhaResumo extends StatelessWidget {
+  const _LinhaResumo({required this.rotulo, required this.valor});
+
+  final String rotulo;
+  final String valor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            rotulo,
+            style: const TextStyle(fontSize: 15, color: AppColors.textSecondary),
+          ),
+          Text(
+            valor,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
       ),
     );
   }
