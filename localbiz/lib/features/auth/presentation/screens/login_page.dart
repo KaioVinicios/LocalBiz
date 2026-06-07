@@ -5,9 +5,20 @@ import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
 import 'package:localbiz/core/ui/app_help_action_button.dart';
 import 'package:localbiz/core/ui/app_outlined_text_field.dart';
+import 'package:localbiz/features/services/presentation/screens/auth/auth_service.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final _emailController = TextEditingController();
+  final _senhaController = TextEditingController();
+  final _authService = AuthService();
+  bool _carregando = false;
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +111,7 @@ class LoginPage extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
 
               // EMAIL FIELD
-              const AppOutlinedTextField(),
+              AppOutlinedTextField(controller: _emailController),
 
               const SizedBox(height: AppSpacing.sm),
 
@@ -113,7 +124,10 @@ class LoginPage extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
 
               // PASSWORD FIELD
-              const AppOutlinedTextField(obscureText: true),
+              AppOutlinedTextField(
+                controller: _senhaController,
+                obscureText: true,
+              ),
 
               const SizedBox(height: AppSpacing.sm),
 
@@ -146,12 +160,48 @@ class LoginPage extends StatelessWidget {
                 height: AppSizes.primaryButtonHeight,
 
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                      AppRoute.dashboard.path,
-                      (route) => false,
-                    );
-                  },
+                  onPressed: _carregando
+                      ? null
+                      : () async {
+                          final navigator = Navigator.of(context);
+                          final scaffoldMessenger = ScaffoldMessenger.of(
+                            context,
+                          );
+
+                          setState(() => _carregando = true);
+                          try {
+                            await _authService.loginComEmail(
+                              _emailController.text.trim(),
+                              _senhaController.text.trim(),
+                            );
+
+                            if (!mounted) return;
+                            navigator.pushNamedAndRemoveUntil(
+                              AppRoute.dashboard.path,
+                              (route) => false,
+                            );
+                          } catch (e) {
+                            if(!mounted) return;
+
+                            String messageError = "Ocorreu um erro inesperado, tente novamente mais tarde.";
+                            String erroString = e.toString();
+                            
+                            if(erroString.contains("invalid-credential")) {
+                              messageError = "E-mail ou senha inválidos";
+                            }
+
+                            scaffoldMessenger.showSnackBar(
+                              SnackBar(
+                                content: Text(messageError),
+                                backgroundColor: Colors.redAccent,
+                              ),
+                            );
+                          } finally {
+                            if (mounted) {
+                              setState(() => _carregando = false);
+                            }
+                          }
+                        },
 
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
@@ -235,7 +285,64 @@ class LoginPage extends StatelessWidget {
                 height: AppRadii.pill,
 
                 child: OutlinedButton(
-                  onPressed: () {},
+                  onPressed: _carregando
+                      ? null
+                      : () async {
+                          final navigator = Navigator.of(context);
+                          final scaffoldMessenger = ScaffoldMessenger.of(
+                            context,
+                          );
+
+                          setState(() => _carregando = true);
+                          try {
+                            await _authService.loginComGoogle();
+
+                            if (!mounted) return;
+
+                            navigator.pushNamedAndRemoveUntil(
+                              AppRoute.dashboard.path,
+                              (route) => false,
+                            );
+                          } catch (e) {
+                            if (!mounted) return;
+
+                            String messageError = "Ocorreu um erro inesperado.";
+                            String erroString = e.toString();
+
+                            if (erroString.contains("user-not-found")) {
+                              messageError =
+                                  "Nenhum usuário encontrado com este e-mail.";
+                            } else if (erroString.contains("wrong-password")) {
+                              messageError =
+                                  "Senha incorreta. Tente novamente.";
+                            } else if (erroString.contains("invalid-email")) {
+                              messageError =
+                                  "O formato do e-mail digitado é inválido.";
+                            } else if (erroString.contains(
+                              "email-already-in-use",
+                            )) {
+                              messageError =
+                                  "Este e-mail já está cadastrado em outra conta.";
+                            } else if (erroString.contains("Acesso negado")) {
+                              // Captura a nossa regra de domínio do @souunit.com.br
+                              messageError = erroString.replaceAll(
+                                "Exception: ",
+                                "",
+                              );
+                            }
+
+                            scaffoldMessenger.showSnackBar(
+                              SnackBar(
+                                content: Text(messageError),
+                                backgroundColor: Colors.redAccent,
+                              ),
+                            );
+                          } finally {
+                            if (mounted) {
+                              setState(() => _carregando = false);
+                            }
+                          }
+                        },
 
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: AppColors.divider),

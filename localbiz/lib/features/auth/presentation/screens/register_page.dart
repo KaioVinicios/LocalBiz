@@ -5,6 +5,7 @@ import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
 import 'package:localbiz/core/ui/app_help_action_button.dart';
 import 'package:localbiz/core/ui/app_outlined_text_field.dart';
+import 'package:localbiz/features/services/presentation/screens/auth/auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -15,6 +16,25 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   bool _acceptedTerms = false;
+  bool _carregando = false;
+
+  final _nomeController = TextEditingController();
+  final _negocioController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _telefoneController = TextEditingController();
+  final _senhaController = TextEditingController();
+
+  final _authService = AuthService();
+
+  @override
+  void dispose() {
+    _nomeController.dispose();
+    _negocioController.dispose();
+    _emailController.dispose();
+    _telefoneController.dispose();
+    _senhaController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +139,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 style: AppTextStyles.fieldLabel.copyWith(fontSize: 14),
               ),
               const SizedBox(height: AppSpacing.xs),
-              const AppOutlinedTextField(
+              AppOutlinedTextField(
+                controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: AppSpacing.sm),
@@ -135,7 +156,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 style: AppTextStyles.fieldLabel.copyWith(fontSize: 14),
               ),
               const SizedBox(height: AppSpacing.xs),
-              const AppOutlinedTextField(obscureText: true),
+              AppOutlinedTextField(
+                controller: _senhaController,
+                obscureText: true,
+              ),
               const SizedBox(height: AppSpacing.md),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,12 +228,57 @@ class _RegisterPageState extends State<RegisterPage> {
                 width: double.infinity,
                 height: AppSizes.primaryButtonHeight,
                 child: ElevatedButton(
-                  onPressed: _acceptedTerms
-                      ? () {
-                          Navigator.of(context).pushNamedAndRemoveUntil(
-                            AppRoute.dashboard.path,
-                            (route) => false,
+                  onPressed: (_acceptedTerms && !_carregando)
+                      ? () async {
+                          final navigator = Navigator.of(context);
+                          final scaffoldMessenger = ScaffoldMessenger.of(
+                            context,
                           );
+
+                          setState(() => _carregando = true);
+                          try {
+                            // Executa a regra de negócio do domínio instituída no AuthService
+                            await _authService.cadastrarComEmail(
+                              email: _emailController.text.trim(),
+                              password: _senhaController.text.trim(),
+                              nomeCompleto: _nomeController.text.trim(),
+                              nomeNegocio: _negocioController.text.trim(),
+                              telefone: _telefoneController.text.trim(),
+                            );
+
+                            if (!mounted) return;
+                            navigator.pushNamedAndRemoveUntil(
+                              AppRoute.dashboard.path,
+                              (route) => false,
+                            );
+                          } catch (e) {
+                            if (!mounted) return;
+                            String messageError = "Ocorreu um erro inesperado.";
+                            String erroString = e.toString();
+                            
+                            if (erroString.contains("invalid-email")) {
+                              messageError = "O formato do e-mail digitado é inválido.";
+                            } else if (erroString.contains("email-already-in-use")) {
+                              messageError = "Este e-mail já está cadastrado em outra conta.";
+                            } else if (erroString.contains("Acesso negado")) {
+                              // Captura a nossa regra de domínio do @souunit.com.br
+                              messageError = erroString.replaceAll("Exception: ", "");
+                            } else if (erroString.contains("Apenas e-mails @souunit.com.br são permitidos.")) {
+                              messageError = erroString.replaceAll("Exception: ", "");
+                            }
+
+
+                            scaffoldMessenger.showSnackBar(
+                              SnackBar(
+                                content: Text(messageError),
+                                backgroundColor: Colors.redAccent,
+                              ),
+                            );
+                          } finally {
+                            if (mounted) {
+                              setState(() => _carregando = false);
+                            }
+                          }
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
