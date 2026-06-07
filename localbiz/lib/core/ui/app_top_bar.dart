@@ -8,12 +8,14 @@ class AppTopBar extends StatelessWidget {
     this.backLabel = 'VOLTAR',
     this.onBack,
     this.showHelp = true,
+    this.onHelp,
     this.padding = const EdgeInsets.fromLTRB(16, 12, 16, 4),
   });
 
   final String backLabel;
   final VoidCallback? onBack;
   final bool showHelp;
+  final VoidCallback? onHelp;
   final EdgeInsetsGeometry padding;
 
   @override
@@ -46,7 +48,7 @@ class AppTopBar extends StatelessWidget {
               ),
             ),
           ),
-          if (showHelp) const AppHelpActionButton(),
+          if (showHelp) AppHelpActionButton(onPressed: onHelp),
         ],
       ),
     );

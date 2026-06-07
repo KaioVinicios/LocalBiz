@@ -59,6 +59,7 @@ const List<ConfigSection> mockConfigSections = [
         icon: Icons.help_outline,
         title: 'Ajuda e Suporte',
         subtitle: 'Fale conosco e perguntas frequentes',
+        route: AppRoute.ajuda,
       ),
     ],
   ),
