@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show TextInputFormatter;
 
 import 'package:localbiz/core/theme/app_colors.dart';
 
@@ -24,17 +25,24 @@ const TextStyle kFieldHintStyle = TextStyle(
   color: AppColors.textSecondary,
 );
 
-OutlineInputBorder fieldBorderShape({bool focused = false}) {
+OutlineInputBorder fieldBorderShape({
+  bool focused = false,
+  bool error = false,
+}) {
+  final Color color = error
+      ? AppColors.danger
+      : (focused ? AppColors.blue : kFieldBorder);
   return OutlineInputBorder(
     borderRadius: BorderRadius.circular(kFieldRadius),
-    borderSide: BorderSide(
-      color: focused ? AppColors.blue : kFieldBorder,
-      width: focused ? 1.4 : 1,
-    ),
+    borderSide: BorderSide(color: color, width: (focused || error) ? 1.4 : 1),
   );
 }
 
-InputDecoration _baseDecoration({String? hint, Widget? suffixIcon}) {
+InputDecoration _baseDecoration({
+  String? hint,
+  Widget? suffixIcon,
+  bool hasError = false,
+}) {
   return InputDecoration(
     filled: true,
     fillColor: Colors.white,
@@ -46,17 +54,22 @@ InputDecoration _baseDecoration({String? hint, Widget? suffixIcon}) {
     suffixIconConstraints: suffixIcon == null
         ? null
         : const BoxConstraints(minWidth: 44, minHeight: kFieldHeight),
-    border: fieldBorderShape(),
-    enabledBorder: fieldBorderShape(),
-    focusedBorder: fieldBorderShape(focused: true),
+    border: fieldBorderShape(error: hasError),
+    enabledBorder: fieldBorderShape(error: hasError),
+    focusedBorder: fieldBorderShape(focused: true, error: hasError),
   );
 }
 
 class _LabelWrap extends StatelessWidget {
-  const _LabelWrap({required this.label, required this.child});
+  const _LabelWrap({
+    required this.label,
+    required this.child,
+    this.errorText,
+  });
 
   final String label;
   final Widget child;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +79,17 @@ class _LabelWrap extends StatelessWidget {
         Text(label, style: kFieldLabelStyle),
         const SizedBox(height: 8),
         SizedBox(height: kFieldHeight, child: child),
+        if (errorText != null) ...[
+          const SizedBox(height: 6),
+          Text(
+            errorText!,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: AppColors.danger,
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -78,23 +102,32 @@ class LabeledTextField extends StatelessWidget {
     required this.hint,
     required this.controller,
     this.keyboardType,
+    this.inputFormatters,
+    this.errorText,
+    this.onChanged,
   });
 
   final String label;
   final String hint;
   final TextEditingController controller;
   final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? errorText;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
     return _LabelWrap(
       label: label,
+      errorText: errorText,
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
+        onChanged: onChanged,
         style: kFieldTextStyle,
         textAlignVertical: TextAlignVertical.center,
-        decoration: _baseDecoration(hint: hint),
+        decoration: _baseDecoration(hint: hint, hasError: errorText != null),
       ),
     );
   }
