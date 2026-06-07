@@ -6,6 +6,9 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  // Usuário autenticado no momento (null se ninguém estiver logado)
+  User? get usuarioAtual => _auth.currentUser;
+
 
   // Validação obrigatória do domínio institucional
   bool _validarDominio(User? user) {
@@ -46,8 +49,16 @@ class AuthService {
         'email': email,
         'criado_em': FieldValue.serverTimestamp(),
         // Atende ao requisito de amarração dinâmica de dados exigido na disciplina:
-        'usuario_logado': email, 
+        'usuario_logado': email,
       });
+
+      // 3. Cria o perfil do negócio (negocios/{uid}), que é a fonte usada
+      //    pela tela de Perfil do Negócio e pelo header da Configuração.
+      await _db.collection('negocios').doc(user.uid).set({
+        'nome': nomeNegocio,
+        'whatsapp': telefone,
+        'criadoEm': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
     }
 
     return user;
