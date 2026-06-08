@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
@@ -9,28 +10,15 @@ import 'package:localbiz/core/ui/app_product_card.dart';
 import 'package:localbiz/core/ui/app_floating_add_button.dart';
 import 'package:localbiz/core/ui/app_cart_menu.dart';
 import 'package:localbiz/core/ui/app_top_bar.dart';
-
-class Produto {
-  Produto({required this.nome, required this.preco, required this.emEstoque});
-
-  final String nome;
-  final double preco;
-  final bool emEstoque;
-}
+import 'package:localbiz/features/vendas/models/venda_produto_model.dart';
+import 'package:localbiz/features/vendas/repositories/venda_repository.dart';
 
 class ItemCarrinho {
   ItemCarrinho({required this.produto, this.quantidade = 1});
 
-  final Produto produto;
+  final VendaProdutoModel produto;
   int quantidade;
 }
-
-final _mockProdutos = <Produto>[
-  Produto(nome: 'Shampoo Argan', preco: 45.90, emEstoque: true),
-  Produto(nome: 'Condicionador Nutri', preco: 49.90, emEstoque: true),
-  Produto(nome: 'Mascara Reconstrutora', preco: 89.90, emEstoque: true),
-  Produto(nome: 'Óleo Capilar 60ml', preco: 34.90, emEstoque: false),
-];
 
 class VendaPage extends StatefulWidget {
   const VendaPage({super.key});
@@ -42,8 +30,13 @@ class VendaPage extends StatefulWidget {
 class _VendaPageState extends State<VendaPage> {
   final _buscaController = TextEditingController();
   final _carrinho = <ItemCarrinho>[];
+  final _repository = VendaRepository();
+
+  final String _negocioId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
   bool _carrinhoAberto = false;
   bool _vendaFinalizada = false;
+  bool _salvando = false;
   String _busca = '';
 
   @override
@@ -52,22 +45,19 @@ class _VendaPageState extends State<VendaPage> {
     super.dispose();
   }
 
-  List<Produto> get _produtosFiltrados {
-    if (_busca.isEmpty) return _mockProdutos;
+  List<VendaProdutoModel> _filtrar(List<VendaProdutoModel> produtos) {
+    if (_busca.isEmpty) return produtos;
     final busca = _busca.toLowerCase();
-    return _mockProdutos
-        .where((b) => b.nome.toLowerCase().contains(busca))
-        .toList();
+    return produtos.where((p) => p.nome.toLowerCase().contains(busca)).toList();
   }
 
   double get _totalCarrinho =>
       _carrinho.fold(0, (acc, i) => acc + i.produto.preco * i.quantidade);
 
-  void _adicionarAoCarrinho(Produto produto) {
+  void _adicionarAoCarrinho(VendaProdutoModel produto) {
     setState(() {
-      final existente = _carrinho
-          .where((i) => i.produto == produto)
-          .firstOrNull;
+      final existente =
+          _carrinho.where((i) => i.produto.id == produto.id).firstOrNull;
       if (existente != null) {
         existente.quantidade++;
       } else {
@@ -83,11 +73,39 @@ class _VendaPageState extends State<VendaPage> {
     });
   }
 
-  void _finalizarVenda() {
-    setState(() {
-      _carrinhoAberto = false;
-      _vendaFinalizada = true;
-    });
+  Future<void> _finalizarVenda() async {
+    setState(() => _salvando = true);
+
+    try {
+      final itens = _carrinho
+          .map((i) => {
+                'produtoId': i.produto.id,
+                'nome': i.produto.nome,
+                'preco': i.produto.preco,
+                'quantidade': i.quantidade,
+              })
+          .toList();
+
+      await _repository.finalizarVenda(
+        negocioId: _negocioId,
+        itens: itens,
+        total: _totalCarrinho,
+      );
+
+      setState(() {
+        _carrinhoAberto = false;
+        _vendaFinalizada = true;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Erro ao finalizar venda. Tente novamente.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _salvando = false);
+    }
   }
 
   void _voltarAoInicio() {
@@ -115,9 +133,8 @@ class _VendaPageState extends State<VendaPage> {
               child: Column(
                 children: [
                   AppTopBar(
-                    onBack: () => Navigator.of(
-                      context,
-                    ).pushReplacementNamed(AppRoute.dashboard.path),
+                    onBack: () => Navigator.of(context)
+                        .pushReplacementNamed(AppRoute.dashboard.path),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -145,9 +162,28 @@ class _VendaPageState extends State<VendaPage> {
                   ),
                   const SizedBox(height: 24),
                   Expanded(
-                    child: _ProdutosGrid(
-                      produtos: _produtosFiltrados,
-                      onAdicionar: _adicionarAoCarrinho,
+                    child: StreamBuilder<List<VendaProdutoModel>>(
+                      stream: _repository.listarProdutos(_negocioId),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        if (snapshot.hasError) {
+                          return const Center(
+                              child: Text('Erro ao carregar produtos.'));
+                        }
+                        final produtos = _filtrar(snapshot.data ?? []);
+                        if (produtos.isEmpty) {
+                          return const Center(
+                              child: Text('Nenhum produto encontrado.'));
+                        }
+                        return _ProdutosGrid(
+                          produtos: produtos,
+                          onAdicionar: _adicionarAoCarrinho,
+                        );
+                      },
                     ),
                   ),
                   const SizedBox(height: 80),
@@ -160,10 +196,8 @@ class _VendaPageState extends State<VendaPage> {
                 bottom: 24,
                 child: SafeArea(
                   child: AppFloatingAddButton(
-                    badgeCount: _carrinho.fold(
-                      0,
-                      (acc, i) => acc + i.quantidade,
-                    ),
+                    badgeCount:
+                        _carrinho.fold(0, (acc, i) => acc + i.quantidade),
                     tooltip: 'Abrir carrinho',
                     onPressed: () => setState(() => _carrinhoAberto = true),
                   ),
@@ -172,18 +206,16 @@ class _VendaPageState extends State<VendaPage> {
             if (_carrinhoAberto)
               AppCartMenu(
                 itens: _carrinho
-                    .map(
-                      (i) => CarrinhoItemData(
-                        nome: i.produto.nome,
-                        preco: i.produto.preco,
-                        quantidade: i.quantidade,
-                      ),
-                    )
+                    .map((i) => CarrinhoItemData(
+                          nome: i.produto.nome,
+                          preco: i.produto.preco,
+                          quantidade: i.quantidade,
+                        ))
                     .toList(),
                 onFechar: () => setState(() => _carrinhoAberto = false),
                 onIncrement: (i) => _alterarQuantidade(_carrinho[i], 1),
                 onDecrement: (i) => _alterarQuantidade(_carrinho[i], -1),
-                onCobrar: _finalizarVenda,
+                onCobrar: _salvando ? () {} : _finalizarVenda,
               ),
             if (_vendaFinalizada)
               AppSaleCompletedOverlay(
@@ -200,8 +232,8 @@ class _VendaPageState extends State<VendaPage> {
 class _ProdutosGrid extends StatelessWidget {
   const _ProdutosGrid({required this.produtos, required this.onAdicionar});
 
-  final List<Produto> produtos;
-  final ValueChanged<Produto> onAdicionar;
+  final List<VendaProdutoModel> produtos;
+  final ValueChanged<VendaProdutoModel> onAdicionar;
 
   @override
   Widget build(BuildContext context) {
@@ -218,7 +250,7 @@ class _ProdutosGrid extends StatelessWidget {
         final p = produtos[i];
         return ProdutoCard(
           nome: p.nome,
-          estoque: 1,
+          estoque: p.estoqueAtual,
           preco: p.preco,
           emEstoque: p.emEstoque,
           onAdicionar: () => onAdicionar(p),
