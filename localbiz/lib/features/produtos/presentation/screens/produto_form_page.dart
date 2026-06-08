@@ -27,6 +27,7 @@ class ProdutoFormPage extends StatelessWidget {
     required this.onConcluir,
     this.imagemAsset,
     this.imagemBytes,
+    this.imagemUrl,
     this.showEstoqueField = true,
   });
 
@@ -46,6 +47,7 @@ class ProdutoFormPage extends StatelessWidget {
   final VoidCallback onConcluir;
   final String? imagemAsset;
   final Uint8List? imagemBytes;
+  final String? imagemUrl;
   final bool showEstoqueField;
 
   @override
@@ -81,6 +83,7 @@ class ProdutoFormPage extends StatelessWidget {
                 _ProdutoPhotoField(
                   imagemAsset: imagemAsset,
                   imagemBytes: imagemBytes,
+                  imagemUrl: imagemUrl,
                   onTap: onSelecionarFoto,
                 ),
                 const SizedBox(height: 28),
@@ -138,16 +141,20 @@ class _ProdutoPhotoField extends StatelessWidget {
     required this.imagemAsset,
     required this.imagemBytes,
     required this.onTap,
+    this.imagemUrl,
   });
 
   final String? imagemAsset;
   final Uint8List? imagemBytes;
+  final String? imagemUrl;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final hasImage =
-        imagemBytes != null || (imagemAsset != null && imagemAsset!.isNotEmpty);
+        imagemBytes != null ||
+        (imagemUrl != null && imagemUrl!.isNotEmpty) ||
+        (imagemAsset != null && imagemAsset!.isNotEmpty);
 
     return Tooltip(
       message: 'Adicionar foto do produto',
@@ -166,6 +173,7 @@ class _ProdutoPhotoField extends StatelessWidget {
                     child: ProdutoImage(
                       assetPath: imagemAsset,
                       memoryBytes: imagemBytes,
+                      networkUrl: imagemUrl,
                       width: 148,
                       height: 190,
                     ),

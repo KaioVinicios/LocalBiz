@@ -98,6 +98,7 @@ class ProdutoEstoquePage extends StatelessWidget {
                   child: ProdutoImage(
                     assetPath: produto.imagemAsset,
                     memoryBytes: produto.imagemBytes,
+                    networkUrl: produto.imagemUrl,
                     width: 148,
                     height: 190,
                   ),
