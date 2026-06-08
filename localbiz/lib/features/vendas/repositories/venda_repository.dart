@@ -5,11 +5,12 @@ class VendaRepository {
   final _db = FirebaseFirestore.instance;
 
 
+  CollectionReference<Map<String, dynamic>> _produtos(String negocioId) =>
+      _db.collection('negocios').doc(negocioId).collection('produtos');
+
   Stream<List<VendaProdutoModel>> listarProdutos(String negocioId) {
-    return _db
-        .collection('produtos')
-        .where('negocioId', isEqualTo: negocioId)
-        .where('ativo', isEqualTo: true)
+    return _produtos(negocioId)
+        .orderBy('nome')
         .snapshots()
         .map((snap) =>
             snap.docs.map(VendaProdutoModel.fromFirestore).toList());
@@ -19,24 +20,26 @@ class VendaRepository {
   Future<void> finalizarVenda({
     required String negocioId,
     required List<Map<String, dynamic>> itens,
-    required double total,
+    required int totalCentavos,
   }) async {
     final batch = _db.batch();
 
+    final negocioRef = _db.collection('negocios').doc(negocioId);
 
-    final vendaRef = _db.collection('vendas').doc();
+    final vendaRef = negocioRef.collection('vendas').doc();
     batch.set(vendaRef, {
       'negocioId': negocioId,
       'itens': itens,
-      'total': total,
+      'totalCentavos': totalCentavos,
       'criadoEm': FieldValue.serverTimestamp(),
     });
 
 
     for (final item in itens) {
-      final produtoRef = _db.collection('produtos').doc(item['produtoId']);
+      final produtoRef =
+          negocioRef.collection('produtos').doc(item['produtoId'] as String);
       batch.update(produtoRef, {
-        'estoqueAtual': FieldValue.increment(-item['quantidade']),
+        'estoqueAtual': FieldValue.increment(-(item['quantidade'] as int)),
       });
     }
 

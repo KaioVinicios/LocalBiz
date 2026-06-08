@@ -5,6 +5,7 @@ import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
 import 'package:localbiz/core/ui/app_floating_add_button.dart';
 import 'package:localbiz/core/ui/app_help_action_button.dart';
+import 'package:localbiz/core/utils/money.dart';
 import 'package:localbiz/features/produtos/data/repositories/produto_repository.dart';
 import 'package:localbiz/features/produtos/domain/entities/produto_model.dart';
 import 'package:localbiz/features/produtos/presentation/screens/produto_estoque_page.dart';
@@ -54,7 +55,39 @@ class _ProdutosPageState extends State<ProdutosPage> {
   Produto? _produtoSelecionado;
 
   @override
+  void initState() {
+    super.initState();
+    precoController.addListener(_formatarPreco);
+  }
+
+  /// Mantém o campo de preço sempre no padrão `0,00`, aceitando apenas dígitos.
+  ///
+  /// Cada número digitado entra pela direita como centavos (estilo caixa
+  /// eletrônico): `1` -> `0,01`, `12` -> `0,12`, `1250` -> `12,50`.
+  void _formatarPreco() {
+    final texto = precoController.text;
+    if (texto.isEmpty) {
+      return;
+    }
+
+    var digitos = texto.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitos.length > 15) {
+      digitos = digitos.substring(0, 15);
+    }
+    final formatado = formatCentavos(digitos.isEmpty ? 0 : int.parse(digitos));
+    if (formatado == texto) {
+      return;
+    }
+
+    precoController.value = TextEditingValue(
+      text: formatado,
+      selection: TextSelection.collapsed(offset: formatado.length),
+    );
+  }
+
+  @override
   void dispose() {
+    precoController.removeListener(_formatarPreco);
     buscaController.dispose();
     nomeController.dispose();
     precoController.dispose();
@@ -94,7 +127,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
     setState(() {
       _produtoSelecionado = produto;
       nomeController.text = produto.nome;
-      precoController.text = produto.preco;
+      precoController.text = formatCentavos(produto.precoCentavos);
       codigoController.text = produto.codigoBarras;
       _imagemSelecionadaBytes = produto.imagemBytes;
       _categoriaSelecionada = produto.categoria;
@@ -141,7 +174,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
     }
 
     final nome = nomeController.text.trim();
-    final preco = precoController.text.trim();
+    final precoCentavos = centavosFromInput(precoController.text);
     final codigo = codigoController.text.trim();
 
     if (nome.isEmpty) {
@@ -166,7 +199,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
           Produto(
             categoria: categoria,
             nome: nome,
-            preco: preco.isEmpty ? 'R\$ 0,00' : preco,
+            precoCentavos: precoCentavos,
             codigoBarras: codigo,
             estoqueAtual: 0,
             estoqueLocal: estoqueLocal,
@@ -180,7 +213,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
             id: selecionado.id,
             categoria: categoria,
             nome: nome,
-            preco: preco.isEmpty ? selecionado.preco : preco,
+            precoCentavos: precoCentavos,
             codigoBarras: codigo,
             estoqueAtual: selecionado.estoqueAtual,
             estoqueLocal: selecionado.estoqueLocal,
