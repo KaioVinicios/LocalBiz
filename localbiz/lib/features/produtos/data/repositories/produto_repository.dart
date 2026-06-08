@@ -57,7 +57,7 @@ class ProdutoRepository {
     await _colecao(uid).doc(id).update({
       'categoria': produto.categoria,
       'nome': produto.nome,
-      'preco': produto.preco,
+      'precoCentavos': produto.precoCentavos,
       'codigoBarras': produto.codigoBarras,
       'estoqueLocal': produto.estoqueLocal,
       'imagemUrl': produto.imagemUrl,

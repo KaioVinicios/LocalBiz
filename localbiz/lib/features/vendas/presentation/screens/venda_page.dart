@@ -51,8 +51,10 @@ class _VendaPageState extends State<VendaPage> {
     return produtos.where((p) => p.nome.toLowerCase().contains(busca)).toList();
   }
 
-  double get _totalCarrinho =>
-      _carrinho.fold(0, (acc, i) => acc + i.produto.preco * i.quantidade);
+  int get _totalCentavos => _carrinho.fold(
+      0, (acc, i) => acc + i.produto.precoCentavos * i.quantidade);
+
+  double get _totalReais => _totalCentavos / 100;
 
   void _adicionarAoCarrinho(VendaProdutoModel produto) {
     setState(() {
@@ -81,7 +83,7 @@ class _VendaPageState extends State<VendaPage> {
           .map((i) => {
                 'produtoId': i.produto.id,
                 'nome': i.produto.nome,
-                'preco': i.produto.preco,
+                'precoCentavos': i.produto.precoCentavos,
                 'quantidade': i.quantidade,
               })
           .toList();
@@ -89,7 +91,7 @@ class _VendaPageState extends State<VendaPage> {
       await _repository.finalizarVenda(
         negocioId: _negocioId,
         itens: itens,
-        total: _totalCarrinho,
+        totalCentavos: _totalCentavos,
       );
 
       setState(() {
@@ -208,7 +210,7 @@ class _VendaPageState extends State<VendaPage> {
                 itens: _carrinho
                     .map((i) => CarrinhoItemData(
                           nome: i.produto.nome,
-                          preco: i.produto.preco,
+                          preco: i.produto.precoReais,
                           quantidade: i.quantidade,
                         ))
                     .toList(),
@@ -219,7 +221,7 @@ class _VendaPageState extends State<VendaPage> {
               ),
             if (_vendaFinalizada)
               AppSaleCompletedOverlay(
-                total: _totalCarrinho,
+                total: _totalReais,
                 onVoltar: _voltarAoInicio,
               ),
           ],
@@ -251,7 +253,7 @@ class _ProdutosGrid extends StatelessWidget {
         return ProdutoCard(
           nome: p.nome,
           estoque: p.estoqueAtual,
-          preco: p.preco,
+          preco: p.precoReais,
           emEstoque: p.emEstoque,
           onAdicionar: () => onAdicionar(p),
         );

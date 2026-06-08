@@ -7,7 +7,7 @@ class Produto {
     this.id,
     required this.categoria,
     required this.nome,
-    required this.preco,
+    required this.precoCentavos,
     required this.codigoBarras,
     required this.estoqueAtual,
     required this.estoqueLocal,
@@ -19,7 +19,7 @@ class Produto {
   String? id;
   String categoria;
   String nome;
-  String preco;
+  int precoCentavos;
   String codigoBarras;
   int estoqueAtual;
   String estoqueLocal;
@@ -33,7 +33,7 @@ class Produto {
       id: doc.id,
       categoria: data['categoria'] as String? ?? 'Sem categoria',
       nome: data['nome'] as String? ?? '',
-      preco: data['preco'] as String? ?? 'R\$ 0,00',
+      precoCentavos: (data['precoCentavos'] as num?)?.toInt() ?? 0,
       codigoBarras: data['codigoBarras'] as String? ?? '',
       estoqueAtual: (data['estoqueAtual'] as num?)?.toInt() ?? 0,
       estoqueLocal: data['estoqueLocal'] as String? ?? 'Estoque A',
@@ -44,7 +44,7 @@ class Produto {
   Map<String, dynamic> toMap() => {
     'categoria': categoria,
     'nome': nome,
-    'preco': preco,
+    'precoCentavos': precoCentavos,
     'codigoBarras': codigoBarras,
     'estoqueAtual': estoqueAtual,
     'estoqueLocal': estoqueLocal,

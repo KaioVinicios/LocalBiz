@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
+import 'package:localbiz/core/utils/money.dart';
 import 'package:localbiz/features/produtos/domain/entities/produto_model.dart';
 import 'package:localbiz/features/produtos/presentation/widgets/produto_image.dart';
 
@@ -72,7 +73,7 @@ class ProdutoListItem extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  produto.preco,
+                                  'R\$ ${formatCentavos(produto.precoCentavos)}',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
