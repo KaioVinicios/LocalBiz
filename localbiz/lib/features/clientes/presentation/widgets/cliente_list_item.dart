@@ -14,7 +14,7 @@ class ClienteListItem extends StatelessWidget {
     var inicial = cliente.nome.isEmpty ? '?' : cliente.nome[0].toUpperCase();
 
     return _ClienteCard(
-      key: ValueKey('cliente-card-${cliente.nome}'),
+      key: ValueKey('cliente-card-${cliente.id ?? cliente.nome}'),
       nome: cliente.nome,
       telefone: cliente.telefone,
       inicial: inicial,
