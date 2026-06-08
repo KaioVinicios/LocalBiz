@@ -3,4 +3,3 @@ firebase.json
 lib/features/services/models/
 lib/features/services/repositories/
 lib/firebase_options.dart
-macos/
