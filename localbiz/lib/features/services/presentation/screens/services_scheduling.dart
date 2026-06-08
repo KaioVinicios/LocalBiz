@@ -59,7 +59,7 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
   @override
   void initState() {
     super.initState();
-    _categoriaSelecionada = _categorias.first;
+    _categoriaSelecionada = _categorias.first; 
   }
 
   void _mesAnterior() => setState(() {
