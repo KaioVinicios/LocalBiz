@@ -49,6 +49,7 @@ class ProdutoListItem extends StatelessWidget {
                           ProdutoImage(
                             assetPath: produto.imagemAsset,
                             memoryBytes: produto.imagemBytes,
+                            networkUrl: produto.imagemUrl,
                             width: 72,
                             height: 72,
                             borderRadius: 0,

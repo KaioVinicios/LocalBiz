@@ -9,6 +9,7 @@ class ProdutoImage extends StatelessWidget {
     super.key,
     this.assetPath,
     this.memoryBytes,
+    this.networkUrl,
     required this.width,
     required this.height,
     this.fit = BoxFit.contain,
@@ -17,6 +18,7 @@ class ProdutoImage extends StatelessWidget {
 
   final String? assetPath;
   final Uint8List? memoryBytes;
+  final String? networkUrl;
   final double width;
   final double height;
   final BoxFit fit;
@@ -31,6 +33,26 @@ class ProdutoImage extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         child: Image.memory(
           bytes,
+          width: width,
+          height: height,
+          fit: fit,
+          errorBuilder: (context, error, stackTrace) {
+            return ProdutoImagePlaceholder(
+              width: width,
+              height: height,
+              borderRadius: borderRadius,
+            );
+          },
+        ),
+      );
+    }
+
+    final url = networkUrl;
+    if (url != null && url.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Image.network(
+          url,
           width: width,
           height: height,
           fit: fit,

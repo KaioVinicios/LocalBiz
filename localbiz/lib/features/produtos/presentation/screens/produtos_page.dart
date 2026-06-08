@@ -5,14 +5,15 @@ import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
 import 'package:localbiz/core/ui/app_floating_add_button.dart';
 import 'package:localbiz/core/ui/app_help_action_button.dart';
+import 'package:localbiz/features/produtos/data/repositories/produto_repository.dart';
 import 'package:localbiz/features/produtos/domain/entities/produto_model.dart';
 import 'package:localbiz/features/produtos/presentation/screens/produto_estoque_page.dart';
 import 'package:localbiz/features/produtos/presentation/screens/produto_form_page.dart';
 import 'package:localbiz/features/produtos/presentation/widgets/produto_list_item.dart';
 import 'package:localbiz/features/produtos/presentation/widgets/produto_photo_picker.dart';
+import 'package:localbiz/features/services/presentation/screens/auth/auth_service.dart';
 
 const _buscaAltura = 56.0;
-const _finiAsset = 'assets/products/fini-salada-frutas.jpg';
 const _searchIcon = 'assets/icons/search.png';
 
 enum _ProdutosView { lista, cadastro, edicao, estoque }
@@ -25,6 +26,10 @@ class ProdutosPage extends StatefulWidget {
 }
 
 class _ProdutosPageState extends State<ProdutosPage> {
+  final _authService = AuthService();
+  final _produtoRepository = ProdutoRepository();
+  late final String? _uid = _authService.usuarioAtual?.uid;
+
   final buscaController = TextEditingController();
   final nomeController = TextEditingController();
   final precoController = TextEditingController();
@@ -44,20 +49,9 @@ class _ProdutosPageState extends State<ProdutosPage> {
   var _categoriaSelecionada = 'Selecione';
   var _estoqueSelecionado = 'Selecione';
   var _movimento = MovimentoEstoque.entrada;
+  bool _salvando = false;
   Uint8List? _imagemSelecionadaBytes;
   Produto? _produtoSelecionado;
-
-  final produtos = <Produto>[
-    Produto(
-      categoria: 'Doces',
-      nome: 'Fini Salada de Frutas',
-      preco: 'R\$ 7,99',
-      codigoBarras: '7898279794835',
-      estoqueAtual: 48,
-      estoqueLocal: 'Estoque A',
-      imagemAsset: _finiAsset,
-    ),
-  ];
 
   @override
   void dispose() {
@@ -69,8 +63,8 @@ class _ProdutosPageState extends State<ProdutosPage> {
     super.dispose();
   }
 
-  List<Produto> get produtosFiltrados {
-    var busca = buscaController.text.trim().toLowerCase();
+  List<Produto> _filtrar(List<Produto> produtos) {
+    final busca = buscaController.text.trim().toLowerCase();
 
     if (busca.isEmpty) {
       return produtos;
@@ -140,26 +134,35 @@ class _ProdutosPageState extends State<ProdutosPage> {
     });
   }
 
-  void _salvarProduto() {
-    var nome = nomeController.text.trim();
-    var preco = precoController.text.trim();
-    var codigo = codigoController.text.trim();
+  Future<void> _salvarProduto() async {
+    final uid = _uid;
+    if (uid == null || _salvando) {
+      return;
+    }
+
+    final nome = nomeController.text.trim();
+    final preco = precoController.text.trim();
+    final codigo = codigoController.text.trim();
 
     if (nome.isEmpty) {
       return;
     }
 
-    setState(() {
-      var categoria = _categoriaSelecionada == 'Selecione'
-          ? 'Sem categoria'
-          : _categoriaSelecionada;
-      var estoqueLocal = _estoqueSelecionado == 'Selecione'
-          ? 'Estoque A'
-          : _estoqueSelecionado;
-      var produto = _produtoSelecionado;
+    final categoria = _categoriaSelecionada == 'Selecione'
+        ? 'Sem categoria'
+        : _categoriaSelecionada;
+    final estoqueLocal = _estoqueSelecionado == 'Selecione'
+        ? 'Estoque A'
+        : _estoqueSelecionado;
+    final selecionado = _produtoSelecionado;
+    final imagemBytes = _imagemSelecionadaBytes;
 
-      if (produto == null) {
-        produtos.add(
+    setState(() => _salvando = true);
+
+    try {
+      if (selecionado == null) {
+        await _produtoRepository.criar(
+          uid,
           Produto(
             categoria: categoria,
             nome: nome,
@@ -167,55 +170,95 @@ class _ProdutosPageState extends State<ProdutosPage> {
             codigoBarras: codigo,
             estoqueAtual: 0,
             estoqueLocal: estoqueLocal,
-            imagemBytes: _imagemSelecionadaBytes,
           ),
+          imagemBytes: imagemBytes,
         );
       } else {
-        produto.categoria = categoria;
-        produto.nome = nome;
-        produto.preco = preco.isEmpty ? produto.preco : preco;
-        produto.codigoBarras = codigo;
-        produto.imagemBytes = _imagemSelecionadaBytes;
+        await _produtoRepository.atualizar(
+          uid,
+          Produto(
+            id: selecionado.id,
+            categoria: categoria,
+            nome: nome,
+            preco: preco.isEmpty ? selecionado.preco : preco,
+            codigoBarras: codigo,
+            estoqueAtual: selecionado.estoqueAtual,
+            estoqueLocal: selecionado.estoqueLocal,
+            imagemUrl: selecionado.imagemUrl,
+          ),
+          novaImagemBytes: imagemBytes,
+        );
       }
 
-      _view = _ProdutosView.lista;
-      _produtoSelecionado = null;
-      _imagemSelecionadaBytes = null;
-    });
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _view = _ProdutosView.lista;
+        _produtoSelecionado = null;
+        _imagemSelecionadaBytes = null;
+      });
+    } catch (_) {
+      if (mounted) {
+        _mostrarErro('Não foi possível salvar o produto. Tente novamente.');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _salvando = false);
+      }
+    }
   }
 
-  void _concluirMovimentoEstoque() {
-    var produto = _produtoSelecionado;
-    if (produto == null) {
+  Future<void> _concluirMovimentoEstoque() async {
+    final uid = _uid;
+    final produto = _produtoSelecionado;
+    if (uid == null || produto == null || produto.id == null) {
       _voltarParaLista();
       return;
     }
 
-    var quantidade = int.tryParse(quantidadeController.text.trim());
+    final quantidade = int.tryParse(quantidadeController.text.trim());
     if (quantidade == null || quantidade <= 0) {
       return;
     }
 
-    setState(() {
-      if (_movimento == MovimentoEstoque.entrada) {
-        produto.estoqueAtual += quantidade;
-      } else {
-        var novoEstoque = produto.estoqueAtual - quantidade;
-        produto.estoqueAtual = novoEstoque < 0 ? 0 : novoEstoque;
-      }
+    final delta = _movimento == MovimentoEstoque.entrada
+        ? quantidade
+        : -quantidade;
+    final novoLocal = _estoqueSelecionado != 'Selecione'
+        ? _estoqueSelecionado
+        : null;
 
-      if (_estoqueSelecionado != 'Selecione') {
-        produto.estoqueLocal = _estoqueSelecionado;
+    try {
+      await _produtoRepository.movimentarEstoque(
+        uid,
+        produto.id!,
+        delta: delta,
+        estoqueLocal: novoLocal,
+      );
+      if (!mounted) {
+        return;
       }
-
-      quantidadeController.clear();
-      _produtoSelecionado = null;
-      _view = _ProdutosView.lista;
-    });
+      setState(() {
+        quantidadeController.clear();
+        _produtoSelecionado = null;
+        _view = _ProdutosView.lista;
+      });
+    } catch (_) {
+      if (mounted) {
+        _mostrarErro('Não foi possível atualizar o estoque. Tente novamente.');
+      }
+    }
   }
 
   Future<void> _confirmarExclusao(Produto produto) async {
-    var excluir = await showDialog<bool>(
+    final uid = _uid;
+    final produtoId = produto.id;
+    if (uid == null || produtoId == null) {
+      return;
+    }
+
+    final excluir = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -239,9 +282,19 @@ class _ProdutosPageState extends State<ProdutosPage> {
       return;
     }
 
-    setState(() {
-      produtos.remove(produto);
-    });
+    try {
+      await _produtoRepository.excluir(uid, produtoId);
+    } catch (_) {
+      if (mounted) {
+        _mostrarErro('Não foi possível excluir o produto. Tente novamente.');
+      }
+    }
+  }
+
+  void _mostrarErro(String mensagem) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(mensagem)));
   }
 
   @override
@@ -252,15 +305,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
         child: SizedBox(
           width: double.infinity,
           child: switch (_view) {
-            _ProdutosView.lista => _ProdutosListView(
-              produtos: produtosFiltrados,
-              buscaController: buscaController,
-              onBuscaChanged: (_) => setState(() {}),
-              onAdicionar: _abrirCadastro,
-              onEditar: _abrirEdicao,
-              onEstoque: _abrirEstoque,
-              onExcluir: _confirmarExclusao,
-            ),
+            _ProdutosView.lista => _buildLista(),
             _ProdutosView.cadastro => ProdutoFormPage(
               title: 'Cadastro de Produto',
               description:
@@ -298,6 +343,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
               estoques: estoques,
               imagemAsset: _produtoSelecionado?.imagemAsset,
               imagemBytes: _imagemSelecionadaBytes,
+              imagemUrl: _produtoSelecionado?.imagemUrl,
               showEstoqueField: false,
               onSelecionarFoto: _selecionarFotoProduto,
               onCategoriaChanged: (value) {
@@ -331,6 +377,44 @@ class _ProdutosPageState extends State<ProdutosPage> {
       ),
     );
   }
+
+  Widget _buildLista() {
+    final uid = _uid;
+
+    if (uid == null) {
+      return _ProdutosListView(
+        produtos: const [],
+        mensagemVazia: 'Faça login para ver seus produtos.',
+        buscaController: buscaController,
+        onBuscaChanged: (_) => setState(() {}),
+        onAdicionar: _abrirCadastro,
+        onEditar: _abrirEdicao,
+        onEstoque: _abrirEstoque,
+        onExcluir: _confirmarExclusao,
+      );
+    }
+
+    return StreamBuilder<List<Produto>>(
+      stream: _produtoRepository.observar(uid),
+      builder: (context, snapshot) {
+        final carregando = snapshot.connectionState == ConnectionState.waiting;
+        final erro = snapshot.hasError;
+        final todos = snapshot.data ?? const <Produto>[];
+
+        return _ProdutosListView(
+          produtos: _filtrar(todos),
+          carregando: carregando,
+          erro: erro,
+          buscaController: buscaController,
+          onBuscaChanged: (_) => setState(() {}),
+          onAdicionar: _abrirCadastro,
+          onEditar: _abrirEdicao,
+          onEstoque: _abrirEstoque,
+          onExcluir: _confirmarExclusao,
+        );
+      },
+    );
+  }
 }
 
 class _ProdutosListView extends StatelessWidget {
@@ -342,6 +426,9 @@ class _ProdutosListView extends StatelessWidget {
     required this.onEditar,
     required this.onEstoque,
     required this.onExcluir,
+    this.carregando = false,
+    this.erro = false,
+    this.mensagemVazia = 'Nenhum produto encontrado',
   });
 
   final List<Produto> produtos;
@@ -351,6 +438,9 @@ class _ProdutosListView extends StatelessWidget {
   final ValueChanged<Produto> onEditar;
   final ValueChanged<Produto> onEstoque;
   final ValueChanged<Produto> onExcluir;
+  final bool carregando;
+  final bool erro;
+  final String mensagemVazia;
 
   @override
   Widget build(BuildContext context) {
@@ -453,8 +543,15 @@ class _ProdutosListView extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     Expanded(
-                      child: produtos.isEmpty
-                          ? const _ProdutosEmptyState()
+                      child: erro
+                          ? const _ProdutosEmptyState(
+                              mensagem:
+                                  'Não foi possível carregar os produtos.',
+                            )
+                          : carregando && produtos.isEmpty
+                          ? const Center(child: CircularProgressIndicator())
+                          : produtos.isEmpty
+                          ? _ProdutosEmptyState(mensagem: mensagemVazia)
                           : ListView.separated(
                               padding: const EdgeInsets.only(bottom: 112),
                               itemCount: produtos.length,
@@ -530,14 +627,17 @@ class _ProdutosTopBar extends StatelessWidget {
 }
 
 class _ProdutosEmptyState extends StatelessWidget {
-  const _ProdutosEmptyState();
+  const _ProdutosEmptyState({this.mensagem = 'Nenhum produto encontrado'});
+
+  final String mensagem;
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Text(
-        'Nenhum produto encontrado',
-        style: TextStyle(
+        mensagem,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
           color: AppColors.textMuted,
           fontSize: 16,
           fontWeight: FontWeight.w600,
