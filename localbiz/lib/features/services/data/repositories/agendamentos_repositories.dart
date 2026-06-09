@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import 'package:localbiz/features/services/models/agendamento_model.dart';
+import 'package:localbiz/features/services/domain/models/agendamento_model.dart';
 
 abstract class AgendamentosRepositoryContract {
   Future<void> criarAgendamento(Map<String, dynamic> payload);
@@ -40,7 +40,9 @@ class AgendamentosRepository implements AgendamentosRepositoryContract {
       throw ArgumentError('servicoId ausente no payload.');
     }
     final negocioId = user.uid;
-    debugPrint('$_logTag add agendamentos negocioId=$negocioId servicoId=$servicoId');
+    debugPrint(
+      '$_logTag add agendamentos negocioId=$negocioId servicoId=$servicoId',
+    );
     try {
       final doc = await _agendamentosRef(negocioId, servicoId).add({
         ...payload,
@@ -48,7 +50,9 @@ class AgendamentosRepository implements AgendamentosRepositoryContract {
         'criado_por': user.email,
         'createdAt': FieldValue.serverTimestamp(),
       });
-      debugPrint('$_logTag criado negocios/$negocioId/servicos/$servicoId/agendamentos/${doc.id}');
+      debugPrint(
+        '$_logTag criado negocios/$negocioId/servicos/$servicoId/agendamentos/${doc.id}',
+      );
     } catch (error, stackTrace) {
       debugPrint('$_logTag erro criarAgendamento: $error');
       Error.throwWithStackTrace(error, stackTrace);
@@ -64,7 +68,9 @@ class AgendamentosRepository implements AgendamentosRepositoryContract {
   Stream<List<AgendamentoModel>> listarPorServico(String servicoId) {
     final negocioId = _auth.currentUser?.uid ?? '';
     if (negocioId.isEmpty) return Stream.value(const []);
-    debugPrint('$_logTag listen negocios/$negocioId/servicos/$servicoId/agendamentos');
+    debugPrint(
+      '$_logTag listen negocios/$negocioId/servicos/$servicoId/agendamentos',
+    );
     return _agendamentosRef(negocioId, servicoId)
         .snapshots()
         .map((snap) {
@@ -72,7 +78,12 @@ class AgendamentosRepository implements AgendamentosRepositoryContract {
             '$_logTag snapshot listarPorServico servicoId=$servicoId docs=${snap.docs.length}',
           );
           return snap.docs
-              .map((d) => AgendamentoModel.fromMap(d.id, d.data() as Map<String, dynamic>))
+              .map(
+                (d) => AgendamentoModel.fromMap(
+                  d.id,
+                  d.data() as Map<String, dynamic>,
+                ),
+              )
               .toList();
         })
         .handleError((Object error, StackTrace stackTrace) {

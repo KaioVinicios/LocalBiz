@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:localbiz/features/services/data/dashboard_repository.dart';
+import 'package:localbiz/features/services/data/repositories/dashboard_repository.dart';
 import 'package:localbiz/features/services/domain/dashboard_summary.dart';
 import 'package:localbiz/features/services/presentation/screens/dashboard_page.dart';
 import 'package:localbiz/features/vendas/models/venda_model.dart';

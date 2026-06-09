@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import 'package:localbiz/features/services/models/servico_model.dart';
+import 'package:localbiz/features/services/domain/models/servico_model.dart';
 
 abstract class ServicosRepositoryContract {
   Stream<List<ServicoModel>> listarAtivos(String uid);

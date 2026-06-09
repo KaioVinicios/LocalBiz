@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:localbiz/features/services/models/servico_model.dart';
+import 'package:localbiz/features/services/domain/models/servico_model.dart';
 import 'package:localbiz/features/services/presentation/screens/auth/auth_service.dart';
 import 'package:localbiz/features/services/presentation/widgets/service_form_fields.dart';
-import 'package:localbiz/features/services/repositories/servicos_repositories.dart';
+import 'package:localbiz/features/services/data/repositories/servicos_repositories.dart';
 
 class ServiceCreatePage extends StatelessWidget {
   const ServiceCreatePage({super.key, this.repository, this.negocioId});

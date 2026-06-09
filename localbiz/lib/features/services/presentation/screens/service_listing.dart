@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:localbiz/core/router/app_route.dart';
-import 'package:localbiz/features/services/models/servico_model.dart';
+import 'package:localbiz/features/services/domain/models/servico_model.dart';
 import 'package:localbiz/features/services/presentation/screens/auth/auth_service.dart';
 import 'package:localbiz/features/services/presentation/screens/services_details.dart';
-import 'package:localbiz/features/services/repositories/servicos_repositories.dart';
+import 'package:localbiz/features/services/data/repositories/servicos_repositories.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 
 class ServicosScreen extends StatefulWidget {

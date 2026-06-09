@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:localbiz/features/services/models/servico_model.dart';
+import 'package:localbiz/features/services/domain/models/servico_model.dart';
 import 'package:localbiz/features/services/presentation/screens/service_create_page.dart';
-import 'package:localbiz/features/services/repositories/servicos_repositories.dart';
+import 'package:localbiz/features/services/data/repositories/servicos_repositories.dart';
 
 void main() {
   testWidgets('cadastro de servico salva item no repositorio', (tester) async {

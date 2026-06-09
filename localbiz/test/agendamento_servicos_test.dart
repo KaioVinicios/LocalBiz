@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:localbiz/features/services/models/agendamento_model.dart';
-import 'package:localbiz/features/services/models/servico_model.dart';
+import 'package:localbiz/features/services/domain/models/agendamento_model.dart';
+import 'package:localbiz/features/services/domain/models/servico_model.dart';
 import 'package:localbiz/features/services/presentation/screens/services_scheduling.dart';
-import 'package:localbiz/features/services/repositories/agendamentos_repositories.dart';
-import 'package:localbiz/features/services/repositories/servicos_repositories.dart';
+import 'package:localbiz/features/services/data/repositories/agendamentos_repositories.dart';
+import 'package:localbiz/features/services/data/repositories/servicos_repositories.dart';
 
 void main() {
   testWidgets('agendamento carrega servicos no select de procedimento', (

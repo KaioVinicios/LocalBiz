@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:localbiz/core/router/app_route.dart';
-import 'package:localbiz/features/services/models/agendamento_model.dart';
-import 'package:localbiz/features/services/models/servico_model.dart';
+import 'package:localbiz/features/services/domain/models/agendamento_model.dart';
+import 'package:localbiz/features/services/domain/models/servico_model.dart';
 import 'package:localbiz/features/services/presentation/screens/auth/auth_service.dart';
-import 'package:localbiz/features/services/repositories/agendamentos_repositories.dart';
-import 'package:localbiz/features/services/repositories/servicos_repositories.dart';
+import 'package:localbiz/features/services/data/repositories/agendamentos_repositories.dart';
+import 'package:localbiz/features/services/data/repositories/servicos_repositories.dart';
 import 'package:localbiz/features/services/presentation/screens/services_scheduling.dart';
 import 'package:localbiz/features/services/presentation/screens/widgets/service_calendar.dart';
 import 'package:localbiz/core/theme/app_colors.dart';

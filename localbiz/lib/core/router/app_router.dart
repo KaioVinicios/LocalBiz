@@ -9,7 +9,7 @@ import 'package:localbiz/features/configuration/presentation/screens/configurati
 import 'package:localbiz/features/configuration/presentation/screens/help_support_page.dart';
 import 'package:localbiz/features/configuration/presentation/screens/report_page.dart';
 import 'package:localbiz/features/services/presentation/screens/dashboard_page.dart';
-import 'package:localbiz/features/services/models/servico_model.dart';
+import 'package:localbiz/features/services/domain/models/servico_model.dart';
 import 'package:localbiz/features/services/presentation/screens/service_create_page.dart';
 import 'package:localbiz/features/services/presentation/screens/service_edit_page.dart';
 import 'package:localbiz/features/services/presentation/screens/service_listing.dart';

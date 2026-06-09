@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localbiz/features/clientes/data/repositories/cliente_repository.dart';
 import 'package:localbiz/features/clientes/domain/entities/cliente_model.dart';
-import 'package:localbiz/features/services/models/agendamento_model.dart';
-import 'package:localbiz/features/services/models/servico_model.dart';
+import 'package:localbiz/features/services/domain/models/agendamento_model.dart';
+import 'package:localbiz/features/services/domain/models/servico_model.dart';
 import 'package:localbiz/features/services/presentation/screens/auth/auth_service.dart';
 import 'package:localbiz/features/services/presentation/screens/widgets/service_calendar.dart';
-import 'package:localbiz/features/services/repositories/agendamentos_repositories.dart';
-import 'package:localbiz/features/services/repositories/servicos_repositories.dart';
+import 'package:localbiz/features/services/data/repositories/agendamentos_repositories.dart';
+import 'package:localbiz/features/services/data/repositories/servicos_repositories.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 
 class AgendamentoServicoScreen extends StatefulWidget {
@@ -285,7 +285,11 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
               ],
             ),
           ),
-          const Icon(Icons.help_outline, color: AppColors.textPrimary, size: 24),
+          const Icon(
+            Icons.help_outline,
+            color: AppColors.textPrimary,
+            size: 24,
+          ),
         ],
       ),
     );
@@ -502,8 +506,9 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
       stream: _agendamentosRepository.listarPorServico(servicoId),
       builder: (context, snapshot) {
         final ocupados = _horariosOcupados(snapshot.data ?? const []);
-        final horariosDisponiveis =
-            _horarios.where((h) => !ocupados.contains(h)).toList();
+        final horariosDisponiveis = _horarios
+            .where((h) => !ocupados.contains(h))
+            .toList();
 
         // Se o horário selecionado foi ocupado, limpa
         if (_horarioSelecionado != null &&
@@ -539,8 +544,7 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
           backgroundColor: AppColors.blue,
           foregroundColor: AppColors.sheetSurface,
           minimumSize: const Size(double.infinity, 52),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           elevation: 0,
         ),
         child: const Text(
@@ -649,7 +653,10 @@ class _InputField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 15),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 14,
+        ),
         filled: true,
         fillColor: AppColors.sheetSurface,
         enabledBorder: OutlineInputBorder(
