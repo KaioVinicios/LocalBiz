@@ -9,7 +9,9 @@ void main() {
     final repository = _FakeServicosRepository();
 
     await tester.pumpWidget(
-      MaterialApp(home: ServiceCreatePage(repository: repository)),
+      MaterialApp(
+        home: ServiceCreatePage(repository: repository, negocioId: 'negocio-1'),
+      ),
     );
 
     await tester.tap(find.byType(DropdownButtonFormField<String>));
@@ -25,6 +27,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repository.criados, hasLength(1));
+    expect(repository.negociosCriados.single, 'negocio-1');
     expect(repository.criados.single.nome, 'Escova');
     expect(repository.criados.single.categoria, 'Serviços Capilares');
     expect(repository.criados.single.preco, 80);
@@ -34,12 +37,14 @@ void main() {
 
 class _FakeServicosRepository implements ServicosRepositoryContract {
   final criados = <ServicoModel>[];
+  final negociosCriados = <String>[];
 
   @override
-  Future<ServicoModel?> buscarPorId(String id) async => null;
+  Future<ServicoModel?> buscarPorId(String negocioId, String id) async => null;
 
   @override
-  Future<ServicoModel> criar(ServicoModel servico) async {
+  Future<ServicoModel> criar(String negocioId, ServicoModel servico) async {
+    negociosCriados.add(negocioId);
     criados.add(servico);
     return ServicoModel(
       id: 's${criados.length}',
@@ -52,8 +57,10 @@ class _FakeServicosRepository implements ServicosRepositoryContract {
   }
 
   @override
-  Future<void> atualizar(ServicoModel servico) async {}
+  Future<void> atualizar(String negocioId, ServicoModel servico) async {}
 
   @override
-  Stream<List<ServicoModel>> listarAtivos() => Stream.value(const []);
+  Stream<List<ServicoModel>> listarAtivos(String negocioId) {
+    return Stream.value(const []);
+  }
 }

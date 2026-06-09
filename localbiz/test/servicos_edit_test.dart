@@ -27,6 +27,7 @@ void main() {
           AppRoute.serviceEdit.path: (context) {
             return ServiceEditPage(
               repository: servicosRepository,
+              negocioId: 'negocio-1',
               servico:
                   ModalRoute.of(context)!.settings.arguments! as ServicoModel,
             );
@@ -34,6 +35,7 @@ void main() {
         },
         home: DetalheServicoScreen(
           servicoId: 's1',
+          negocioId: 'negocio-1',
           servicosRepository: servicosRepository,
           agendamentosRepository: _FakeAgendamentosRepository(),
         ),
@@ -56,7 +58,11 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: ServiceEditPage(repository: servicosRepository, servico: servico),
+        home: ServiceEditPage(
+          repository: servicosRepository,
+          negocioId: 'negocio-1',
+          servico: servico,
+        ),
       ),
     );
 
@@ -68,6 +74,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(servicosRepository.atualizados, hasLength(1));
+    expect(servicosRepository.negociosAtualizados.single, 'negocio-1');
     expect(servicosRepository.atualizados.single.id, 's1');
     expect(servicosRepository.atualizados.single.nome, 'Corte Premium');
     expect(
@@ -84,20 +91,30 @@ class _FakeServicosRepository implements ServicosRepositoryContract {
 
   final ServicoModel servico;
   final atualizados = <ServicoModel>[];
+  final negociosBuscados = <String>[];
+  final negociosAtualizados = <String>[];
 
   @override
-  Future<ServicoModel?> buscarPorId(String id) async => servico;
+  Future<ServicoModel?> buscarPorId(String negocioId, String id) async {
+    negociosBuscados.add(negocioId);
+    return servico;
+  }
 
   @override
-  Future<ServicoModel> criar(ServicoModel servico) async => servico;
+  Future<ServicoModel> criar(String negocioId, ServicoModel servico) async {
+    return servico;
+  }
 
   @override
-  Future<void> atualizar(ServicoModel servico) async {
+  Future<void> atualizar(String negocioId, ServicoModel servico) async {
+    negociosAtualizados.add(negocioId);
     atualizados.add(servico);
   }
 
   @override
-  Stream<List<ServicoModel>> listarAtivos() => Stream.value([servico]);
+  Stream<List<ServicoModel>> listarAtivos(String negocioId) {
+    return Stream.value([servico]);
+  }
 }
 
 class _FakeAgendamentosRepository implements AgendamentosRepositoryContract {

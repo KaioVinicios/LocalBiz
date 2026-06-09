@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/features/services/models/servico_model.dart';
+import 'package:localbiz/features/services/presentation/screens/auth/auth_service.dart';
 import 'package:localbiz/features/services/presentation/screens/services_details.dart';
 import 'package:localbiz/features/services/repositories/servicos_repositories.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 
 class ServicosScreen extends StatefulWidget {
-  const ServicosScreen({super.key});
+  const ServicosScreen({super.key, this.repository, this.negocioId});
+
+  final ServicosRepositoryContract? repository;
+  final String? negocioId;
 
   @override
   State<ServicosScreen> createState() => _ServicosScreenState();
@@ -14,7 +18,9 @@ class ServicosScreen extends StatefulWidget {
 
 class _ServicosScreenState extends State<ServicosScreen> {
   final TextEditingController _searchController = TextEditingController();
-  final ServicosRepository _servicosRepository = ServicosRepository();
+  late final ServicosRepositoryContract _servicosRepository =
+      widget.repository ?? ServicosRepository();
+  late final String? _uid = widget.negocioId ?? AuthService().usuarioAtual?.uid;
 
   List<ServicoModel> _filtrarServicos(List<ServicoModel> servicos) {
     final query = _searchController.text.toLowerCase();
@@ -138,8 +144,18 @@ class _ServicosScreenState extends State<ServicosScreen> {
   }
 
   Widget _buildList() {
+    final uid = _uid;
+    if (uid == null || uid.isEmpty) {
+      return const Center(
+        child: Text(
+          'Faça login para ver seus serviços.',
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
+      );
+    }
+
     return StreamBuilder<List<ServicoModel>>(
-      stream: _servicosRepository.listarAtivos(),
+      stream: _servicosRepository.listarAtivos(uid),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -177,7 +193,10 @@ class _ServicosScreenState extends State<ServicosScreen> {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => DetalheServicoScreen(servicoId: servico.id),
+                    builder: (_) => DetalheServicoScreen(
+                      servicoId: servico.id,
+                      negocioId: uid,
+                    ),
                   ),
                 );
               },
