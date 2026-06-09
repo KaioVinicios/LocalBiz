@@ -109,7 +109,7 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
     }
 
     if (_clienteController.text.trim().isEmpty ||
-        _telefoneController.text.trim().isEmpty ||
+        _telefoneController.text.trim().length < 11 ||
         _diaSelecionado == null ||
         _horarioSelecionado == null ||
         _horarioSelecionado!.isEmpty) {
@@ -304,7 +304,10 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
         controller: _telefoneController,
         hint: '(00) 00000-0000',
         keyboardType: TextInputType.phone,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+          LengthLimitingTextInputFormatter(11),
+        ],
       ),
     );
   }
