@@ -18,6 +18,7 @@ import 'package:localbiz/features/produtos/presentation/screens/produtos_page.da
 import 'package:localbiz/features/vendas/models/venda_model.dart';
 import 'package:localbiz/features/vendas/presentation/screens/venda_historico_page.dart';
 import 'package:localbiz/features/vendas/presentation/screens/venda_page.dart';
+import 'package:localbiz/core/guards/protected_route.dart';
 
 class AppRouter {
   const AppRouter._();
@@ -25,31 +26,46 @@ class AppRouter {
   static String get initialRoute => AppRoute.login.path;
 
   static Map<String, WidgetBuilder> get routes => {
-    AppRoute.home.path: (context) => const DashboardPage(),
-    AppRoute.dashboard.path: (context) => const DashboardPage(),
     AppRoute.login.path: (context) => const LoginPage(),
     AppRoute.forgotPassword.path: (context) => const ForgotPasswordPage(),
     AppRoute.register.path: (context) => const RegisterPage(),
-    AppRoute.clientes.path: (context) => const ClientesPage(),
-    AppRoute.produtos.path: (context) => const ProdutosPage(),
-    AppRoute.configuracoes.path: (context) => const ConfigurationPage(),
-    AppRoute.vendas.path: (context) => const VendaPage(),
-    AppRoute.vendasHistorico.path: (context) => const VendaHistoricoPage(),
+
+    AppRoute.home.path: (context) =>
+        const ProtectedRoute(child: DashboardPage()),
+    AppRoute.dashboard.path: (context) =>
+        const ProtectedRoute(child: DashboardPage()),
+    AppRoute.clientes.path: (context) =>
+        const ProtectedRoute(child: ClientesPage()),
+    AppRoute.produtos.path: (context) =>
+        const ProtectedRoute(child: ProdutosPage()),
+    AppRoute.configuracoes.path: (context) =>
+        const ProtectedRoute(child: ConfigurationPage()),
+    AppRoute.vendas.path: (context) => const ProtectedRoute(child: VendaPage()),
+    AppRoute.vendasHistorico.path: (context) =>
+        const ProtectedRoute(child: VendaHistoricoPage()),
     AppRoute.vendaEdit.path: (context) {
       final venda = ModalRoute.of(context)?.settings.arguments as VendaModel?;
-      return VendaPage(vendaInicial: venda);
+      return ProtectedRoute(child: VendaPage(vendaInicial: venda));
     },
-    AppRoute.services.path: (context) => const ServicosScreen(),
-    AppRoute.serviceCreate.path: (context) => const ServiceCreatePage(),
-    AppRoute.serviceEdit.path: (context) => const ServiceEditPage(),
+    AppRoute.services.path: (context) =>
+        const ProtectedRoute(child: ServicosScreen()),
+    AppRoute.serviceCreate.path: (context) =>
+        const ProtectedRoute(child: ServiceCreatePage()),
+    AppRoute.serviceEdit.path: (context) =>
+        const ProtectedRoute(child: ServiceEditPage()),
     AppRoute.serviceDetails.path: (context) =>
-        const DetalheServicoScreen(servicoId: ''),
+        const ProtectedRoute(child: DetalheServicoScreen(servicoId: '')),
     AppRoute.serviceSchedules.path: (context) =>
-        const AgendamentoServicoScreen(),
-    AppRoute.configuration.path: (context) => const ConfigurationPage(),
-    AppRoute.businessProfile.path: (context) => const BusinessProfilePage(),
-    AppRoute.report.path: (context) => const ReportPage(),
-    AppRoute.relatorios.path: (context) => const ReportPage(),
-    AppRoute.ajuda.path: (context) => const HelpSupportPage(),
+        const ProtectedRoute(child: AgendamentoServicoScreen()),
+    AppRoute.configuration.path: (context) =>
+        const ProtectedRoute(child: ConfigurationPage()),
+    AppRoute.businessProfile.path: (context) =>
+        const ProtectedRoute(child: BusinessProfilePage()),
+    AppRoute.report.path: (context) =>
+        const ProtectedRoute(child: ReportPage()),
+    AppRoute.relatorios.path: (context) =>
+        const ProtectedRoute(child: ReportPage()),
+    AppRoute.ajuda.path: (context) =>
+        const ProtectedRoute(child: HelpSupportPage()),
   };
 }
