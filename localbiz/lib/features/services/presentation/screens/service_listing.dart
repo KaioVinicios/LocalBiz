@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/features/services/models/servico_model.dart';
 import 'package:localbiz/features/services/presentation/screens/services_details.dart';
 import 'package:localbiz/features/services/repositories/servicos_repositories.dart';
@@ -189,7 +190,8 @@ class _ServicosScreenState extends State<ServicosScreen> {
 
   Widget _buildFAB() {
     return FloatingActionButton(
-      onPressed: () {},
+      onPressed: () =>
+          Navigator.of(context).pushNamed(AppRoute.serviceCreate.path),
       backgroundColor: AppColors.blue,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: const Icon(Icons.add, color: Colors.white, size: 28),
