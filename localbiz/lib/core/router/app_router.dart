@@ -15,6 +15,8 @@ import 'package:localbiz/features/services/presentation/screens/service_listing.
 import 'package:localbiz/features/services/presentation/screens/services_details.dart';
 import 'package:localbiz/features/services/presentation/screens/services_scheduling.dart';
 import 'package:localbiz/features/produtos/presentation/screens/produtos_page.dart';
+import 'package:localbiz/features/vendas/models/venda_model.dart';
+import 'package:localbiz/features/vendas/presentation/screens/venda_historico_page.dart';
 import 'package:localbiz/features/vendas/presentation/screens/venda_page.dart';
 
 class AppRouter {
@@ -32,10 +34,16 @@ class AppRouter {
     AppRoute.produtos.path: (context) => const ProdutosPage(),
     AppRoute.configuracoes.path: (context) => const ConfigurationPage(),
     AppRoute.vendas.path: (context) => const VendaPage(),
+    AppRoute.vendasHistorico.path: (context) => const VendaHistoricoPage(),
+    AppRoute.vendaEdit.path: (context) {
+      final venda = ModalRoute.of(context)?.settings.arguments as VendaModel?;
+      return VendaPage(vendaInicial: venda);
+    },
     AppRoute.services.path: (context) => const ServicosScreen(),
     AppRoute.serviceCreate.path: (context) => const ServiceCreatePage(),
     AppRoute.serviceEdit.path: (context) => const ServiceEditPage(),
-    AppRoute.serviceDetails.path: (context) => const DetalheServicoScreen( servicoId: ''),  
+    AppRoute.serviceDetails.path: (context) =>
+        const DetalheServicoScreen(servicoId: ''),
     AppRoute.serviceSchedules.path: (context) =>
         const AgendamentoServicoScreen(),
     AppRoute.configuration.path: (context) => const ConfigurationPage(),

@@ -1,16 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
+import 'package:localbiz/features/services/data/dashboard_repository.dart';
+import 'package:localbiz/features/services/domain/dashboard_summary.dart';
 
 const _dashboardWideBreakpoint = 900.0;
 
 class DashboardPage extends StatelessWidget {
-  const DashboardPage({super.key});
+  const DashboardPage({super.key, this.repository, this.usuarioId});
+
+  final DashboardRepositoryContract? repository;
+  final String? usuarioId;
+
+  DashboardRepositoryContract get _repository =>
+      repository ?? DashboardRepository();
+
+  String? get _uid => usuarioId ?? _usuarioAtualId();
+
+  String? _usuarioAtualId() {
+    try {
+      return FirebaseAuth.instance.currentUser?.uid;
+    } catch (_) {
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final dashboardRepository = _repository;
+    final uid = _uid;
+
     return Scaffold(
       backgroundColor: AppColorTokens.surfaceWhite,
       body: SafeArea(
@@ -41,7 +63,11 @@ class DashboardPage extends StatelessWidget {
                           ).pushNamed(AppRoute.serviceCreate.path),
                         ),
                         SizedBox(height: isWide ? 28 : 20),
-                        _DashboardContent(isWide: isWide),
+                        _DashboardContent(
+                          isWide: isWide,
+                          repository: dashboardRepository,
+                          uid: uid,
+                        ),
                         const SizedBox(height: 8),
                       ],
                     ),
@@ -58,16 +84,22 @@ class DashboardPage extends StatelessWidget {
 }
 
 class _DashboardContent extends StatelessWidget {
-  const _DashboardContent({required this.isWide});
+  const _DashboardContent({
+    required this.isWide,
+    required this.repository,
+    required this.uid,
+  });
 
   final bool isWide;
+  final DashboardRepositoryContract repository;
+  final String? uid;
 
   @override
   Widget build(BuildContext context) {
-    const alerts = Column(
+    final alerts = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Alertas importantes',
           style: TextStyle(
             color: AppColorTokens.dashboardPurple,
@@ -76,25 +108,32 @@ class _DashboardContent extends StatelessWidget {
             height: 1,
           ),
         ),
-        SizedBox(height: 24),
-        _InventoryAlertCard(),
+        const SizedBox(height: 24),
+        _InventoryAlertCard(repository: repository, uid: uid),
       ],
     );
 
     if (isWide) {
-      return const Row(
+      return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(flex: 7, child: _SummaryCards()),
-          SizedBox(width: 28),
+          Expanded(
+            flex: 7,
+            child: _SummaryCards(repository: repository, uid: uid),
+          ),
+          const SizedBox(width: 28),
           Expanded(flex: 5, child: alerts),
         ],
       );
     }
 
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [_SummaryCards(), SizedBox(height: 24), alerts],
+      children: [
+        _SummaryCards(repository: repository, uid: uid),
+        const SizedBox(height: 24),
+        alerts,
+      ],
     );
   }
 }
@@ -284,120 +323,127 @@ class _QuickActionCard extends StatelessWidget {
 }
 
 class _SummaryCards extends StatelessWidget {
-  const _SummaryCards();
+  const _SummaryCards({required this.repository, required this.uid});
+
+  final DashboardRepositoryContract repository;
+  final String? uid;
+
+  Stream<DashboardResumoVendas> _stream() {
+    final usuario = uid;
+    if (usuario == null || usuario.isEmpty) {
+      return Stream.value(const DashboardResumoVendas.vazio());
+    }
+    return repository.observarResumoVendasHoje(usuario);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            color: AppColors.blue,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(
-                color: AppColorTokens.shadowBlack06,
-                blurRadius: 28,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Row(
-                children: [
-                  Expanded(
-                    child: Text.rich(
-                      TextSpan(
-                        text: 'Faturamento de ',
-                        style: TextStyle(
-                          color: AppColorTokens.white80,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: 'Hoje',
-                            style: TextStyle(
-                              color: AppColorTokens.surfaceWhite,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Icon(
-                    Icons.show_chart,
-                    color: AppColorTokens.surfaceWhite,
-                    size: 18,
+    return StreamBuilder<DashboardResumoVendas>(
+      stream: _stream(),
+      initialData: const DashboardResumoVendas.vazio(),
+      builder: (context, snapshot) {
+        final resumo = snapshot.data ?? const DashboardResumoVendas.vazio();
+
+        return Column(
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                color: AppColors.blue,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColorTokens.shadowBlack06,
+                    blurRadius: 28,
+                    offset: const Offset(0, 10),
                   ),
                 ],
               ),
-              const SizedBox(height: 22),
-              const Text.rich(
-                TextSpan(
-                  text: 'R\$',
-                  style: TextStyle(
-                    color: AppColorTokens.white60,
-                    fontSize: 30,
-                    fontWeight: FontWeight.w800,
-                  ),
-                  children: [
-                    TextSpan(
-                      text: '845',
-                      style: TextStyle(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Expanded(
+                        child: Text.rich(
+                          TextSpan(
+                            text: 'Faturamento de ',
+                            style: TextStyle(
+                              color: AppColorTokens.white80,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: 'Hoje',
+                                style: TextStyle(
+                                  color: AppColorTokens.surfaceWhite,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Icon(
+                        Icons.show_chart,
                         color: AppColorTokens.surfaceWhite,
-                        fontSize: 44,
+                        size: 18,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 22),
+                  Text(
+                    formatarMoedaBr(resumo.faturamentoHoje),
+                    style: const TextStyle(
+                      color: AppColorTokens.surfaceWhite,
+                      fontSize: 38,
+                      fontWeight: FontWeight.w900,
+                      height: 1,
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 7,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColorTokens.slate200,
+                      borderRadius: BorderRadius.circular(33),
+                    ),
+                    child: Text(
+                      resumo.variacaoFormatada,
+                      style: const TextStyle(
+                        color: AppColors.blue,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    TextSpan(
-                      text: ',50',
-                      style: TextStyle(
-                        color: AppColorTokens.surfaceWhite,
-                        fontSize: 33,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 14),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
-                decoration: BoxDecoration(
-                  color: AppColorTokens.slate200,
-                  borderRadius: BorderRadius.circular(33),
-                ),
-                child: const Text(
-                  '+12% vs. ontem',
-                  style: TextStyle(
-                    color: AppColors.blue,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 15),
-        const Row(
-          children: [
-            Expanded(child: _AttendanceCard()),
-            SizedBox(width: 22),
-            Expanded(child: _NextClientCard()),
+            ),
+            const SizedBox(height: 15),
+            Row(
+              children: [
+                Expanded(child: _AttendanceCard(vendasHoje: resumo.vendasHoje)),
+                const SizedBox(width: 22),
+                const Expanded(child: _NextClientCard()),
+              ],
+            ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 }
 
 class _AttendanceCard extends StatelessWidget {
-  const _AttendanceCard();
+  const _AttendanceCard({required this.vendasHoje});
+
+  final int vendasHoje;
 
   @override
   Widget build(BuildContext context) {
@@ -405,12 +451,12 @@ class _AttendanceCard extends StatelessWidget {
       height: 150,
       padding: const EdgeInsets.all(14),
       decoration: _softCardDecoration(),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            'Atendimentos\nConcluídos',
+          const Text(
+            'Vendas\nConcluídas',
             style: TextStyle(
               color: AppColorTokens.slate900,
               fontSize: 15,
@@ -420,14 +466,13 @@ class _AttendanceCard extends StatelessWidget {
           ),
           Text.rich(
             TextSpan(
-              text: '08',
-              style: TextStyle(
+              text: '$vendasHoje',
+              style: const TextStyle(
                 color: AppColorTokens.primaryBlue83,
                 fontSize: 40,
                 fontWeight: FontWeight.w900,
                 height: 1,
               ),
-              children: [TextSpan(text: '/12', style: TextStyle(fontSize: 20))],
             ),
           ),
         ],
@@ -516,65 +561,98 @@ BoxDecoration _softCardDecoration() {
 }
 
 class _InventoryAlertCard extends StatelessWidget {
-  const _InventoryAlertCard();
+  const _InventoryAlertCard({required this.repository, required this.uid});
+
+  final DashboardRepositoryContract repository;
+  final String? uid;
+
+  Stream<List<ProdutoEstoqueBaixo>> _stream() {
+    final usuario = uid;
+    if (usuario == null || usuario.isEmpty) {
+      return Stream.value(const <ProdutoEstoqueBaixo>[]);
+    }
+    return repository.observarEstoqueBaixo(usuario);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColorTokens.primaryBlue20,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.blue),
-      ),
-      child: Column(
-        children: [
-          Row(
+    return StreamBuilder<List<ProdutoEstoqueBaixo>>(
+      stream: _stream(),
+      initialData: const <ProdutoEstoqueBaixo>[],
+      builder: (context, snapshot) {
+        final produtos = snapshot.data ?? const <ProdutoEstoqueBaixo>[];
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColorTokens.primaryBlue20,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: AppColors.blue),
+          ),
+          child: Column(
             children: [
-              const Expanded(
-                child: Text(
-                  'Estoque baixo',
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Estoque baixo',
+                      style: TextStyle(
+                        color: AppColorTokens.slate700,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.blue,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '${produtos.length} Itens',
+                      style: const TextStyle(
+                        color: AppColorTokens.surfaceWhite,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Os seguintes produtos atingiram o nível mínimo de reposição.',
+                style: TextStyle(
+                  color: AppColorTokens.slate700,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w300,
+                  height: 1.2,
+                ),
+              ),
+              const SizedBox(height: 14),
+              if (produtos.isEmpty)
+                const Text(
+                  'Nenhum produto com estoque baixo.',
                   style: TextStyle(
                     color: AppColorTokens.slate700,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.blue,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  '3 Itens',
-                  style: TextStyle(
-                    color: AppColorTokens.surfaceWhite,
                     fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w500,
                   ),
-                ),
-              ),
+                )
+              else
+                for (final produto in produtos) ...[
+                  _InventoryItem(
+                    name: produto.nome,
+                    quantity: '${produto.estoqueAtual} un.',
+                  ),
+                  if (produto != produtos.last) const SizedBox(height: 14),
+                ],
             ],
           ),
-          const SizedBox(height: 8),
-          const Text(
-            'Os seguintes produtos atingiram o nível mínimo de reposição.',
-            style: TextStyle(
-              color: AppColorTokens.slate700,
-              fontSize: 12,
-              fontWeight: FontWeight.w300,
-              height: 1.2,
-            ),
-          ),
-          const SizedBox(height: 14),
-          const _InventoryItem(name: 'Shampoo Argan', quantity: '2 un.'),
-          const SizedBox(height: 14),
-          const _InventoryItem(name: 'Máscara Recon.', quantity: '1 un.'),
-        ],
-      ),
+        );
+      },
     );
   }
 }
