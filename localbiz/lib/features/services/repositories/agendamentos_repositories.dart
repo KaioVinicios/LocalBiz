@@ -20,23 +20,35 @@ class AgendamentosRepository implements AgendamentosRepositoryContract {
     : _firestore = firestore ?? FirebaseFirestore.instance,
       _auth = auth ?? FirebaseAuth.instance;
 
+  CollectionReference _agendamentosRef(String negocioId, String servicoId) {
+    return _firestore
+        .collection('negocios')
+        .doc(negocioId)
+        .collection('servicos')
+        .doc(servicoId)
+        .collection('agendamentos');
+  }
+
   @override
   Future<void> criarAgendamento(Map<String, dynamic> payload) async {
     final user = _auth.currentUser;
     if (user == null || user.email == null) {
       throw StateError('Nenhum usuário autenticado para criar o agendamento.');
     }
-    debugPrint('$_logTag add agendamentos user=${user.uid}');
+    final servicoId = payload['servicoId'] as String?;
+    if (servicoId == null || servicoId.isEmpty) {
+      throw ArgumentError('servicoId ausente no payload.');
+    }
+    final negocioId = user.uid;
+    debugPrint('$_logTag add agendamentos negocioId=$negocioId servicoId=$servicoId');
     try {
-      final doc = await _firestore.collection('agendamentos').add({
+      final doc = await _agendamentosRef(negocioId, servicoId).add({
         ...payload,
-        // Amarração dinâmica: vincula o agendamento ao negócio/usuário logado,
-        // permitindo que os relatórios filtrem pelos dados do próprio negócio.
-        'negocioId': user.uid,
+        'negocioId': negocioId,
         'criado_por': user.email,
         'createdAt': FieldValue.serverTimestamp(),
       });
-      debugPrint('$_logTag criado agendamentos/${doc.id}');
+      debugPrint('$_logTag criado negocios/$negocioId/servicos/$servicoId/agendamentos/${doc.id}');
     } catch (error, stackTrace) {
       debugPrint('$_logTag erro criarAgendamento: $error');
       Error.throwWithStackTrace(error, stackTrace);
@@ -50,17 +62,17 @@ class AgendamentosRepository implements AgendamentosRepositoryContract {
 
   @override
   Stream<List<AgendamentoModel>> listarPorServico(String servicoId) {
-    debugPrint('$_logTag listen agendamentos where servicoId == $servicoId');
-    return _firestore
-        .collection('agendamentos')
-        .where('servicoId', isEqualTo: servicoId)
+    final negocioId = _auth.currentUser?.uid ?? '';
+    if (negocioId.isEmpty) return Stream.value(const []);
+    debugPrint('$_logTag listen negocios/$negocioId/servicos/$servicoId/agendamentos');
+    return _agendamentosRef(negocioId, servicoId)
         .snapshots()
         .map((snap) {
           debugPrint(
             '$_logTag snapshot listarPorServico servicoId=$servicoId docs=${snap.docs.length}',
           );
           return snap.docs
-              .map((d) => AgendamentoModel.fromMap(d.id, d.data()))
+              .map((d) => AgendamentoModel.fromMap(d.id, d.data() as Map<String, dynamic>))
               .toList();
         })
         .handleError((Object error, StackTrace stackTrace) {
