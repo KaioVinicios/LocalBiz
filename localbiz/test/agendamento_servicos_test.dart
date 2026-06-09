@@ -29,6 +29,7 @@ void main() {
         home: AgendamentoServicoScreen(
           servicosRepository: servicosRepository,
           agendamentosRepository: agendamentosRepository,
+          negocioId: 'negocio-1',
         ),
       ),
     );
@@ -44,16 +45,18 @@ void main() {
     expect(find.text('Escova'), findsOneWidget);
     expect(find.text('R\$ 80,00'), findsOneWidget);
     expect(find.text('Serviços Capilares'), findsOneWidget);
+    expect(servicosRepository.negociosListados.single, 'negocio-1');
   });
 }
 
 class _FakeServicosRepository implements ServicosRepositoryContract {
-  const _FakeServicosRepository({required this.servicos});
+  _FakeServicosRepository({required this.servicos});
 
   final List<ServicoModel> servicos;
+  final negociosListados = <String>[];
 
   @override
-  Future<ServicoModel?> buscarPorId(String id) async {
+  Future<ServicoModel?> buscarPorId(String negocioId, String id) async {
     for (final servico in servicos) {
       if (servico.id == id) {
         return servico;
@@ -63,13 +66,18 @@ class _FakeServicosRepository implements ServicosRepositoryContract {
   }
 
   @override
-  Future<ServicoModel> criar(ServicoModel servico) async => servico;
+  Future<ServicoModel> criar(String negocioId, ServicoModel servico) async {
+    return servico;
+  }
 
   @override
-  Future<void> atualizar(ServicoModel servico) async {}
+  Future<void> atualizar(String negocioId, ServicoModel servico) async {}
 
   @override
-  Stream<List<ServicoModel>> listarAtivos() => Stream.value(servicos);
+  Stream<List<ServicoModel>> listarAtivos(String negocioId) {
+    negociosListados.add(negocioId);
+    return Stream.value(servicos);
+  }
 }
 
 class _FakeAgendamentosRepository implements AgendamentosRepositoryContract {

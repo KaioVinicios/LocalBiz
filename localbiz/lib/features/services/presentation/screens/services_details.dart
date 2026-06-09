@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/features/services/models/agendamento_model.dart';
 import 'package:localbiz/features/services/models/servico_model.dart';
+import 'package:localbiz/features/services/presentation/screens/auth/auth_service.dart';
 import 'package:localbiz/features/services/repositories/agendamentos_repositories.dart';
 import 'package:localbiz/features/services/repositories/servicos_repositories.dart';
 import 'package:localbiz/features/services/presentation/screens/services_scheduling.dart';
@@ -15,12 +16,14 @@ class DetalheServicoScreen extends StatefulWidget {
     required this.servicoId,
     this.servicosRepository,
     this.agendamentosRepository,
+    this.negocioId,
     this.serviceEditRoutePath = '/services/edit',
   });
 
   final String servicoId;
   final ServicosRepositoryContract? servicosRepository;
   final AgendamentosRepositoryContract? agendamentosRepository;
+  final String? negocioId;
   final String serviceEditRoutePath;
 
   @override
@@ -30,6 +33,7 @@ class DetalheServicoScreen extends StatefulWidget {
 class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
   late final ServicosRepositoryContract _servicosRepository;
   late final AgendamentosRepositoryContract _agendamentosRepository;
+  late final String? _uid;
 
   late Future<ServicoModel?> _servicoFuture;
   StreamSubscription<List<AgendamentoModel>>? _agendamentosSub;
@@ -44,7 +48,11 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
     _servicosRepository = widget.servicosRepository ?? ServicosRepository();
     _agendamentosRepository =
         widget.agendamentosRepository ?? AgendamentosRepository();
-    _servicoFuture = _servicosRepository.buscarPorId(widget.servicoId);
+    _uid = widget.negocioId ?? AuthService().usuarioAtual?.uid;
+    final uid = _uid;
+    _servicoFuture = uid == null || uid.isEmpty
+        ? Future.value(null)
+        : _servicosRepository.buscarPorId(uid, widget.servicoId);
     _agendamentosSub = _agendamentosRepository
         .listarPorServico(widget.servicoId)
         .listen((lista) {
@@ -111,6 +119,18 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final uid = _uid;
+    if (uid == null || uid.isEmpty) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Faça login para ver o serviço.',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+        ),
+      );
+    }
+
     return FutureBuilder<ServicoModel?>(
       future: _servicoFuture,
       builder: (context, snapshot) {
@@ -300,7 +320,10 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
     );
     if (editado == true && mounted) {
       setState(() {
-        _servicoFuture = _servicosRepository.buscarPorId(widget.servicoId);
+        _servicoFuture = _servicosRepository.buscarPorId(
+          _uid!,
+          widget.servicoId,
+        );
       });
     }
   }
@@ -387,7 +410,8 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => AgendamentoServicoScreen(servico: servico),
+              builder: (_) =>
+                  AgendamentoServicoScreen(servico: servico, negocioId: _uid),
             ),
           );
         },
