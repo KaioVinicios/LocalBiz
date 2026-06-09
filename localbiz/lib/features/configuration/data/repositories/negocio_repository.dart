@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:localbiz/features/configuration/data/models/negocio_model.dart';
 
@@ -8,6 +9,18 @@ class NegocioRepository {
   final CollectionReference _col =
       FirebaseFirestore.instance.collection('negocios');
   final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  /// E-mail do usuário autenticado no momento da escrita.
+  /// Atende à regra de amarração dinâmica de dados: nenhum registro pode ser
+  /// salvo de forma anônima — todo write carrega o e-mail do Firebase Auth.
+  String get _criadoPor {
+    final email = _auth.currentUser?.email;
+    if (email == null || email.isEmpty) {
+      throw StateError('Nenhum usuário autenticado para salvar o registro.');
+    }
+    return email;
+  }
 
   /// Carrega o perfil do negócio do usuário. Retorna `null` se ainda não existir.
   Future<NegocioModel?> carregar(String uid) async {
@@ -28,6 +41,7 @@ class NegocioRepository {
   Future<void> salvar(String uid, NegocioModel negocio) async {
     await _col.doc(uid).set({
       ...negocio.toMap(),
+      'criado_por': _criadoPor,
       'atualizadoEm': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
@@ -41,6 +55,7 @@ class NegocioRepository {
 
     await _col.doc(uid).set({
       'fotoUrl': url,
+      'criado_por': _criadoPor,
       'atualizadoEm': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
 
