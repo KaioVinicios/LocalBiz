@@ -4,9 +4,24 @@ import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
 import 'package:localbiz/core/ui/app_outlined_text_field.dart';
+import 'package:localbiz/features/services/presentation/screens/auth/auth_service.dart';
 
-class ForgotPasswordPage extends StatelessWidget {
+class ForgotPasswordPage extends StatefulWidget {
   const ForgotPasswordPage({super.key});
+
+  @override
+  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
+}
+
+class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
+  final _emailController = TextEditingController();
+  final _authService = AuthService();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,6 +141,7 @@ class ForgotPasswordPage extends StatelessWidget {
 
                     // INPUT
                     AppOutlinedTextField(
+                      controller: _emailController,
                       textStyle: AppTextStyles.fieldText.copyWith(fontSize: 16),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 18,
@@ -141,18 +157,37 @@ class ForgotPasswordPage extends StatelessWidget {
                       height: AppSizes.primaryButtonHeight,
 
                       child: ElevatedButton(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                "Link de recuperação enviado com sucesso",
+                        onPressed: () async {
+                          try {
+                            await _authService.recuperarSenha(
+                              _emailController.text.trim(),
+                            );
+
+                            if (!context.mounted) return;
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Link de redefinição enviado para seu e-mail.',
+                                ),
                               ),
-                            ),
-                          );
-                          Navigator.of(context).pushNamedAndRemoveUntil(
-                            AppRoute.login.path,
-                            (route) => false,
-                          );
+                            );
+
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              AppRoute.login.path,
+                              (route) => false,
+                            );
+                          } catch (e) {
+                            if (!context.mounted) return;
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  e.toString().replaceFirst('Exception: ', ''),
+                                ),
+                              ),
+                            );
+                          }
                         },
 
                         style: ElevatedButton.styleFrom(
