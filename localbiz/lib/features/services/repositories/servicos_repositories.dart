@@ -8,6 +8,8 @@ abstract class ServicosRepositoryContract {
   Future<ServicoModel?> buscarPorId(String id);
 
   Future<ServicoModel> criar(ServicoModel servico);
+
+  Future<void> atualizar(ServicoModel servico);
 }
 
 class ServicosRepository implements ServicosRepositoryContract {
@@ -70,6 +72,25 @@ class ServicosRepository implements ServicosRepositoryContract {
       );
     } catch (error, stackTrace) {
       debugPrint('$_logTag erro criar: $error');
+      Error.throwWithStackTrace(error, stackTrace);
+    }
+  }
+
+  @override
+  Future<void> atualizar(ServicoModel servico) async {
+    if (servico.id.isEmpty) {
+      throw ArgumentError('Serviço sem id não pode ser atualizado.');
+    }
+
+    debugPrint('$_logTag update servicos/${servico.id}');
+    try {
+      await _firestore.collection('servicos').doc(servico.id).update({
+        ...servico.toMap(),
+        'atualizadoEm': FieldValue.serverTimestamp(),
+      });
+      debugPrint('$_logTag atualizado servicos/${servico.id}');
+    } catch (error, stackTrace) {
+      debugPrint('$_logTag erro atualizar id=${servico.id}: $error');
       Error.throwWithStackTrace(error, stackTrace);
     }
   }

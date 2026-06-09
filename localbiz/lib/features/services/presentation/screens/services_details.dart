@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/features/services/models/agendamento_model.dart';
 import 'package:localbiz/features/services/models/servico_model.dart';
 import 'package:localbiz/features/services/repositories/agendamentos_repositories.dart';
@@ -9,20 +10,28 @@ import 'package:localbiz/features/services/presentation/screens/widgets/service_
 import 'package:localbiz/core/theme/app_colors.dart';
 
 class DetalheServicoScreen extends StatefulWidget {
-  const DetalheServicoScreen({super.key, required this.servicoId});
+  const DetalheServicoScreen({
+    super.key,
+    required this.servicoId,
+    this.servicosRepository,
+    this.agendamentosRepository,
+    this.serviceEditRoutePath = '/services/edit',
+  });
 
   final String servicoId;
+  final ServicosRepositoryContract? servicosRepository;
+  final AgendamentosRepositoryContract? agendamentosRepository;
+  final String serviceEditRoutePath;
 
   @override
   State<DetalheServicoScreen> createState() => _DetalheServicoScreenState();
 }
 
 class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
-  final ServicosRepository _servicosRepository = ServicosRepository();
-  final AgendamentosRepository _agendamentosRepository =
-      AgendamentosRepository();
+  late final ServicosRepositoryContract _servicosRepository;
+  late final AgendamentosRepositoryContract _agendamentosRepository;
 
-  late final Future<ServicoModel?> _servicoFuture;
+  late Future<ServicoModel?> _servicoFuture;
   StreamSubscription<List<AgendamentoModel>>? _agendamentosSub;
   List<AgendamentoModel> _agendamentosCached = [];
 
@@ -32,6 +41,9 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
   @override
   void initState() {
     super.initState();
+    _servicosRepository = widget.servicosRepository ?? ServicosRepository();
+    _agendamentosRepository =
+        widget.agendamentosRepository ?? AgendamentosRepository();
     _servicoFuture = _servicosRepository.buscarPorId(widget.servicoId);
     _agendamentosSub = _agendamentosRepository
         .listarPorServico(widget.servicoId)
@@ -243,10 +255,12 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
                 color: AppColors.navBarBg,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
-                Icons.edit,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                iconSize: 18,
                 color: AppColors.textPrimary,
-                size: 18,
+                icon: const Icon(Icons.edit),
+                onPressed: () => _abrirEdicao(servico),
               ),
             ),
           ],
@@ -275,6 +289,20 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
         ),
       ],
     );
+  }
+
+  Future<void> _abrirEdicao(ServicoModel servico) async {
+    final editado = await Navigator.of(context).pushNamed(
+      widget.serviceEditRoutePath.isEmpty
+          ? AppRoute.serviceEdit.path
+          : widget.serviceEditRoutePath,
+      arguments: servico,
+    );
+    if (editado == true && mounted) {
+      setState(() {
+        _servicoFuture = _servicosRepository.buscarPorId(widget.servicoId);
+      });
+    }
   }
 
   Widget _buildAgendamentos({

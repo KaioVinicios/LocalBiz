@@ -210,6 +210,7 @@ class ServiceFormScaffold extends StatefulWidget {
     this.name,
     this.price,
     this.onSubmit,
+    this.popResult,
   });
 
   final String title;
@@ -220,6 +221,7 @@ class ServiceFormScaffold extends StatefulWidget {
   final String? name;
   final String? price;
   final Future<void> Function(ServiceFormValue value)? onSubmit;
+  final Object? popResult;
 
   @override
   State<ServiceFormScaffold> createState() => _ServiceFormScaffoldState();
@@ -405,7 +407,7 @@ class _ServiceFormScaffoldState extends State<ServiceFormScaffold> {
         ServiceFormValue(category: category, name: name, price: price),
       );
       if (mounted) {
-        Navigator.of(context).maybePop();
+        Navigator.of(context).maybePop(widget.popResult);
       }
     } catch (_) {
       if (mounted) {

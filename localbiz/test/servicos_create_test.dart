@@ -52,5 +52,8 @@ class _FakeServicosRepository implements ServicosRepositoryContract {
   }
 
   @override
+  Future<void> atualizar(ServicoModel servico) async {}
+
+  @override
   Stream<List<ServicoModel>> listarAtivos() => Stream.value(const []);
 }

@@ -9,6 +9,7 @@ import 'package:localbiz/features/configuration/presentation/screens/configurati
 import 'package:localbiz/features/configuration/presentation/screens/help_support_page.dart';
 import 'package:localbiz/features/configuration/presentation/screens/report_page.dart';
 import 'package:localbiz/features/services/presentation/screens/dashboard_page.dart';
+import 'package:localbiz/features/services/models/servico_model.dart';
 import 'package:localbiz/features/services/presentation/screens/service_create_page.dart';
 import 'package:localbiz/features/services/presentation/screens/service_edit_page.dart';
 import 'package:localbiz/features/services/presentation/screens/service_listing.dart';
@@ -41,7 +42,11 @@ class AppRouter {
     },
     AppRoute.services.path: (context) => const ServicosScreen(),
     AppRoute.serviceCreate.path: (context) => const ServiceCreatePage(),
-    AppRoute.serviceEdit.path: (context) => const ServiceEditPage(),
+    AppRoute.serviceEdit.path: (context) {
+      final servico =
+          ModalRoute.of(context)?.settings.arguments as ServicoModel?;
+      return ServiceEditPage(servico: servico);
+    },
     AppRoute.serviceDetails.path: (context) =>
         const DetalheServicoScreen(servicoId: ''),
     AppRoute.serviceSchedules.path: (context) =>
