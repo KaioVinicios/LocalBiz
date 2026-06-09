@@ -99,6 +99,18 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
     return dias;
   }
 
+  List<String> _horariosDisponiveis(List<AgendamentoModel> agendamentos) {
+  if (_diaSelecionado == null) return _horarios;
+
+  final dataIso = _dataSelecionadaIso();
+  final ocupados = agendamentos
+      .where((a) => a.data == dataIso)
+      .map((a) => a.hora.trim())
+      .toSet();
+
+  return _horarios.where((h) => !ocupados.contains(h)).toList();
+}
+
   Future<void> _confirmarAgendamento() async {
     final servico = widget.servico;
     if (servico == null || servico.id.isEmpty) {
@@ -110,6 +122,7 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
 
     if (_clienteController.text.trim().isEmpty ||
         _telefoneController.text.trim().isEmpty ||
+        _telefoneController.text.trim().length < 11 ||
         _diaSelecionado == null ||
         _horarioSelecionado == null ||
         _horarioSelecionado!.isEmpty) {
@@ -181,14 +194,7 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
                     const SizedBox(height: 16),
                     _buildCampoTelefone(),
                     const SizedBox(height: 24),
-                    _buildSectionLabel('Selecionar Data'),
-                    const SizedBox(height: 12),
-                    _buildCalendario(),
-                    const SizedBox(height: 24),
-                    _buildSectionLabel('Selecionar Horário'),
-                    const SizedBox(height: 12),
-                    _buildDropdownHorario(),
-                    const SizedBox(height: 24),
+                    _buildCalendarioEHorarios(),
                   ],
                 ),
               ),
@@ -304,7 +310,10 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
         controller: _telefoneController,
         hint: '(00) 00000-0000',
         keyboardType: TextInputType.phone,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+          LengthLimitingTextInputFormatter(11),
+        ],
       ),
     );
   }
@@ -320,46 +329,67 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
     );
   }
 
-  Widget _buildCalendario() {
-    final servicoId = widget.servico?.id;
-    if (servicoId == null || servicoId.isEmpty) {
-      return ServiceCalendar(
+
+Widget _buildCalendarioEHorarios() {
+  final servicoId = widget.servico?.id;
+
+  if (servicoId == null || servicoId.isEmpty) {
+    return _buildCalendarioEHorariosComDados(const []);
+  }
+
+  return StreamBuilder<List<AgendamentoModel>>(
+    stream: _agendamentosRepository.listarPorServico(servicoId),
+    builder: (context, snapshot) {
+      return _buildCalendarioEHorariosComDados(snapshot.data ?? const []);
+    },
+  );
+}
+
+Widget _buildCalendarioEHorariosComDados(List<AgendamentoModel> agendamentos) {
+  final diasComAgendamento = _diasComAgendamentoNoMes(agendamentos);
+  final horariosDisponiveis = _horariosDisponiveis(agendamentos);
+
+  // Se o horário selecionado ficou indisponível, limpa
+  if (_horarioSelecionado != null &&
+      !horariosDisponiveis.contains(_horarioSelecionado)) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() => _horarioSelecionado = null);
+    });
+  }
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      _buildSectionLabel('Selecionar Data'),
+      const SizedBox(height: 12),
+      ServiceCalendar(
         mesAtual: _mesAtual,
         diaSelecionado: _diaSelecionado,
-        diasComAgendamento: const {},
+        diasComAgendamento: diasComAgendamento,
         onMesAnterior: _mesAnterior,
         onProximoMes: _proximoMes,
         onDiaSelecionado: (dia) => setState(() => _diaSelecionado = dia),
-      );
-    }
-
-    return StreamBuilder<List<AgendamentoModel>>(
-      stream: _agendamentosRepository.listarPorServico(servicoId),
-      builder: (context, snapshot) {
-        final diasComAgendamento = _diasComAgendamentoNoMes(
-          snapshot.data ?? const [],
-        );
-        return ServiceCalendar(
-          mesAtual: _mesAtual,
-          diaSelecionado: _diaSelecionado,
-          diasComAgendamento: diasComAgendamento,
-          onMesAnterior: _mesAnterior,
-          onProximoMes: _proximoMes,
-          onDiaSelecionado: (dia) => setState(() => _diaSelecionado = dia),
-        );
-      },
-    );
-  }
-
-  Widget _buildDropdownHorario() {
-    return _DropdownField<String>(
-      value: _horarioSelecionado,
-      items: _horarios,
-      labelBuilder: (v) => v,
-      hint: 'Selecionar',
-      onChanged: (v) => setState(() => _horarioSelecionado = v),
-    );
-  }
+      ),
+      const SizedBox(height: 24),
+      _buildSectionLabel('Selecionar Horário'),
+      const SizedBox(height: 12),
+      horariosDisponiveis.isEmpty
+          ? const Text(
+              'Nenhum horário disponível neste dia.',
+              style: TextStyle(color: AppColors.textSecondary),
+            )
+          : _DropdownField<String>(
+              value: horariosDisponiveis.contains(_horarioSelecionado)
+                  ? _horarioSelecionado
+                  : null,
+              items: horariosDisponiveis,
+              labelBuilder: (v) => v,
+              hint: 'Selecionar',
+              onChanged: (v) => setState(() => _horarioSelecionado = v),
+            ),
+    ],
+  );
+}
 
   Widget _buildBottomButton() {
     return Container(
