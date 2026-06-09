@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localbiz/features/services/models/agendamento_model.dart';
 import 'package:localbiz/features/services/models/servico_model.dart';
+import 'package:localbiz/features/services/presentation/screens/auth/auth_service.dart';
 import 'package:localbiz/features/services/presentation/screens/widgets/service_calendar.dart';
 import 'package:localbiz/features/services/repositories/agendamentos_repositories.dart';
 import 'package:localbiz/features/services/repositories/servicos_repositories.dart';
@@ -13,11 +14,13 @@ class AgendamentoServicoScreen extends StatefulWidget {
     this.servico,
     this.servicosRepository,
     this.agendamentosRepository,
+    this.negocioId,
   });
 
   final ServicoModel? servico;
   final ServicosRepositoryContract? servicosRepository;
   final AgendamentosRepositoryContract? agendamentosRepository;
+  final String? negocioId;
 
   @override
   State<AgendamentoServicoScreen> createState() =>
@@ -30,6 +33,7 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
   late final ServicosRepositoryContract _servicosRepository;
   late final AgendamentosRepositoryContract _agendamentosRepository;
   late final Stream<List<ServicoModel>> _servicosStream;
+  late final String? _uid;
 
   ServicoModel? _servicoSelecionado;
   String? _categoriaSelecionada;
@@ -71,7 +75,11 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
     _servicosRepository = widget.servicosRepository ?? ServicosRepository();
     _agendamentosRepository =
         widget.agendamentosRepository ?? AgendamentosRepository();
-    _servicosStream = _servicosRepository.listarAtivos();
+    _uid = widget.negocioId ?? AuthService().usuarioAtual?.uid;
+    final uid = _uid;
+    _servicosStream = uid == null || uid.isEmpty
+        ? Stream.value(const [])
+        : _servicosRepository.listarAtivos(uid);
     _servicoSelecionado = widget.servico;
     _categoriaSelecionada = _categorias.first;
   }
