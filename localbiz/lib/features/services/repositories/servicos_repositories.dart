@@ -3,13 +3,13 @@ import 'package:flutter/foundation.dart';
 import 'package:localbiz/features/services/models/servico_model.dart';
 
 abstract class ServicosRepositoryContract {
-  Stream<List<ServicoModel>> listarAtivos();
+  Stream<List<ServicoModel>> listarAtivos(String uid);
 
-  Future<ServicoModel?> buscarPorId(String id);
+  Future<ServicoModel?> buscarPorId(String uid, String id);
 
-  Future<ServicoModel> criar(ServicoModel servico);
+  Future<ServicoModel> criar(String uid, ServicoModel servico);
 
-  Future<void> atualizar(ServicoModel servico);
+  Future<void> atualizar(String uid, ServicoModel servico);
 }
 
 class ServicosRepository implements ServicosRepositoryContract {
@@ -19,11 +19,13 @@ class ServicosRepository implements ServicosRepositoryContract {
   ServicosRepository({FirebaseFirestore? firestore})
     : _firestore = firestore ?? FirebaseFirestore.instance;
 
+  CollectionReference<Map<String, dynamic>> _colecao(String uid) =>
+      _firestore.collection('negocios').doc(uid).collection('servicos');
+
   @override
-  Stream<List<ServicoModel>> listarAtivos() {
-    debugPrint('$_logTag listen servicos where ativo == true');
-    return _firestore
-        .collection('servicos')
+  Stream<List<ServicoModel>> listarAtivos(String uid) {
+    debugPrint('$_logTag listen negocios/$uid/servicos where ativo == true');
+    return _colecao(uid)
         .where('ativo', isEqualTo: true)
         .snapshots()
         .map((snap) {
@@ -39,10 +41,10 @@ class ServicosRepository implements ServicosRepositoryContract {
   }
 
   @override
-  Future<ServicoModel?> buscarPorId(String id) async {
-    debugPrint('$_logTag get servicos/$id');
+  Future<ServicoModel?> buscarPorId(String uid, String id) async {
+    debugPrint('$_logTag get negocios/$uid/servicos/$id');
     try {
-      final doc = await _firestore.collection('servicos').doc(id).get();
+      final doc = await _colecao(uid).doc(id).get();
       debugPrint('$_logTag resultado buscarPorId id=$id exists=${doc.exists}');
       if (!doc.exists) return null;
       return ServicoModel.fromMap(doc.id, doc.data()!);
@@ -53,10 +55,10 @@ class ServicosRepository implements ServicosRepositoryContract {
   }
 
   @override
-  Future<ServicoModel> criar(ServicoModel servico) async {
-    debugPrint('$_logTag add servicos nome=${servico.nome}');
+  Future<ServicoModel> criar(String uid, ServicoModel servico) async {
+    debugPrint('$_logTag add negocios/$uid/servicos nome=${servico.nome}');
     try {
-      final doc = await _firestore.collection('servicos').add({
+      final doc = await _colecao(uid).add({
         ...servico.toMap(),
         'criadoEm': FieldValue.serverTimestamp(),
         'atualizadoEm': FieldValue.serverTimestamp(),
@@ -77,14 +79,14 @@ class ServicosRepository implements ServicosRepositoryContract {
   }
 
   @override
-  Future<void> atualizar(ServicoModel servico) async {
+  Future<void> atualizar(String uid, ServicoModel servico) async {
     if (servico.id.isEmpty) {
       throw ArgumentError('Serviço sem id não pode ser atualizado.');
     }
 
-    debugPrint('$_logTag update servicos/${servico.id}');
+    debugPrint('$_logTag update negocios/$uid/servicos/${servico.id}');
     try {
-      await _firestore.collection('servicos').doc(servico.id).update({
+      await _colecao(uid).doc(servico.id).update({
         ...servico.toMap(),
         'atualizadoEm': FieldValue.serverTimestamp(),
       });
