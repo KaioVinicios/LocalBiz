@@ -49,7 +49,7 @@ class AuthService {
         'email': email,
         'criado_em': FieldValue.serverTimestamp(),
         // Atende ao requisito de amarração dinâmica de dados exigido na disciplina:
-        'usuario_logado': email,
+        'criado_por': email,
       });
 
       // 3. Cria o perfil do negócio (negocios/{uid}), que é a fonte usada
@@ -58,6 +58,8 @@ class AuthService {
         'nome': nomeNegocio,
         'whatsapp': telefone,
         'criadoEm': FieldValue.serverTimestamp(),
+        // Amarração dinâmica: vincula o registro ao usuário do Firebase Auth.
+        'criado_por': email,
       }, SetOptions(merge: true));
     }
 
