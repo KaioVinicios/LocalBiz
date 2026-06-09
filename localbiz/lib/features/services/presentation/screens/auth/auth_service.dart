@@ -96,5 +96,21 @@ class AuthService {
     return null;
   }
 
+  Future<void> recuperarSenha(String email) async {
+  if (email.trim().isEmpty) {
+    throw Exception("Informe um e-mail.");
+  }
+
+  if (!email.endsWith('@souunit.com.br')) {
+    throw Exception(
+      "Utilize um e-mail institucional @souunit.com.br.",
+    );
+  }
+
+  await _auth.sendPasswordResetEmail(
+    email: email.trim(),
+  );
+}
+
   Future<void> logout() async => await _auth.signOut();
 }
