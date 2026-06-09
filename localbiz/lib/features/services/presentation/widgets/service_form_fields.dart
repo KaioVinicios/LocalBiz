@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/theme/app_design_tokens.dart';
 import 'package:localbiz/core/ui/app_help_action_button.dart';
+import 'package:localbiz/core/utils/money.dart';
 
 const serviceCategoryOptions = [
   'Serviços Capilares',
@@ -14,6 +15,18 @@ const serviceCategoryOptions = [
 
 const _serviceFormWideBreakpoint = 900.0;
 const _serviceFormDesktopButtonWidth = 260.0;
+
+class ServiceFormValue {
+  const ServiceFormValue({
+    required this.category,
+    required this.name,
+    required this.price,
+  });
+
+  final String category;
+  final String name;
+  final double price;
+}
 
 class ServiceTextField extends StatelessWidget {
   const ServiceTextField({
@@ -196,6 +209,8 @@ class ServiceFormScaffold extends StatefulWidget {
     this.categories = serviceCategoryOptions,
     this.name,
     this.price,
+    this.onSubmit,
+    this.popResult,
   });
 
   final String title;
@@ -205,6 +220,8 @@ class ServiceFormScaffold extends StatefulWidget {
   final List<String> categories;
   final String? name;
   final String? price;
+  final Future<void> Function(ServiceFormValue value)? onSubmit;
+  final Object? popResult;
 
   @override
   State<ServiceFormScaffold> createState() => _ServiceFormScaffoldState();
@@ -214,6 +231,7 @@ class _ServiceFormScaffoldState extends State<ServiceFormScaffold> {
   late final TextEditingController _nameController;
   late final TextEditingController _priceController;
   String? _selectedCategory;
+  bool _submitting = false;
 
   @override
   void initState() {
@@ -274,7 +292,7 @@ class _ServiceFormScaffoldState extends State<ServiceFormScaffold> {
                           ? _serviceFormDesktopButtonWidth
                           : double.infinity,
                       child: ElevatedButton(
-                        onPressed: () => Navigator.of(context).maybePop(),
+                        onPressed: _submitting ? null : _handleSubmit,
                         style: ElevatedButton.styleFrom(
                           elevation: 0,
                           backgroundColor: AppColors.blue,
@@ -363,6 +381,49 @@ class _ServiceFormScaffoldState extends State<ServiceFormScaffold> {
     setState(() {
       _selectedCategory = category;
     });
+  }
+
+  Future<void> _handleSubmit() async {
+    final onSubmit = widget.onSubmit;
+    if (onSubmit == null) {
+      Navigator.of(context).maybePop();
+      return;
+    }
+
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      _showError('Informe o nome do serviço.');
+      return;
+    }
+
+    final category = _selectedCategory?.trim().isNotEmpty == true
+        ? _selectedCategory!.trim()
+        : 'Sem categoria';
+    final price = centavosFromInput(_priceController.text) / 100;
+
+    setState(() => _submitting = true);
+    try {
+      await onSubmit(
+        ServiceFormValue(category: category, name: name, price: price),
+      );
+      if (mounted) {
+        Navigator.of(context).maybePop(widget.popResult);
+      }
+    } catch (_) {
+      if (mounted) {
+        _showError('Não foi possível salvar o serviço. Tente novamente.');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _submitting = false);
+      }
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 }
 

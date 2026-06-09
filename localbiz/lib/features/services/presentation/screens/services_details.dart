@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/features/services/models/agendamento_model.dart';
 import 'package:localbiz/features/services/models/servico_model.dart';
+import 'package:localbiz/features/services/presentation/screens/auth/auth_service.dart';
 import 'package:localbiz/features/services/repositories/agendamentos_repositories.dart';
 import 'package:localbiz/features/services/repositories/servicos_repositories.dart';
 import 'package:localbiz/features/services/presentation/screens/services_scheduling.dart';
@@ -9,20 +11,31 @@ import 'package:localbiz/features/services/presentation/screens/widgets/service_
 import 'package:localbiz/core/theme/app_colors.dart';
 
 class DetalheServicoScreen extends StatefulWidget {
-  const DetalheServicoScreen({super.key, required this.servicoId});
+  const DetalheServicoScreen({
+    super.key,
+    required this.servicoId,
+    this.servicosRepository,
+    this.agendamentosRepository,
+    this.negocioId,
+    this.serviceEditRoutePath = '/services/edit',
+  });
 
   final String servicoId;
+  final ServicosRepositoryContract? servicosRepository;
+  final AgendamentosRepositoryContract? agendamentosRepository;
+  final String? negocioId;
+  final String serviceEditRoutePath;
 
   @override
   State<DetalheServicoScreen> createState() => _DetalheServicoScreenState();
 }
 
 class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
-  final ServicosRepository _servicosRepository = ServicosRepository();
-  final AgendamentosRepository _agendamentosRepository =
-      AgendamentosRepository();
+  late final ServicosRepositoryContract _servicosRepository;
+  late final AgendamentosRepositoryContract _agendamentosRepository;
+  late final String? _uid;
 
-  late final Future<ServicoModel?> _servicoFuture;
+  late Future<ServicoModel?> _servicoFuture;
   StreamSubscription<List<AgendamentoModel>>? _agendamentosSub;
   List<AgendamentoModel> _agendamentosCached = [];
 
@@ -32,7 +45,14 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
   @override
   void initState() {
     super.initState();
-    _servicoFuture = _servicosRepository.buscarPorId(widget.servicoId);
+    _servicosRepository = widget.servicosRepository ?? ServicosRepository();
+    _agendamentosRepository =
+        widget.agendamentosRepository ?? AgendamentosRepository();
+    _uid = widget.negocioId ?? AuthService().usuarioAtual?.uid;
+    final uid = _uid;
+    _servicoFuture = uid == null || uid.isEmpty
+        ? Future.value(null)
+        : _servicosRepository.buscarPorId(uid, widget.servicoId);
     _agendamentosSub = _agendamentosRepository
         .listarPorServico(widget.servicoId)
         .listen((lista) {
@@ -99,6 +119,18 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final uid = _uid;
+    if (uid == null || uid.isEmpty) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'Faça login para ver o serviço.',
+            style: TextStyle(color: AppColors.textSecondary),
+          ),
+        ),
+      );
+    }
+
     return FutureBuilder<ServicoModel?>(
       future: _servicoFuture,
       builder: (context, snapshot) {
@@ -243,10 +275,12 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
                 color: AppColors.navBarBg,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(
-                Icons.edit,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                iconSize: 18,
                 color: AppColors.textPrimary,
-                size: 18,
+                icon: const Icon(Icons.edit),
+                onPressed: () => _abrirEdicao(servico),
               ),
             ),
           ],
@@ -275,6 +309,23 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
         ),
       ],
     );
+  }
+
+  Future<void> _abrirEdicao(ServicoModel servico) async {
+    final editado = await Navigator.of(context).pushNamed(
+      widget.serviceEditRoutePath.isEmpty
+          ? AppRoute.serviceEdit.path
+          : widget.serviceEditRoutePath,
+      arguments: servico,
+    );
+    if (editado == true && mounted) {
+      setState(() {
+        _servicoFuture = _servicosRepository.buscarPorId(
+          _uid!,
+          widget.servicoId,
+        );
+      });
+    }
   }
 
   Widget _buildAgendamentos({
@@ -359,7 +410,8 @@ class _DetalheServicoScreenState extends State<DetalheServicoScreen> {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => AgendamentoServicoScreen(servico: servico),
+              builder: (_) =>
+                  AgendamentoServicoScreen(servico: servico, negocioId: _uid),
             ),
           );
         },
