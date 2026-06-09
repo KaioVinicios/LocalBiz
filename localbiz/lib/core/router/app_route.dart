@@ -8,6 +8,8 @@ enum AppRoute {
   produtos('/produtos'),
   configuracoes('/configuracoes'),
   vendas('/vendas'),
+  vendasHistorico('/vendas/historico'),
+  vendaEdit('/vendas/edit'),
   services('/services'),
   serviceCreate('/services/new'),
   serviceEdit('/services/edit'),

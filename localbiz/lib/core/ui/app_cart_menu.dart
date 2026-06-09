@@ -25,6 +25,7 @@ class AppCartMenu extends StatelessWidget {
     required this.onIncrement,
     required this.onDecrement,
     required this.onCobrar,
+    this.actionLabel = 'Cobrar',
   });
 
   final List<CarrinhoItemData> itens;
@@ -32,6 +33,7 @@ class AppCartMenu extends StatelessWidget {
   final ValueChanged<int> onIncrement;
   final ValueChanged<int> onDecrement;
   final VoidCallback onCobrar;
+  final String actionLabel;
 
   double get _total => itens.fold(0, (acc, i) => acc + i.preco * i.quantidade);
 
@@ -113,7 +115,11 @@ class AppCartMenu extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xs),
                   const SizedBox(height: AppSpacing.xs),
 
-                  _CarrinhoFooter(total: _total, onCobrar: onCobrar),
+                  _CarrinhoFooter(
+                    total: _total,
+                    onCobrar: onCobrar,
+                    actionLabel: actionLabel,
+                  ),
                 ],
               ),
             ),
@@ -280,10 +286,15 @@ class _QtyButton extends StatelessWidget {
 }
 
 class _CarrinhoFooter extends StatelessWidget {
-  const _CarrinhoFooter({required this.total, required this.onCobrar});
+  const _CarrinhoFooter({
+    required this.total,
+    required this.onCobrar,
+    required this.actionLabel,
+  });
 
   final double total;
   final VoidCallback onCobrar;
+  final String actionLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -347,9 +358,9 @@ class _CarrinhoFooter extends StatelessWidget {
                   width: 22,
                   height: 22,
                 ),
-                label: const Text(
-                  'Cobrar',
-                  style: TextStyle(
+                label: Text(
+                  actionLabel,
+                  style: const TextStyle(
                     fontFamily: 'Poppins',
                     color: Color(0xFF043DAE),
                     fontSize: 18,
