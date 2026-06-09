@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:localbiz/core/router/app_route.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 import 'package:localbiz/core/ui/app_top_bar.dart';
-import 'package:localbiz/core/ui/photo_picker.dart';
 import 'package:localbiz/features/configuration/data/models/negocio_model.dart';
 import 'package:localbiz/features/configuration/data/repositories/negocio_repository.dart';
 import 'package:localbiz/features/configuration/presentation/models/mock_data.dart';
@@ -69,35 +68,16 @@ class _ProfileHeader extends StatefulWidget {
 class _ProfileHeaderState extends State<_ProfileHeader> {
   final _authService = AuthService();
   final _negocioRepository = NegocioRepository();
-  bool _enviando = false;
 
-  Future<void> _selecionarFoto() async {
-    final messenger = ScaffoldMessenger.of(context);
-    final uid = _authService.usuarioAtual?.uid;
-    if (uid == null) return;
-
-    final bytes = await escolherImagem();
-    if (bytes == null) return; // usuário cancelou
-
-    setState(() => _enviando = true);
-    try {
-      await _negocioRepository.uploadFoto(uid, bytes);
-      // O StreamBuilder abaixo atualiza a foto automaticamente via fotoUrl.
-      if (!mounted) return;
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Foto do negócio atualizada.')),
-      );
-    } catch (_) {
-      if (!mounted) return;
-      messenger.showSnackBar(
-        const SnackBar(
-          content: Text('Não foi possível enviar a foto. Tente novamente.'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _enviando = false);
-    }
+  // O upload de foto depende do Object Storage, que está desativado no projeto
+  // por questões financeiras. Em vez de disparar o picker/upload (que nunca
+  // resolve e trava a página), avisamos o usuário que o recurso está indisponível.
+  void _selecionarFoto() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Não foi possível utilizar esse recurso no momento.'),
+      ),
+    );
   }
 
   @override
@@ -147,28 +127,23 @@ class _ProfileHeaderState extends State<_ProfileHeader> {
               Positioned(
                 right: 4,
                 bottom: 4,
-                child: GestureDetector(
-                  onTap: _enviando ? null : _selecionarFoto,
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.accent,
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: _selecionarFoto,
+                    child: Container(
+                      width: 32,
+                      height: 32,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.accent,
+                      ),
+                      child: const Icon(
+                        Icons.photo_camera,
+                        size: 16,
+                        color: Colors.white,
+                      ),
                     ),
-                    child: _enviando
-                        ? const Padding(
-                            padding: EdgeInsets.all(8),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(
-                            Icons.photo_camera,
-                            size: 16,
-                            color: Colors.white,
-                          ),
                   ),
                 ),
               ),
