@@ -166,7 +166,7 @@ class _ReportPageState extends State<ReportPage> {
                     LabeledDropdown(
                       label: 'Tipo',
                       value: _type,
-                      items: const ['Financeiro', 'Movimentação', 'Vendas'],
+                      items: const ['Financeiro', 'Vendas', 'Agendamentos'],
                       onChanged: (v) => setState(() => _type = v ?? _type),
                     ),
                     const SizedBox(height: 20),
@@ -197,16 +197,20 @@ class _ReportPageState extends State<ReportPage> {
                       label: 'Tipo do documento',
                       value: _docType,
                       items: const ['PDF', 'CSV', 'XLSX'],
+                      enabled: false,
                       onChanged: (v) =>
                           setState(() => _docType = v ?? _docType),
                     ),
+                    const _LegendaEmConstrucao(),
                     const SizedBox(height: 20),
                     LabeledDropdown(
                       label: 'Enviar Para',
                       value: _sendTo,
                       items: const ['Email', 'Whatsapp'],
+                      enabled: false,
                       onChanged: (v) => setState(() => _sendTo = v ?? _sendTo),
                     ),
+                    const _LegendaEmConstrucao(),
                     if (_resultado != null) ...[
                       const SizedBox(height: 28),
                       _ResultadoCard(relatorio: _resultado!),
@@ -234,9 +238,33 @@ class _ResultadoCard extends StatelessWidget {
 
   final RelatorioModel relatorio;
 
+  static String _reais(double v) =>
+      'R\$ ${v.toStringAsFixed(2).replaceAll('.', ',')}';
+
+  List<Widget> _linhasPorTipo() {
+    switch (relatorio.tipo) {
+      case 'Financeiro':
+        return [
+          _LinhaResumo(rotulo: 'Serviços', valor: _reais(relatorio.valorServicos)),
+          _LinhaResumo(rotulo: 'Produtos', valor: _reais(relatorio.valorProdutos)),
+          _LinhaResumo(rotulo: 'Total', valor: _reais(relatorio.valorTotal)),
+        ];
+      case 'Agendamentos':
+        return [
+          _LinhaResumo(rotulo: 'Finalizados', valor: '${relatorio.finalizados}'),
+          _LinhaResumo(rotulo: 'Em aberto', valor: '${relatorio.emAberto}'),
+        ];
+      case 'Vendas':
+      default:
+        return [
+          _LinhaResumo(rotulo: 'Vendas', valor: '${relatorio.quantidade}'),
+          _LinhaResumo(rotulo: 'Faturamento', valor: _reais(relatorio.valorTotal)),
+        ];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final valor = relatorio.valorTotal.toStringAsFixed(2).replaceAll('.', ',');
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -264,16 +292,39 @@ class _ResultadoCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _LinhaResumo(rotulo: 'Agendamentos', valor: '${relatorio.quantidade}'),
-          _LinhaResumo(rotulo: 'Cancelados', valor: '${relatorio.cancelados}'),
-          _LinhaResumo(rotulo: 'Faturamento', valor: 'R\$ $valor'),
+          ..._linhasPorTipo(),
           const SizedBox(height: 8),
-          Text(
-            'Salvo no histórico • ${relatorio.formato} • ${relatorio.destino}',
-            style: const TextStyle(
+          const Text(
+            'Salvo no histórico',
+            style: TextStyle(
               fontSize: 12,
               color: AppColors.textSecondary,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LegendaEmConstrucao extends StatelessWidget {
+  const _LegendaEmConstrucao();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.only(top: 6, left: 2),
+      child: Row(
+        children: [
+          Icon(
+            Icons.construction_outlined,
+            size: 14,
+            color: AppColors.textSecondary,
+          ),
+          SizedBox(width: 6),
+          Text(
+            'Funcionalidade em construção.',
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
           ),
         ],
       ),

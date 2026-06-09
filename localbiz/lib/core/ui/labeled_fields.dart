@@ -140,6 +140,7 @@ class LabeledDropdown extends StatelessWidget {
     required this.value,
     required this.items,
     required this.onChanged,
+    this.enabled = true,
   });
 
   final String label;
@@ -147,13 +148,16 @@ class LabeledDropdown extends StatelessWidget {
   final List<String> items;
   final ValueChanged<String?> onChanged;
 
+  /// Quando `false`, o campo fica acinzentado e não recebe interação.
+  final bool enabled;
+
   @override
   Widget build(BuildContext context) {
     return _LabelWrap(
       label: label,
       child: DropdownButtonFormField<String>(
         initialValue: value,
-        onChanged: onChanged,
+        onChanged: enabled ? onChanged : null,
         isExpanded: true,
         icon: const Icon(
           Icons.keyboard_arrow_down,
