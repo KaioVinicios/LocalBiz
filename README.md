@@ -7,4 +7,4 @@
 | João Alfredo Moura | 1. Venda <br> 2. Venda carrinho <br> 3. Venda concluída | https://drive.google.com/drive/folders/16zuB4j7SEA21uKy142N8kOhoSH-TXX6o?usp=drive_link
 | Alessandro Samir Borges dos Santos Lelis | 1. Login <br> 2. Cadastro <br> 3. Redefinição de Senha | https://drive.google.com/file/d/1JxUwcJsHj7a6nn_VGWqQFbjNePYrUGqr/view?usp=drive_link |
 | Stheffany da Cruz Santos | 1. listagem de serviço <br> 2. agendamento de serviço <br> 3. detalhe do serviço | https://drive.google.com/file/d/1nD1UeJ7h3U2MjxLeVQ75QjFLn69UdpJW/view?usp=drive_link |
-| Luiz Gustavo Moura Santos | 1. Dashboard <br> 2. Cadastro de Serviço <br> 3. Edição de Serviço |
+| Luiz Gustavo Moura Santos | 1. Dashboard <br> 2. Cadastro de Serviço <br> 3. Edição de Serviço | https://drive.google.com/file/d/1Gu2bPFqz2UrZVnPj1Wtg-db_i_cgdRLI/view?usp=sharing |
