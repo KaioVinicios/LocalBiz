@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:localbiz/features/clientes/data/repositories/cliente_repository.dart';
+import 'package:localbiz/features/clientes/domain/entities/cliente_model.dart';
 import 'package:localbiz/features/services/models/agendamento_model.dart';
 import 'package:localbiz/features/services/models/servico_model.dart';
 import 'package:localbiz/features/services/presentation/screens/auth/auth_service.dart';
@@ -32,12 +34,15 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
   final TextEditingController _telefoneController = TextEditingController();
   late final ServicosRepositoryContract _servicosRepository;
   late final AgendamentosRepositoryContract _agendamentosRepository;
+  late final ClienteRepository _clienteRepository;
   late final Stream<List<ServicoModel>> _servicosStream;
+  late final Stream<List<Cliente>> _clientesStream;
   late final String? _uid;
 
   ServicoModel? _servicoSelecionado;
   String? _categoriaSelecionada;
   String? _horarioSelecionado;
+  Cliente? _clienteSelecionado;
 
   DateTime _mesAtual = DateTime.now();
   int? _diaSelecionado;
@@ -69,17 +74,25 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
     '17:30',
   ];
 
+  bool get _categoriaExigeSelect =>
+      _categoriaSelecionada == 'Cliente Recorrente' ||
+      _categoriaSelecionada == 'Cliente VIP';
+
   @override
   void initState() {
     super.initState();
     _servicosRepository = widget.servicosRepository ?? ServicosRepository();
     _agendamentosRepository =
         widget.agendamentosRepository ?? AgendamentosRepository();
+    _clienteRepository = ClienteRepository();
     _uid = widget.negocioId ?? AuthService().usuarioAtual?.uid;
     final uid = _uid;
     _servicosStream = uid == null || uid.isEmpty
         ? Stream.value(const [])
         : _servicosRepository.listarAtivos(uid);
+    _clientesStream = uid == null || uid.isEmpty
+        ? Stream.value(const [])
+        : _clienteRepository.observar(uid);
     _servicoSelecionado = widget.servico;
     _categoriaSelecionada = _categorias.first;
   }
@@ -110,9 +123,7 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
     final dias = <int>{};
     for (final item in agendamentos) {
       final parsedData = DateTime.tryParse(item.data.trim());
-      if (parsedData == null) {
-        continue;
-      }
+      if (parsedData == null) continue;
       if (parsedData.year == _mesAtual.year &&
           parsedData.month == _mesAtual.month) {
         dias.add(parsedData.day);
@@ -121,30 +132,61 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
     return dias;
   }
 
+  Set<String> _horariosOcupados(List<AgendamentoModel> agendamentos) {
+    if (_diaSelecionado == null) return {};
+    final dataSelecionada = _dataSelecionadaIso();
+    return agendamentos
+        .where((a) => a.data == dataSelecionada)
+        .map((a) => a.hora)
+        .toSet();
+  }
+
   Future<void> _confirmarAgendamento() async {
     final servico = _servicoSelecionado;
     if (servico == null || servico.id.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Servico invalido para agendamento.')),
+        const SnackBar(content: Text('Serviço inválido para agendamento.')),
       );
       return;
     }
 
-    if (_clienteController.text.trim().isEmpty ||
-        _telefoneController.text.trim().isEmpty ||
-        _diaSelecionado == null ||
+    final nomeCliente = _categoriaExigeSelect
+        ? (_clienteSelecionado?.nome ?? '')
+        : _clienteController.text.trim();
+
+    final telefoneCliente = _categoriaExigeSelect
+        ? (_clienteSelecionado?.telefone ?? '')
+        : _telefoneController.text.trim();
+
+    if (nomeCliente.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecione ou informe o cliente.')),
+      );
+      return;
+    }
+
+    if (!_categoriaExigeSelect) {
+      if (telefoneCliente.length != 11) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Telefone deve ter 11 dígitos.')),
+        );
+        return;
+      }
+    }
+
+    if (_diaSelecionado == null ||
         _horarioSelecionado == null ||
         _horarioSelecionado!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha todos os campos obrigatorios.')),
+        const SnackBar(content: Text('Preencha todos os campos obrigatórios.')),
       );
       return;
     }
 
     final payload = <String, dynamic>{
       'servicoId': servico.id,
-      'clienteNome': _clienteController.text.trim(),
-      'clienteTelefone': _telefoneController.text.trim(),
+      'clienteNome': nomeCliente,
+      'clienteTelefone': telefoneCliente,
       'categoriaCliente': _categoriaSelecionada ?? _categorias.first,
       'data': _dataSelecionadaIso(),
       'hora': _horarioSelecionado,
@@ -154,17 +196,13 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
 
     try {
       await _agendamentosRepository.criarAgendamento(payload);
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Agendamento confirmado com sucesso.')),
       );
       Navigator.of(context).pop();
     } catch (_) {
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Falha ao confirmar agendamento.')),
       );
@@ -201,8 +239,8 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
                     const SizedBox(height: 16),
                     _buildDropdownCategoria(),
                     const SizedBox(height: 16),
-                    _buildCampoTelefone(),
-                    const SizedBox(height: 24),
+                    if (!_categoriaExigeSelect) _buildCampoTelefone(),
+                    if (!_categoriaExigeSelect) const SizedBox(height: 24),
                     _buildSectionLabel('Selecionar Data'),
                     const SizedBox(height: 12),
                     _buildCalendario(),
@@ -247,11 +285,7 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
               ],
             ),
           ),
-          const Icon(
-            Icons.help_outline,
-            color: AppColors.textPrimary,
-            size: 24,
-          ),
+          const Icon(Icons.help_outline, color: AppColors.textPrimary, size: 24),
         ],
       ),
     );
@@ -259,7 +293,7 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
 
   Widget _buildTitulo() {
     final servico = _servicoSelecionado;
-    final categoria = servico?.categoria ?? 'Servico';
+    final categoria = servico?.categoria ?? 'Serviço';
     final preco = servico != null
         ? 'R\$ ${_formatCurrency(servico.preco)}'
         : 'R\$ 0,00';
@@ -296,7 +330,6 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
           if (snapshot.hasError) {
             return const _InputReadOnly(texto: 'Erro ao carregar serviços');
           }
-
           final servicos = snapshot.data ?? const <ServicoModel>[];
           if (servicos.isEmpty) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -304,7 +337,6 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
             }
             return const _InputReadOnly(texto: 'Nenhum serviço cadastrado');
           }
-
           return _DropdownField<ServicoModel>(
             value: _servicoSelecionadoNaLista(servicos),
             items: servicos,
@@ -314,6 +346,7 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
               setState(() {
                 _servicoSelecionado = servico;
                 _diaSelecionado = null;
+                _horarioSelecionado = null;
               });
             },
           );
@@ -324,25 +357,49 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
 
   ServicoModel? _servicoSelecionadoNaLista(List<ServicoModel> servicos) {
     final selecionado = _servicoSelecionado;
-    if (selecionado == null) {
-      return null;
-    }
+    if (selecionado == null) return null;
     for (final servico in servicos) {
-      if (servico.id == selecionado.id) {
-        return servico;
-      }
+      if (servico.id == selecionado.id) return servico;
     }
     return null;
   }
 
   Widget _buildCampoCliente() {
+    if (!_categoriaExigeSelect) {
+      return _CampoLabel(
+        label: 'Cliente',
+        child: _InputField(
+          controller: _clienteController,
+          hint: 'Nome do cliente',
+          keyboardType: TextInputType.name,
+          textCapitalization: TextCapitalization.words,
+        ),
+      );
+    }
+
     return _CampoLabel(
       label: 'Cliente',
-      child: _InputField(
-        controller: _clienteController,
-        hint: '',
-        keyboardType: TextInputType.name,
-        textCapitalization: TextCapitalization.words,
+      child: StreamBuilder<List<Cliente>>(
+        stream: _clientesStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const _InputReadOnly(texto: 'Carregando clientes...');
+          }
+          if (snapshot.hasError) {
+            return const _InputReadOnly(texto: 'Erro ao carregar clientes');
+          }
+          final clientes = snapshot.data ?? const <Cliente>[];
+          if (clientes.isEmpty) {
+            return const _InputReadOnly(texto: 'Nenhum cliente cadastrado');
+          }
+          return _DropdownField<Cliente>(
+            value: _clienteSelecionado,
+            items: clientes,
+            labelBuilder: (c) => c.nome,
+            hint: 'Selecionar cliente',
+            onChanged: (c) => setState(() => _clienteSelecionado = c),
+          );
+        },
       ),
     );
   }
@@ -354,7 +411,13 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
         value: _categoriaSelecionada ?? _categorias.first,
         items: _categorias,
         labelBuilder: (v) => v,
-        onChanged: (v) => setState(() => _categoriaSelecionada = v),
+        onChanged: (v) => setState(() {
+          _categoriaSelecionada = v;
+          // Limpa seleção ao trocar categoria
+          _clienteSelecionado = null;
+          _clienteController.clear();
+          _telefoneController.clear();
+        }),
       ),
     );
   }
@@ -366,7 +429,10 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
         controller: _telefoneController,
         hint: '(00) 00000-0000',
         keyboardType: TextInputType.phone,
-        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        inputFormatters: [
+          FilteringTextInputFormatter.digitsOnly,
+          LengthLimitingTextInputFormatter(11),
+        ],
       ),
     );
   }
@@ -391,35 +457,74 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
         diasComAgendamento: const {},
         onMesAnterior: _mesAnterior,
         onProximoMes: _proximoMes,
-        onDiaSelecionado: (dia) => setState(() => _diaSelecionado = dia),
+        onDiaSelecionado: (dia) => setState(() {
+          _diaSelecionado = dia;
+          _horarioSelecionado = null;
+        }),
       );
     }
 
     return StreamBuilder<List<AgendamentoModel>>(
       stream: _agendamentosRepository.listarPorServico(servicoId),
       builder: (context, snapshot) {
-        final diasComAgendamento = _diasComAgendamentoNoMes(
-          snapshot.data ?? const [],
-        );
+        final agendamentos = snapshot.data ?? const [];
+        final diasComAgendamento = _diasComAgendamentoNoMes(agendamentos);
         return ServiceCalendar(
           mesAtual: _mesAtual,
           diaSelecionado: _diaSelecionado,
           diasComAgendamento: diasComAgendamento,
           onMesAnterior: _mesAnterior,
           onProximoMes: _proximoMes,
-          onDiaSelecionado: (dia) => setState(() => _diaSelecionado = dia),
+          onDiaSelecionado: (dia) => setState(() {
+            _diaSelecionado = dia;
+            _horarioSelecionado = null;
+          }),
         );
       },
     );
   }
 
   Widget _buildDropdownHorario() {
-    return _DropdownField<String>(
-      value: _horarioSelecionado,
-      items: _horarios,
-      labelBuilder: (v) => v,
-      hint: 'Selecionar',
-      onChanged: (v) => setState(() => _horarioSelecionado = v),
+    final servicoId = _servicoSelecionado?.id;
+
+    // Sem serviço selecionado, exibe todos os horários
+    if (servicoId == null || servicoId.isEmpty) {
+      return _DropdownField<String>(
+        value: _horarioSelecionado,
+        items: _horarios,
+        labelBuilder: (v) => v,
+        hint: 'Selecionar',
+        onChanged: (v) => setState(() => _horarioSelecionado = v),
+      );
+    }
+
+    return StreamBuilder<List<AgendamentoModel>>(
+      stream: _agendamentosRepository.listarPorServico(servicoId),
+      builder: (context, snapshot) {
+        final ocupados = _horariosOcupados(snapshot.data ?? const []);
+        final horariosDisponiveis =
+            _horarios.where((h) => !ocupados.contains(h)).toList();
+
+        // Se o horário selecionado foi ocupado, limpa
+        if (_horarioSelecionado != null &&
+            ocupados.contains(_horarioSelecionado)) {
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => setState(() => _horarioSelecionado = null),
+          );
+        }
+
+        return _DropdownField<String>(
+          value: horariosDisponiveis.contains(_horarioSelecionado)
+              ? _horarioSelecionado
+              : null,
+          items: horariosDisponiveis,
+          labelBuilder: (v) => v,
+          hint: horariosDisponiveis.isEmpty
+              ? 'Nenhum horário disponível'
+              : 'Selecionar',
+          onChanged: (v) => setState(() => _horarioSelecionado = v),
+        );
+      },
     );
   }
 
@@ -434,7 +539,8 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
           backgroundColor: AppColors.blue,
           foregroundColor: AppColors.sheetSurface,
           minimumSize: const Size(double.infinity, 52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           elevation: 0,
         ),
         child: const Text(
@@ -543,10 +649,7 @@ class _InputField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 15),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 14,
-        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         filled: true,
         fillColor: AppColors.sheetSurface,
         enabledBorder: OutlineInputBorder(
