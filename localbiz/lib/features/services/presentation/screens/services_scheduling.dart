@@ -2,15 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localbiz/features/services/models/agendamento_model.dart';
 import 'package:localbiz/features/services/models/servico_model.dart';
-import 'package:localbiz/features/services/repositories/agendamentos_repositories.dart';
+import 'package:localbiz/features/services/presentation/screens/auth/auth_service.dart';
 import 'package:localbiz/features/services/presentation/screens/widgets/service_calendar.dart';
+import 'package:localbiz/features/services/repositories/agendamentos_repositories.dart';
+import 'package:localbiz/features/services/repositories/servicos_repositories.dart';
 import 'package:localbiz/core/theme/app_colors.dart';
 
-
 class AgendamentoServicoScreen extends StatefulWidget {
-  const AgendamentoServicoScreen({super.key, this.servico});
+  const AgendamentoServicoScreen({
+    super.key,
+    this.servico,
+    this.servicosRepository,
+    this.agendamentosRepository,
+    this.negocioId,
+  });
 
   final ServicoModel? servico;
+  final ServicosRepositoryContract? servicosRepository;
+  final AgendamentosRepositoryContract? agendamentosRepository;
+  final String? negocioId;
 
   @override
   State<AgendamentoServicoScreen> createState() =>
@@ -20,9 +30,12 @@ class AgendamentoServicoScreen extends StatefulWidget {
 class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
   final TextEditingController _clienteController = TextEditingController();
   final TextEditingController _telefoneController = TextEditingController();
-  final AgendamentosRepository _agendamentosRepository =
-      AgendamentosRepository();
+  late final ServicosRepositoryContract _servicosRepository;
+  late final AgendamentosRepositoryContract _agendamentosRepository;
+  late final Stream<List<ServicoModel>> _servicosStream;
+  late final String? _uid;
 
+  ServicoModel? _servicoSelecionado;
   String? _categoriaSelecionada;
   String? _horarioSelecionado;
 
@@ -59,7 +72,16 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
   @override
   void initState() {
     super.initState();
-    _categoriaSelecionada = _categorias.first; 
+    _servicosRepository = widget.servicosRepository ?? ServicosRepository();
+    _agendamentosRepository =
+        widget.agendamentosRepository ?? AgendamentosRepository();
+    _uid = widget.negocioId ?? AuthService().usuarioAtual?.uid;
+    final uid = _uid;
+    _servicosStream = uid == null || uid.isEmpty
+        ? Stream.value(const [])
+        : _servicosRepository.listarAtivos(uid);
+    _servicoSelecionado = widget.servico;
+    _categoriaSelecionada = _categorias.first;
   }
 
   void _mesAnterior() => setState(() {
@@ -100,7 +122,7 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
   }
 
   Future<void> _confirmarAgendamento() async {
-    final servico = widget.servico;
+    final servico = _servicoSelecionado;
     if (servico == null || servico.id.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Servico invalido para agendamento.')),
@@ -236,7 +258,7 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
   }
 
   Widget _buildTitulo() {
-    final servico = widget.servico;
+    final servico = _servicoSelecionado;
     final categoria = servico?.categoria ?? 'Servico';
     final preco = servico != null
         ? 'R\$ ${_formatCurrency(servico.preco)}'
@@ -266,11 +288,51 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
   }
 
   Widget _buildCampoProcedimento() {
-    final nomeServico = widget.servico?.nome ?? 'Servico nao informado';
     return _CampoLabel(
       label: 'Procedimento',
-      child: _InputReadOnly(texto: nomeServico),
+      child: StreamBuilder<List<ServicoModel>>(
+        stream: _servicosStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const _InputReadOnly(texto: 'Erro ao carregar serviços');
+          }
+
+          final servicos = snapshot.data ?? const <ServicoModel>[];
+          if (servicos.isEmpty) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const _InputReadOnly(texto: 'Carregando serviços...');
+            }
+            return const _InputReadOnly(texto: 'Nenhum serviço cadastrado');
+          }
+
+          return _DropdownField<ServicoModel>(
+            value: _servicoSelecionadoNaLista(servicos),
+            items: servicos,
+            labelBuilder: (servico) => servico.nome,
+            hint: 'Selecionar procedimento',
+            onChanged: (servico) {
+              setState(() {
+                _servicoSelecionado = servico;
+                _diaSelecionado = null;
+              });
+            },
+          );
+        },
+      ),
     );
+  }
+
+  ServicoModel? _servicoSelecionadoNaLista(List<ServicoModel> servicos) {
+    final selecionado = _servicoSelecionado;
+    if (selecionado == null) {
+      return null;
+    }
+    for (final servico in servicos) {
+      if (servico.id == selecionado.id) {
+        return servico;
+      }
+    }
+    return null;
   }
 
   Widget _buildCampoCliente() {
@@ -321,7 +383,7 @@ class _AgendamentoServicoScreenState extends State<AgendamentoServicoScreen> {
   }
 
   Widget _buildCalendario() {
-    final servicoId = widget.servico?.id;
+    final servicoId = _servicoSelecionado?.id;
     if (servicoId == null || servicoId.isEmpty) {
       return ServiceCalendar(
         mesAtual: _mesAtual,
@@ -395,7 +457,7 @@ class _BadgeTexto extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        border: Border.all(color: cor.withOpacity(0.3)),
+        border: Border.all(color: cor.withValues(alpha: 0.3)),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(

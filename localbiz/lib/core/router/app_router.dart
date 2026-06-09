@@ -9,6 +9,7 @@ import 'package:localbiz/features/configuration/presentation/screens/configurati
 import 'package:localbiz/features/configuration/presentation/screens/help_support_page.dart';
 import 'package:localbiz/features/configuration/presentation/screens/report_page.dart';
 import 'package:localbiz/features/services/presentation/screens/dashboard_page.dart';
+import 'package:localbiz/features/services/models/servico_model.dart';
 import 'package:localbiz/features/services/presentation/screens/service_create_page.dart';
 import 'package:localbiz/features/services/presentation/screens/service_edit_page.dart';
 import 'package:localbiz/features/services/presentation/screens/service_listing.dart';
@@ -51,8 +52,11 @@ class AppRouter {
         const ProtectedRoute(child: ServicosScreen()),
     AppRoute.serviceCreate.path: (context) =>
         const ProtectedRoute(child: ServiceCreatePage()),
-    AppRoute.serviceEdit.path: (context) =>
-        const ProtectedRoute(child: ServiceEditPage()),
+    AppRoute.serviceEdit.path: (context) {
+      final servico =
+          ModalRoute.of(context)?.settings.arguments as ServicoModel?;
+      return ProtectedRoute(child: ServiceEditPage(servico: servico));
+    },
     AppRoute.serviceDetails.path: (context) =>
         const ProtectedRoute(child: DetalheServicoScreen(servicoId: '')),
     AppRoute.serviceSchedules.path: (context) =>
